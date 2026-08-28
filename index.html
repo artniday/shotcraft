@@ -1128,7 +1128,8 @@ body.dark .launchnew{background:rgba(20,27,51,.94);border-color:#303a60}.dark .l
 .lnpre,.lnpre:nth-child(n){position:relative;min-height:102px;padding:15px 15px 31px;border:0;border-radius:13px;background:linear-gradient(135deg,color-mix(in srgb,var(--preset) 88%,#fff),var(--preset));box-shadow:0 8px 18px color-mix(in srgb,var(--preset) 19%,transparent),inset 0 1px 0 rgba(255,255,255,.24);color:#fff;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;overflow:hidden;isolation:isolate}
 .lnpre::before{content:"";position:absolute;z-index:-1;left:0;right:0;top:auto;bottom:0;width:auto;height:27px;background:rgba(5,15,47,.15)}
 .lnpre::after{content:"";position:absolute;right:10px;top:9px;width:18px;height:18px;border:1px solid rgba(255,255,255,.34);border-radius:50%;opacity:0;transition:.18s ease}
-.lnpreicon{order:2;width:52px;height:52px;flex:0 0 52px;display:grid;place-items:center;border-radius:15px;background:rgba(9,23,61,.14);color:rgba(255,255,255,.72);font-size:27px;line-height:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);transform:translate(5px,-4px);transition:.2s ease}
+.lnpreicon{order:2;width:52px;height:52px;flex:0 0 52px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(5,15,47,.14));color:rgba(255,255,255,.88);line-height:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.17),0 7px 16px rgba(5,15,47,.12);transform:translate(5px,-4px);transition:.2s ease}
+.lnpreicon svg{width:29px;height:29px;display:block;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 2px rgba(4,12,38,.18))}.lnpreicon svg .soft{fill:currentColor;stroke:none;opacity:.18}.lnpreicon svg .solid{fill:currentColor;stroke:none}
 .lnprecopy{order:1;align-self:stretch;min-width:0;display:flex;flex-direction:column;align-items:flex-start}.lnpretext{font-size:13px;font-weight:850;line-height:1.25;text-align:left;text-shadow:0 1px 2px rgba(5,12,38,.18)}
 .lnprecopy small{position:absolute;left:0;right:0;bottom:6px;color:rgba(255,255,255,.88);font-size:9.5px;font-weight:750;letter-spacing:.04em;text-align:center;text-transform:uppercase}
 .lnpre:hover{transform:translateY(-2px);box-shadow:0 12px 25px color-mix(in srgb,var(--preset) 29%,transparent),inset 0 1px 0 rgba(255,255,255,.28);filter:saturate(1.06)}
@@ -4654,7 +4655,7 @@ function vfSVG(cam,W,H,opt){
       const F=scr(feet),Hh=scr(head),ih=Math.max(28,Math.abs(F[1]-Hh[1])),iw=ih*.43;
       const clip="vfActor"+String(ac.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,5);
       const female=(ac.gender||"female")==="female",ix=female?F[0]-iw*1.5:F[0]-iw*.5;
-      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.62).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${(iw*1.24).toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})" transform="${poseTransform(ac,F[0],F[1])}"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${(iw*2).toFixed(1)}" height="${ih.toFixed(1)}" href="shotcraft-characters-cutout.png" preserveAspectRatio="none"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)} · ${esc(ac.pose||"Standing")}</text>`:""}`});
+      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><g transform="${poseTransform(ac,F[0],F[1])}"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${(iw*2).toFixed(1)}" height="${ih.toFixed(1)}" href="shotcraft-characters-cutout.png" preserveAspectRatio="none"/></g></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)} · ${esc(ac.pose||"Standing")}</text>`:""}`});
       return;
     }
     const skin = (ac.gender||"neutral")==="female" ? "#d9a07f" : (ac.gender||"neutral")==="male" ? "#b97857" : "#c98d6d";
@@ -6441,6 +6442,21 @@ const PRESETS = [
   {id:"custom",  n:"Custom", i:"✦", c:"#df5a70",
    d:"Keep every module exactly as you last left it. Turn anything on or off in Viewing Options.", tab:"inspector"}
 ];
+const PRESET_ICON={
+  blank:`<rect class="soft" x="4" y="4" width="24" height="24" rx="5"/><path d="M9 8v20M16 8v20M23 8v20M4 11h24M4 18h24M4 25h24"/>`,
+  blocking:`<path d="M5 12h23v16H5zM5 12l4-7h23l-4 7M12 5l-4 7M21 5l-4 7M29 5l-4 7M10 19h13M10 23h8"/>`,
+  full:`<rect class="soft" x="4" y="8" width="21" height="18" rx="5"/><path d="M5 12h20v13H5zM10 12l3-5h5l3 5M25 16l5-3v11l-5-3M10 18h7"/>`,
+  narrative:`<path d="M8 4h13l5 5v19H8zM21 4v6h6M12 15h10M12 20h7M24 13l4 4-8 8-5 1 1-5z"/>`,
+  documentary:`<circle class="soft" cx="16" cy="16" r="12"/><circle cx="16" cy="16" r="10"/><path d="M16 6l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>`,
+  commercial:`<rect class="soft" x="4" y="7" width="24" height="18" rx="5"/><rect x="4" y="7" width="24" height="18" rx="5"/><path class="solid" d="M14 12l7 4-7 4z"/><path d="M8 4v5M24 4v5M8 23v5M24 23v5"/>`,
+  interview:`<rect class="soft" x="10" y="3" width="12" height="19" rx="6"/><rect x="11" y="3" width="10" height="18" rx="5"/><path d="M7 15v1a9 9 0 0018 0v-1M16 25v4M11 29h10M13 8h6M13 12h6M13 16h6"/>`,
+  concert:`<path class="soft" d="M5 20h4v8H5zM12 13h4v15h-4zM19 7h4v21h-4zM26 16h4v12h-4z"/><path d="M7 20v8M14 13v15M21 7v21M28 16v12M4 28h27"/>`,
+  broadcast:`<path d="M16 18v11M11 29h10M16 18a3 3 0 100-6 3 3 0 000 6zM9 21a8 8 0 010-12M23 21a8 8 0 000-12M5 25A13 13 0 015 5M27 25a13 13 0 000-20"/>`,
+  studio:`<rect class="soft" x="4" y="6" width="24" height="18" rx="4"/><rect x="4" y="6" width="24" height="18" rx="4"/><path d="M8 10h16v10H8zM12 28h8M16 24v4"/>`,
+  photo:`<path class="soft" d="M4 10h24v17H4z"/><path d="M4 10h7l2-4h7l2 4h6v17H4z"/><circle cx="16" cy="18" r="6"/><circle cx="16" cy="18" r="2"/><path d="M24 14h1"/>`,
+  custom:`<path d="M8 5v22M16 5v22M24 5v22M5 11h6M13 21h6M21 14h6"/><circle class="solid" cx="8" cy="11" r="3"/><circle class="solid" cx="16" cy="21" r="3"/><circle class="solid" cx="24" cy="14" r="3"/>`
+};
+function presetIcon(id){return `<svg viewBox="0 0 32 32" aria-hidden="true">${PRESET_ICON[id]||PRESET_ICON.custom}</svg>`}
 let LAUNCH = {preset:"blocking", examples:false, title:""};
 const svgIc = d => `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
@@ -6598,7 +6614,7 @@ function renderLauncher(){
         with notes and boards, a lighting plot, thirteen crew and cast, two locations, a two day stripboard, a priced
         budget, a task board and the gear list. Read it, then change it into your own production.</span></label>
     <div class="lnlabel">WORKSPACE PRESET</div>
-    <div class="lnpresets">${PRESETS.map(p=>`<button class="lnpre${LAUNCH.preset===p.id?" on":""}" data-preset="${p.id}" style="--preset:${p.c}"><span class="lnprecopy"><span class="lnpretext">${esc(p.n)}</span><small>${LAUNCH.preset===p.id?"Selected":"Choose preset"} &nbsp;→</small></span><span class="lnpreicon" aria-hidden="true">${p.i}</span></button>`).join("")}</div>
+    <div class="lnpresets">${PRESETS.map(p=>`<button class="lnpre${LAUNCH.preset===p.id?" on":""}" data-preset="${p.id}" style="--preset:${p.c}"><span class="lnprecopy"><span class="lnpretext">${esc(p.n)}</span><small>${LAUNCH.preset===p.id?"Selected":"Choose preset"} &nbsp;→</small></span><span class="lnpreicon" aria-hidden="true">${presetIcon(p.id)}</span></button>`).join("")}</div>
     <p class="lndesc">${esc(P.d)} Every workspace tab stays available whichever preset you pick. The preset only
       decides which tab opens first, and you can hide any module later in Viewing Options.</p>
   </div>`;
@@ -7394,7 +7410,7 @@ function frontElevationSVG(){
     const x=Xf(p.x)-w*sc/2,y=Zf(elev+z),ww=Math.max(7,w*sc),hh=Math.max(5,z*sc);
     if(e.type==="actor"){
       const clip="frontActor"+String(e.id).replace(/[^a-zA-Z0-9_-]/g,"")+"_"+Math.random().toString(36).slice(2,8),female=(e.gender||"female")==="female",imageX=female?Xf(p.x)-ww*1.5:Xf(p.x)-ww*.5;
-      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x-ww*.12}" y="${y}" width="${ww*1.24}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})" transform="${poseTransform(e,Xf(p.x),ground-elev*sc)}"><image x="${imageX}" y="${y}" width="${ww*2}" height="${hh}" href="shotcraft-characters-cutout.png" preserveAspectRatio="none"/></g>`;
+      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})"><g transform="${poseTransform(e,Xf(p.x),ground-elev*sc)}"><image x="${imageX}" y="${y}" width="${ww*2}" height="${hh}" href="shotcraft-characters-cutout.png" preserveAspectRatio="none"/></g></g>`;
     }
     else g+=`<rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="${col}" stroke="#fff" stroke-opacity=".65"/><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="url(#frontObj)"/>`;
     g+=`<text x="${Xf(p.x)}" y="${Math.max(18,y-8)}" text-anchor="middle" font-size="12" font-weight="800" fill="#f7f9ff" stroke="#101a30" stroke-width="3" paint-order="stroke">${esc(e.label||e.type)} · ${elev.toFixed(2)} m</text>`;});
