@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Applied Media ShotCraft</title>
+<title>ShotCraft</title>
 <style>
 :root{
   --hct-blue:#00249C;
@@ -572,7 +572,7 @@ body.dark .helpcontrols,body.dark .helpchips button,body.dark #helpBody kbd{back
 /* ---------- animatic timeline ---------- */
 #veilAnimatic .modal{max-width:1120px}.animatic-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px}.anim-view{min-height:390px;border-radius:14px;background:#080d1b;display:grid;place-items:center;overflow:hidden;position:relative}.anim-view img,.anim-view svg{display:block;width:100%;height:100%;max-height:520px;object-fit:contain}.anim-overlay{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:end;justify-content:space-between;gap:12px;color:#fff;text-shadow:0 2px 8px #000}.anim-overlay b{font-size:16px}.anim-side{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--card)}.anim-controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.anim-controls .spacer{flex:1}.anim-track{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 4px}.anim-clip{flex:0 0 178px;border:2px solid transparent;border-radius:11px;padding:6px;background:var(--soft);cursor:pointer;text-align:left}.anim-clip.on{border-color:var(--hct-blue);box-shadow:0 5px 14px rgba(0,36,156,.18)}.anim-thumb{height:88px;border-radius:7px;background:#0b1020;overflow:hidden}.anim-thumb img,.anim-thumb svg{width:100%;height:100%;object-fit:cover}.anim-meta{display:flex;justify-content:space-between;margin-top:6px;font-size:10px}.anim-progress{height:4px;border-radius:9px;background:#dfe5f2;overflow:hidden;margin-top:5px}.anim-progress i{display:block;height:100%;background:#4fd8b3;width:0}.anim-clip.on .anim-progress i{width:100%;transition:width var(--clip-ms,1000ms) linear}@media(max-width:800px){.animatic-layout{grid-template-columns:1fr}.anim-side{display:none}}
 .hud .viewmode{width:auto;padding:0 9px;font-size:9px;font-weight:800;letter-spacing:.04em}.hud .viewmode.on{background:#2448c5;color:#fff}
-#veilSceneView .modal{max-width:1120px}.sceneviewbar{display:flex;gap:7px;align-items:center;margin-bottom:10px}.sceneviewbar .btn.on{background:var(--hct-blue);color:#fff}.sceneviewcanvas{height:min(68vh,650px);border-radius:14px;overflow:hidden;background:#0b1020;display:grid;place-items:center}.sceneviewcanvas svg{width:100%;height:100%;display:block}
+#veilSceneView .modal{max-width:1120px}.sceneviewbar{display:flex;gap:7px;align-items:center;margin-bottom:10px}.sceneviewbar .btn.on{background:var(--hct-blue);color:#fff}.sceneviewcanvas{width:100%;aspect-ratio:16/9;max-height:68vh;border-radius:14px;overflow:hidden;background:#0b1020;display:grid;place-items:center;box-shadow:inset 0 0 0 1px #26385d,0 12px 30px #08112622}.sceneviewcanvas svg{width:100%;height:100%;display:block}
 
 /* ---------- modal ---------- */
 .veil{
@@ -1111,6 +1111,11 @@ body.dark .launchnew{background:rgba(20,27,51,.94);border-color:#303a60}.dark .l
 .modal.launch>header{min-height:108px;padding:20px 26px!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:18px!important;background:linear-gradient(115deg,#071b55 0%,#173ca7 100%)!important;box-shadow:0 14px 34px rgba(21,42,101,.18)!important}
 .modal.launch>header::before,.modal.launch>header::after{display:none!important}
 .launchbrand{gap:16px}.launchbrand .brandmark{width:50px;height:50px;filter:none}.launchbrand h3{font-size:25px;letter-spacing:.01em}.launchbrand p{margin-top:4px;font-size:12.5px;color:rgba(255,255,255,.76)}
+.modal.launch>header.launchhero{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:18px;min-height:124px;padding:22px 28px!important;background:linear-gradient(120deg,#071848 0%,#12399f 58%,#2453c8 100%)!important}
+.launchhero .lmark{width:64px!important;height:64px!important;flex-basis:64px!important;border-radius:0!important;background:transparent!important}
+.launchhero .lmark img{width:55px!important;height:55px!important;object-fit:contain;filter:brightness(0) invert(1);opacity:.98}
+.launchidentity{min-width:0;align-self:center}.launchidentity h3{font-size:30px!important;line-height:1;margin:0!important;letter-spacing:-.02em!important;text-transform:none}.launchidentity .launchsub{margin:7px 0 0;font-size:13px;color:rgba(255,255,255,.77);line-height:1.35}
+.launchcredentials{align-self:center;margin-right:54px;padding:9px 16px 9px 18px;border-left:1px solid rgba(255,255,255,.25);color:#fff;text-align:left;white-space:nowrap;z-index:1}.launchcredentials strong{display:block;font-size:12px;line-height:1.35;letter-spacing:.02em}.launchcredentials span{display:block;margin-top:2px;color:rgba(255,255,255,.72);font-size:10.5px;line-height:1.35}.launchcredentials .creator{margin-top:7px;color:#fff;font-weight:700}
 .launchclose{top:18px;right:18px;width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);box-shadow:none}
 .launchnew{margin-top:18px;padding:22px;border:1px solid #dfe4ee;border-radius:16px;background:#fff;box-shadow:0 10px 28px rgba(34,52,94,.08)}
 .launchnew::before{height:3px;background:#2448c5}
@@ -1138,7 +1143,8 @@ body.dark #veilLaunch{background:linear-gradient(180deg,#111827,#0d1422)}
 body.dark .launchnew,body.dark .proj{background:#151d2c;border-color:#2c374b}
 body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;border-color:#2c374b}
 @media(max-width:900px){.modal.launch{padding:16px}.modal.launch>header{min-height:100px}.lnpresets{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:620px){.modal.launch>header{padding:18px!important}.launchbrand h3{font-size:20px}.launchbrand p{display:none}.launchnew{padding:16px}.lnpresets{grid-template-columns:1fr}}
+@media(max-width:760px){.modal.launch>header.launchhero{grid-template-columns:auto 1fr;min-height:112px}.launchhero .lmark{width:48px!important;height:48px!important;flex-basis:48px!important}.launchhero .lmark img{width:43px!important;height:43px!important}.launchcredentials{grid-column:2;margin:9px 48px 0 0;padding:8px 0 0;border-left:0;border-top:1px solid rgba(255,255,255,.2);white-space:normal}.launchcredentials strong,.launchcredentials span{display:inline}.launchcredentials span::before{content:" · "}.launchcredentials .creator{display:block;margin-top:4px}}
+@media(max-width:620px){.modal.launch>header{padding:18px!important}.launchidentity h3{font-size:22px!important}.launchidentity .launchsub{display:none}.launchnew{padding:16px}.lnpresets{grid-template-columns:1fr}}
 @media(max-width:1100px){.brand small,.saveflag,.topbar .tvsep{display:none}.topbar{gap:6px}.tbtn{padding:7px 8px}.topbar input.title{width:150px}.panel{--panelw:430px}.ptab span:not(.badge){max-width:76px;overflow:hidden;text-overflow:ellipsis}}
 @media(max-width:760px){.topbar{overflow-x:auto}.brand>div:last-child{display:none}.panel{position:absolute;right:0;left:auto;top:0;bottom:0;width:min(88vw,560px)!important;z-index:18}.panel.hidden{width:0!important}.tools{width:56px;flex-basis:56px}.tool{width:42px}.beatbar{overflow-x:auto}}
 </style>
@@ -1267,11 +1273,12 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
 <!-- ================= MODALS ================= -->
 <div class="veil" id="veilLaunch">
   <div class="modal launch">
-    <header>
+    <header class="launchhero">
       <div class="lmark"><img src="data:image/png;base64,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" alt=""></div>
-      <div><h3>YOUR PRODUCTIONS</h3>
-        <p>Start a new production, or pick up where you left off. Everything is saved in this browser on this computer.</p></div>
-      <button class="x" data-close>&times;</button>
+      <div class="launchidentity"><h3>ShotCraft</h3>
+        <p class="launchsub">Plan, block and visualise every shot with confidence.</p></div>
+      <div class="launchcredentials"><strong>Higher Colleges of Technology</strong><span>Sharjah Campus</span><span class="creator">Created by: Arturo Niday Jr.</span></div>
+      <button class="x launchclose" data-close aria-label="Close ShotCraft launcher">&times;</button>
     </header>
     <div class="mbody" id="launchBody"></div>
   </div>
@@ -1640,6 +1647,27 @@ function nextLetter(){
   for(let i=0;i<26;i++){ const l=String.fromCharCode(65+i); if(!used.includes(l)) return l; }
   return "A";
 }
+const ACTOR_NAMES={
+  female:["Sarah","Maya","Lina","Noor","Aisha","Elena","Sofia","Amira","Layla","Nadia"],
+  male:["Alex","Omar","Daniel","Samir","Adam","Michael","Yousef","Elias","Karim","Rami"],
+  neutral:["Jordan","Taylor","Morgan","Casey","Riley","Avery","Jamie","Robin"]
+};
+const ACTOR_POSES=[
+  "Standing neutral","Standing relaxed","Standing alert","Hands on hips","Arms crossed","Hands in pockets",
+  "Walking","Walking carefully","Running","Jogging","Sprinting","Stopping","Turning","Looking back",
+  "Sitting","Sitting relaxed","Sitting upright","Driving","Wheelchair seated","Kneeling","Crouching","Squatting",
+  "Lying down","Sleeping","Fallen","Crawling","Climbing","Descending","Jumping","Balancing",
+  "Pointing","Reaching","Lifting","Carrying","Pushing","Pulling","Fighting stance","Dancing","Presenting",
+  "Using phone","Reading","Writing","Talking","Listening","Waving","Embracing"
+];
+function poseKey(el){return String(el.pose||((el.seated)?"Sitting":"Standing neutral")).toLowerCase()}
+function poseHeightFactor(el){const p=poseKey(el);if(/lying|sleeping|fallen/.test(p))return .28;if(/crouch|squat|crawl/.test(p))return .58;if(/kneel/.test(p))return .68;if(/sitting|driving|wheelchair/.test(p))return .72;if(/jump/.test(p))return 1.04;return 1}
+function poseTransform(el,cx,bottom){const p=poseKey(el);let skew=0,rot=0;if(/sprint|running/.test(p)){skew=-10;rot=-4}else if(/walk|jog/.test(p))skew=-5;else if(/climb|descend/.test(p)){skew=-7;rot=-3}else if(/fallen|lying|sleeping/.test(p))rot=-90;else if(/reach|push|pull/.test(p))skew=-4;return `translate(${cx} ${bottom}) rotate(${rot}) skewX(${skew}) translate(${-cx} ${-bottom})`}
+function nextActorName(gender){
+  const list=ACTOR_NAMES[gender]||ACTOR_NAMES.neutral;
+  const used=new Set(actors().flatMap(a=>[a.character,a.label]).filter(Boolean).map(x=>String(x).toLowerCase()));
+  return list.find(n=>!used.has(n.toLowerCase()))||`${gender==="female"?"Female":gender==="male"?"Male":"Actor"} ${actors().length+1}`;
+}
 function nextCamId(){
   const used = cameras().map(c=>c.camId);
   for(let i=0;i<26;i++){ const l=String.fromCharCode(65+i); if(!used.includes(l)) return l; }
@@ -1655,9 +1683,9 @@ function makeElement(type,x,y,extra){
       safety:it.flag==="safety",exclusion:it.flag==="safety"?3:0};
   };
   const T = {
-    actor:()=>({letter:nextLetter(),color:ACTOR_COLORS[actors().length%ACTOR_COLORS.length],
-      label:"Actor "+nextLetter(),character:"",seated:false,action:"",lines:"",wardrobe:"",
-      gender:pendingActorGender||"female", heightM:0, castNo:actors().length+1}),
+    actor:()=>{const gender=pendingActorGender||"female",name=nextActorName(gender),letter=nextLetter();return {letter,color:ACTOR_COLORS[actors().length%ACTOR_COLORS.length],
+      label:name,character:name,autoActorName:true,seated:false,pose:"Standing neutral",action:"",lines:"",wardrobe:"",
+      gender, heightM:0, castNo:actors().length+1};},
     camera:()=>{
       const cid = nextCamId();
       return {camId:cid,label:"Cam "+cid,lens:35,sensor:"s35",rig:"Tripod",height:1.6,tilt:null,
@@ -2467,7 +2495,9 @@ function drawElement(el,crossing){
     /* A standing person occupies roughly 0.48 × 0.65 m on the blocking plan.
        Scale the marker in metres so its relationship to furniture stays true. */
     const R=S(0.30),rr=Math.max(11,R),aw=clamp(S(0.48),30,120),ah=clamp(S(0.65),42,162);
-    const clipId="actorClip"+String(el.id).replace(/[^a-zA-Z0-9_-]/g,"");
+    /* Scene Views can display a second plan beside the editor. A unique clip id
+       keeps that copy from borrowing the editor actor's clipping rectangle. */
+    const clipId="actorClip"+String(el.id).replace(/[^a-zA-Z0-9_-]/g,"")+"_"+Math.random().toString(36).slice(2,8);
     const female=(el.gender||"female")==="female";
     const imageX=female?cx-aw*1.5:cx-aw/2;
     g = `<ellipse cx="${cx}" cy="${cy+ah*.42}" rx="${aw*.46}" ry="7" fill="#091126" opacity=".25"/>
@@ -2482,6 +2512,8 @@ function drawElement(el,crossing){
         <path d="M${cx+aw/2+10} ${cy} L${cx+aw/2+1} ${cy-7} L${cx+aw/2+1} ${cy+7} Z" fill="${el.color}" stroke="#fff" stroke-width="1.5"/>
         <line x1="${cx+aw/2+7}" y1="${cy}" x2="${cx+aw/2+S(0.9)}" y2="${cy}" stroke="${el.color}" stroke-width="2" stroke-dasharray="4 3" opacity="0.7"/>
       </g>` + selRing(Math.max(aw,ah)/2+7);
+    const poseLabel=(el.pose||(el.seated?"Sitting":"Standing neutral")).replace(/standing /i,"").toUpperCase();
+    g += `<g pointer-events="none"><rect x="${cx-aw/2}" y="${cy-ah/2-19}" width="${Math.max(42,poseLabel.length*5.8+12)}" height="15" rx="7.5" fill="#fff" stroke="${el.color}" stroke-width="1.2"/><text x="${cx-aw/2+7}" y="${cy-ah/2-8.3}" font-size="8.3" font-weight="800" fill="${el.color}" font-family="Tahoma,sans-serif">${esc(poseLabel)}</text></g>`;
     if(el.seated) g += `<g pointer-events="none"><rect x="${cx-16}" y="${cy-ah/2-17}" width="32" height="15" rx="4" fill="#e0a106"/>
       <text x="${cx}" y="${cy-ah/2-6}" text-anchor="middle" font-size="10" font-weight="700" fill="${textOn("#e0a106")}" font-family="Tahoma,sans-serif">SIT</text></g>`;
     g += label(cx, cy+ah/2+15, el.label, {fs:11,bg:"#0d1330",cat:"actors"});
@@ -3434,6 +3466,11 @@ function applyBind(path,value,isNum){
     const el=byId(parts[1]); if(!el) return;
     const v = isNum ? (parseFloat(value)||0) : value;
     if(parts[2].includes(".")) setDeep(el,parts[2],v); else el[parts[2]] = v;
+    if(el.type==="actor"&&(parts[2]==="character"||parts[2]==="label")) el.autoActorName=false;
+    if(el.type==="actor"&&parts[2]==="gender"&&el.autoActorName){
+      const name=nextActorName(value);el.character=name;el.label=name;
+    }
+    if(el.type==="actor"&&parts[2]==="pose") el.seated=/sitting|driving|wheelchair|kneeling/i.test(value);
     if(parts[2]==="asset" && CAT[el.type]){
       const a = assetById(el.type,value);
       if(a){ el.w=a.w; el.h=a.h; el.z=a.z; el.label=a.n;
@@ -3675,13 +3712,11 @@ function inspectorActor(el){
       </div></div>`
     + `<div class="row">${fSelect("Presented gender (for the 3D figure)","elem",el.id,"gender",el.gender||"neutral",
         [{v:"neutral",n:"Not specified"},{v:"female",n:"Female"},{v:"male",n:"Male"}])}</div>`
-    + `<div class="row">${fSelect("Pose","elem",el.id,"pose",el.pose||"Standing",
-        ["Standing","Walking","Running","Sitting","Crouching","Pointing","Fighting","Driving"].map(v=>({v,n:v})))}
+    + `<div class="row">${fSelect("Pose","elem",el.id,"pose",el.pose||(el.seated?"Sitting":"Standing neutral"),
+        ACTOR_POSES.map(v=>({v,n:v})))}
         ${fSelect("Expression","elem",el.id,"expression",el.expression||"Neutral",
         ["Neutral","Happy","Concerned","Angry","Surprised","Sad","Focused"].map(v=>({v,n:v})))}</div>`
-    + fToggle("Stance","elem",el.id,"seated",el.seated,"Seated","Standing")
-    + `<p class="hint">Gender only changes the proportions of the figure in the viewfinder: standing height, shoulder and
-       hip width, and the eye line the camera aims at. It has no effect on anything else in the plan.</p>`
+    + `<p class="hint">The selected pose updates the actor's stance, apparent height and presentation in Top, Front and Perspective views.</p>`
     + fArea("Action / blocking note","elem",el.id,"action",el.action,"What does this character do in the beat")
     + fArea("Dialogue cue","elem",el.id,"lines",el.lines,"Key line or cue for this position"), el.letter);
 
@@ -4613,13 +4648,13 @@ function vfSVG(cam,W,H,opt){
   actors().forEach(ac=>{
     const q=posAt(ac);
     const G = GENDER[ac.gender||"neutral"] || GENDER.neutral;
-    const figureH=ac.seated?G.h*.72:G.h,ez=+ac.elevation||0,feet=prj([q.x,q.y,ez]),head=prj([q.x,q.y,ez+figureH]);
+    const figureH=G.h*poseHeightFactor(ac),ez=+ac.elevation||0,feet=prj([q.x,q.y,ez]),head=prj([q.x,q.y,ez+figureH]);
     if(feet.d>NEAR&&head.d>NEAR){
       shadow(q.x,q.y,ac.seated?.42:.28,ac.seated?.38:.24);
       const F=scr(feet),Hh=scr(head),ih=Math.max(28,Math.abs(F[1]-Hh[1])),iw=ih*.43;
       const clip="vfActor"+String(ac.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,5);
       const female=(ac.gender||"female")==="female",ix=female?F[0]-iw*1.5:F[0]-iw*.5;
-      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${(iw*2).toFixed(1)}" height="${ih.toFixed(1)}" href="shotcraft-characters-cutout.png" preserveAspectRatio="none"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)} ${fmtLen(feet.d)}</text>`:""}`});
+      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.62).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${(iw*1.24).toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})" transform="${poseTransform(ac,F[0],F[1])}"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${(iw*2).toFixed(1)}" height="${ih.toFixed(1)}" href="shotcraft-characters-cutout.png" preserveAspectRatio="none"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)} · ${esc(ac.pose||"Standing")}</text>`:""}`});
       return;
     }
     const skin = (ac.gender||"neutral")==="female" ? "#d9a07f" : (ac.gender||"neutral")==="male" ? "#b97857" : "#c98d6d";
@@ -7339,7 +7374,7 @@ function renderStory(){
 /* ------------------------- top / front / perspective scene views ------------------------- */
 let sceneViewMode="front";
 function itemWorldHeight(el){
-  if(el.type==="actor") return el.seated?1.18:((el.gender||"neutral")==="female"?1.66:(el.gender||"neutral")==="male"?1.78:1.72);
+  if(el.type==="actor") return ((el.gender||"neutral")==="female"?1.66:(el.gender||"neutral")==="male"?1.78:1.72)*poseHeightFactor(el);
   if(el.type==="camera") return .28;
   if(el.type==="light") return el.flag?.9:.28;
   if(el.type==="door") return 2.05;if(el.type==="window")return Math.max(.3,(el.head||2.2)-(el.sill||.9));
@@ -7347,19 +7382,22 @@ function itemWorldHeight(el){
 }
 function frontElevationSVG(){
   const list=els().filter(elVisible),W=1000,H=560,pad=55;
-  if(!list.length)return `<svg viewBox="0 0 ${W} ${H}"><rect width="100%" height="100%" fill="#f3f6fc"/><text x="500" y="280" text-anchor="middle" fill="#66728b">Add items to see the front elevation.</text></svg>`;
+  if(!list.length)return `<svg viewBox="0 0 ${W} ${H}"><rect width="100%" height="100%" fill="#172541"/><text x="500" y="280" text-anchor="middle" fill="#b8c8e8">Add items to see the front elevation.</text></svg>`;
   let minx=Infinity,maxx=-Infinity,maxz=3;
   list.forEach(e=>{const p=posAt(e),w=e.type==="wall"?Math.abs((e.x2||p.x)-p.x):(+e.w||.6);minx=Math.min(minx,p.x-w/2);maxx=Math.max(maxx,p.x+w/2);maxz=Math.max(maxz,(+e.elevation||0)+itemWorldHeight(e));});
   const sc=Math.min((W-pad*2)/Math.max(2,maxx-minx),(H-pad*2)/Math.max(3,maxz)),ground=H-pad,Xf=x=>pad+(x-minx)*sc,Zf=z=>ground-z*sc;
-  let g=`<defs><linearGradient id="frontSky" x2="0" y2="1"><stop stop-color="#dce9ff"/><stop offset="1" stop-color="#f7f9fd"/></linearGradient><linearGradient id="frontObj" x2="0" y2="1"><stop stop-color="#ffffff" stop-opacity=".55"/><stop offset=".2" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#0b1735" stop-opacity=".28"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#frontSky)"/>`;
-  for(let m=0;m<=Math.ceil(maxz);m++)g+=`<line x1="0" y1="${Zf(m)}" x2="${W}" y2="${Zf(m)}" stroke="#cbd6e8"/><text x="10" y="${Zf(m)-4}" fill="#70809d" font-size="11">${m} m</text>`;
-  g+=`<line x1="0" y1="${ground}" x2="${W}" y2="${ground}" stroke="#263653" stroke-width="3"/>`;
+  let g=`<defs><linearGradient id="frontSky" x2="0" y2="1"><stop stop-color="#263a61"/><stop offset=".72" stop-color="#172641"/><stop offset=".72" stop-color="#111a30"/><stop offset="1" stop-color="#0b1224"/></linearGradient><linearGradient id="frontObj" x2="0" y2="1"><stop stop-color="#ffffff" stop-opacity=".34"/><stop offset=".22" stop-color="#ffffff" stop-opacity=".06"/><stop offset="1" stop-color="#050b18" stop-opacity=".38"/></linearGradient><filter id="frontShadow"><feGaussianBlur stdDeviation="5"/></filter></defs><rect width="100%" height="100%" fill="url(#frontSky)"/>`;
+  for(let m=0;m<=Math.ceil(maxz);m++)g+=`<line x1="0" y1="${Zf(m)}" x2="${W}" y2="${Zf(m)}" stroke="#aabbd8" stroke-opacity=".28"/><text x="12" y="${Zf(m)-5}" fill="#aebfdd" font-size="11">${m} m</text>`;
+  g+=`<line x1="0" y1="${ground}" x2="${W}" y2="${ground}" stroke="#8fa6cc" stroke-width="2"/><line x1="0" y1="${Zf(1.6)}" x2="${W}" y2="${Zf(1.6)}" stroke="#45c9bd" stroke-width="1.4" stroke-dasharray="9 8" opacity=".55"/>`;
   list.slice().sort((a,b)=>(posAt(b).y-posAt(a).y)).forEach(e=>{const p=posAt(e),elev=+e.elevation||0,z=itemWorldHeight(e),col=e.color||({actor:"#3479d6",camera:"#173ca7",light:"#e0a106",wall:"#68738b",door:"#8a6f52",window:"#86bce3"}[e.type]||"#75839d");let w=+e.w||.55;
     if(e.type==="wall")w=Math.max(.12,Math.abs((e.x2||p.x)-p.x));if(e.type==="door"||e.type==="window")w=e.width||.9;
     const x=Xf(p.x)-w*sc/2,y=Zf(elev+z),ww=Math.max(7,w*sc),hh=Math.max(5,z*sc);
-    if(e.type==="actor")g+=`<ellipse cx="${Xf(p.x)}" cy="${Zf(elev+z*.82)}" rx="${ww*.28}" ry="${hh*.18}" fill="${col}"/><rect x="${x+ww*.3}" y="${y+hh*.3}" width="${ww*.4}" height="${hh*.62}" rx="${ww*.15}" fill="${col}"/><circle cx="${Xf(p.x)}" cy="${y+hh*.14}" r="${Math.min(ww*.24,hh*.12)}" fill="#d8a888"/>`;
+    if(e.type==="actor"){
+      const clip="frontActor"+String(e.id).replace(/[^a-zA-Z0-9_-]/g,"")+"_"+Math.random().toString(36).slice(2,8),female=(e.gender||"female")==="female",imageX=female?Xf(p.x)-ww*1.5:Xf(p.x)-ww*.5;
+      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x-ww*.12}" y="${y}" width="${ww*1.24}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})" transform="${poseTransform(e,Xf(p.x),ground-elev*sc)}"><image x="${imageX}" y="${y}" width="${ww*2}" height="${hh}" href="shotcraft-characters-cutout.png" preserveAspectRatio="none"/></g>`;
+    }
     else g+=`<rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="${col}" stroke="#fff" stroke-opacity=".65"/><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="url(#frontObj)"/>`;
-    g+=`<text x="${Xf(p.x)}" y="${Math.max(14,y-6)}" text-anchor="middle" font-size="11" font-weight="700" fill="#24324c">${esc(e.label||e.type)} · ${elev.toFixed(2)} m</text>`;});
+    g+=`<text x="${Xf(p.x)}" y="${Math.max(18,y-8)}" text-anchor="middle" font-size="12" font-weight="800" fill="#f7f9ff" stroke="#101a30" stroke-width="3" paint-order="stroke">${esc(e.label||e.type)} · ${elev.toFixed(2)} m</text>`;});
   return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
 }
 function perspectiveSceneSVG(){
@@ -7370,7 +7408,7 @@ function perspectiveSceneSVG(){
 function renderSceneView(){
   const body=$("#sceneViewBody");if(!body)return;
   const art=sceneViewMode==="top"?planSVGString(1000,560,true):sceneViewMode==="front"?frontElevationSVG():perspectiveSceneSVG();
-  body.innerHTML=`<div class="sceneviewbar"><button class="btn${sceneViewMode==="top"?" on":""}" data-scene-view="top">Top view</button><button class="btn${sceneViewMode==="front"?" on":""}" data-scene-view="front">Front view</button><button class="btn${sceneViewMode==="perspective"?" on":""}" data-scene-view="perspective">Perspective view</button><span style="flex:1"></span><span class="hint">Select an item in Top view to adjust its elevation in the Inspector.</span></div><div class="sceneviewcanvas">${art}</div>`;
+  body.innerHTML=`<div class="sceneviewbar"><button class="btn${sceneViewMode==="top"?" on":""}" data-scene-view="top">Top view</button><button class="btn${sceneViewMode==="front"?" on":""}" data-scene-view="front">Front view</button><button class="btn${sceneViewMode==="perspective"?" on":""}" data-scene-view="perspective">Perspective view</button><span style="flex:1"></span><span class="hint">Consistent scale and elevation across every view.</span></div><div class="sceneviewcanvas mode-${sceneViewMode}">${art}</div>`;
   body.querySelectorAll("[data-scene-view]").forEach(b=>b.onclick=()=>{sceneViewMode=b.dataset.sceneView;renderSceneView();});
 }
 function openSceneView(mode){sceneViewMode=mode||"front";renderSceneView();$("#veilSceneView").classList.add("show");}
