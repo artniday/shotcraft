@@ -478,9 +478,10 @@ body.presizing{cursor:col-resize;user-select:none}
 .logoprev img{max-width:100%;max-height:100%;object-fit:contain}
 .logoprev span{font-size:10.5px;color:var(--muted)}
 .logobtns{flex:1;display:flex;flex-direction:column;gap:6px;justify-content:center}
-.sect.collapsed>h4{border-bottom:0}
-.sect.collapsed>.sbody{display:none}
-.sbody{padding:12px}
+.sect.collapsed>h4{border-bottom:0}.sect>h4:hover{background:color-mix(in srgb,var(--soft) 82%,#dce5ff)}
+.sect>.sbody{padding:12px;max-height:5000px;opacity:1;overflow:hidden;transition:max-height .28s ease,opacity .2s ease,padding .28s ease}
+.sect.collapsed>.sbody{display:block;max-height:0;opacity:0;padding-top:0;padding-bottom:0}
+.sect>h4 .schev{transition:transform .22s ease}.sect.collapsed>h4 .schev{transform:rotate(-90deg)}
 .row{display:flex;gap:9px;margin-bottom:9px}
 .row>*{flex:1;min-width:0}
 .f{display:block;margin-bottom:9px}
@@ -568,6 +569,10 @@ table.grid select:hover,table.grid input:hover{border-color:var(--line);backgrou
 .helpactions .btn{font-size:10.5px}.helpempty{display:none;padding:24px;text-align:center;color:var(--muted)}
 body.dark .helpcontrols,body.dark .helpchips button,body.dark #helpBody kbd{background:#151d2c;border-color:#2c374b}
 .walljoin{opacity:.001;cursor:crosshair;transition:opacity .14s ease}.walljoin:hover{opacity:1}.walljoin circle{fill:#fff;stroke:#1745c8;stroke-width:2}.walljoin path{stroke:#1745c8;stroke-width:2;stroke-linecap:round;pointer-events:none}
+/* ---------- animatic timeline ---------- */
+#veilAnimatic .modal{max-width:1120px}.animatic-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px}.anim-view{min-height:390px;border-radius:14px;background:#080d1b;display:grid;place-items:center;overflow:hidden;position:relative}.anim-view img,.anim-view svg{display:block;width:100%;height:100%;max-height:520px;object-fit:contain}.anim-overlay{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:end;justify-content:space-between;gap:12px;color:#fff;text-shadow:0 2px 8px #000}.anim-overlay b{font-size:16px}.anim-side{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--card)}.anim-controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.anim-controls .spacer{flex:1}.anim-track{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 4px}.anim-clip{flex:0 0 178px;border:2px solid transparent;border-radius:11px;padding:6px;background:var(--soft);cursor:pointer;text-align:left}.anim-clip.on{border-color:var(--hct-blue);box-shadow:0 5px 14px rgba(0,36,156,.18)}.anim-thumb{height:88px;border-radius:7px;background:#0b1020;overflow:hidden}.anim-thumb img,.anim-thumb svg{width:100%;height:100%;object-fit:cover}.anim-meta{display:flex;justify-content:space-between;margin-top:6px;font-size:10px}.anim-progress{height:4px;border-radius:9px;background:#dfe5f2;overflow:hidden;margin-top:5px}.anim-progress i{display:block;height:100%;background:#4fd8b3;width:0}.anim-clip.on .anim-progress i{width:100%;transition:width var(--clip-ms,1000ms) linear}@media(max-width:800px){.animatic-layout{grid-template-columns:1fr}.anim-side{display:none}}
+.hud .viewmode{width:auto;padding:0 9px;font-size:9px;font-weight:800;letter-spacing:.04em}.hud .viewmode.on{background:#2448c5;color:#fff}
+#veilSceneView .modal{max-width:1120px}.sceneviewbar{display:flex;gap:7px;align-items:center;margin-bottom:10px}.sceneviewbar .btn.on{background:var(--hct-blue);color:#fff}.sceneviewcanvas{height:min(68vh,650px);border-radius:14px;overflow:hidden;background:#0b1020;display:grid;place-items:center}.sceneviewcanvas svg{width:100%;height:100%;display:block}
 
 /* ---------- modal ---------- */
 .veil{
@@ -1114,21 +1119,23 @@ body.dark .launchnew{background:rgba(20,27,51,.94);border-color:#303a60}.dark .l
 .lnrow .btn.primary{background:#2448c5}.lnrow .btn.good{background:#24b99a;color:#062b28}
 .lncheck{margin-top:10px;padding:10px 12px;border:1px solid #e3e7ef;border-radius:10px;background:#f8f9fb}
 .lnsection{margin:17px 0 8px;color:#65718a;letter-spacing:.13em}
-.lnpresets{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
-.lnpre,.lnpre:nth-child(n){min-height:52px;padding:8px 12px 8px 10px;border:1px solid #d9dfeb;border-radius:10px;background:#fff;box-shadow:none;color:#344057;display:flex;align-items:center;gap:10px}
-.lnpre::before{width:3px;background:var(--preset,#2448c5)}
-.lnpreicon{width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;border-radius:9px;background:color-mix(in srgb,var(--preset,#2448c5) 14%,white);font-size:17px;line-height:1;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--preset,#2448c5) 20%,transparent)}
-.lnpretext{font-size:12px;font-weight:800;line-height:1.2;text-align:left}
-.lnpre:hover{transform:none;border-color:var(--preset,#879bd8);box-shadow:0 4px 12px color-mix(in srgb,var(--preset,#2448c5) 10%,transparent)}
-.lnpre.on{border-color:#173ca7;background:#173ca7;color:#fff;box-shadow:0 5px 14px rgba(23,60,167,.16)}
-.lnpre.on .lnpreicon{background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
-.lnpre.on::before{background:#6ee1c4}
+.lnpresets{grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.lnpre,.lnpre:nth-child(n){position:relative;min-height:102px;padding:15px 15px 31px;border:0;border-radius:13px;background:linear-gradient(135deg,color-mix(in srgb,var(--preset) 88%,#fff),var(--preset));box-shadow:0 8px 18px color-mix(in srgb,var(--preset) 19%,transparent),inset 0 1px 0 rgba(255,255,255,.24);color:#fff;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;overflow:hidden;isolation:isolate}
+.lnpre::before{content:"";position:absolute;z-index:-1;left:0;right:0;top:auto;bottom:0;width:auto;height:27px;background:rgba(5,15,47,.15)}
+.lnpre::after{content:"";position:absolute;right:10px;top:9px;width:18px;height:18px;border:1px solid rgba(255,255,255,.34);border-radius:50%;opacity:0;transition:.18s ease}
+.lnpreicon{order:2;width:52px;height:52px;flex:0 0 52px;display:grid;place-items:center;border-radius:15px;background:rgba(9,23,61,.14);color:rgba(255,255,255,.72);font-size:27px;line-height:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);transform:translate(5px,-4px);transition:.2s ease}
+.lnprecopy{order:1;align-self:stretch;min-width:0;display:flex;flex-direction:column;align-items:flex-start}.lnpretext{font-size:13px;font-weight:850;line-height:1.25;text-align:left;text-shadow:0 1px 2px rgba(5,12,38,.18)}
+.lnprecopy small{position:absolute;left:0;right:0;bottom:6px;color:rgba(255,255,255,.88);font-size:9.5px;font-weight:750;letter-spacing:.04em;text-align:center;text-transform:uppercase}
+.lnpre:hover{transform:translateY(-2px);box-shadow:0 12px 25px color-mix(in srgb,var(--preset) 29%,transparent),inset 0 1px 0 rgba(255,255,255,.28);filter:saturate(1.06)}
+.lnpre:hover .lnpreicon{transform:translate(3px,-6px) scale(1.06);color:#fff}
+.lnpre.on{outline:3px solid #fff;outline-offset:-5px;background:linear-gradient(135deg,color-mix(in srgb,var(--preset) 82%,#fff),color-mix(in srgb,var(--preset) 80%,#071747));box-shadow:0 0 0 2px var(--preset),0 13px 27px color-mix(in srgb,var(--preset) 34%,transparent)}
+.lnpre.on::after{content:"✓";display:grid;place-items:center;background:#fff;color:var(--preset);font-size:11px;font-weight:900;opacity:1}.lnpre.on .lnpreicon{color:#fff;background:rgba(255,255,255,.14)}
 .lnhint{margin-top:12px;padding:11px 13px;border-radius:10px;background:#f5f7fb;color:#68748c}
 .savedtitle{margin-top:22px;color:#526078}.savedtitle::before{background:#24b99a;box-shadow:0 0 0 5px rgba(36,185,154,.12)}
 .projects{gap:12px}.proj{border:1px solid #dce2ed;border-radius:14px;background:#fff;box-shadow:0 7px 20px rgba(34,52,94,.07)}
 .proj::before{width:3px;background:#2448c5}.proj:hover{transform:none;border-color:#9baade;box-shadow:0 9px 24px rgba(34,52,94,.10)}
 body.dark #veilLaunch{background:linear-gradient(180deg,#111827,#0d1422)}
-body.dark .launchnew,body.dark .lnpre,body.dark .proj{background:#151d2c;border-color:#2c374b}
+body.dark .launchnew,body.dark .proj{background:#151d2c;border-color:#2c374b}
 body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;border-color:#2c374b}
 @media(max-width:900px){.modal.launch{padding:16px}.modal.launch>header{min-height:100px}.lnpresets{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.modal.launch>header{padding:18px!important}.launchbrand h3{font-size:20px}.launchbrand p{display:none}.launchnew{padding:16px}.lnpresets{grid-template-columns:1fr}}
@@ -1217,6 +1224,9 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
         <button id="hLabels" class="on" title="Toggle labels"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7"/></svg></button>
         <button id="hCones" class="on" title="Toggle camera and light cones"><svg viewBox="0 0 24 24"><path d="M12 4L4 20h16z"/></svg></button>
         <button id="h180" title="Toggle the 180 degree axis overlay"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M8.5 12h7"/></svg></button>
+        <button class="viewmode on" id="hViewTop" title="Top editing view">TOP</button>
+        <button class="viewmode" id="hViewFront" title="Front elevation view">FRONT</button>
+        <button class="viewmode" id="hViewPerspective" title="Perspective scene view">3D</button>
       </div>
     </div>
 
@@ -1332,6 +1342,20 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
   <div class="modal">
     <header><div><h3>HOW TO USE SHOTCRAFT</h3><p>Interactive guide to planning, blocking and production</p></div><button class="x" data-close>&times;</button></header>
     <div class="mbody" id="helpBody"></div>
+  </div>
+</div>
+
+<div class="veil" id="veilAnimatic">
+  <div class="modal">
+    <header><div><h3>ANIMATIC TIMELINE</h3><p>Preview shot order, pacing and transitions</p></div><button class="x" data-close>&times;</button></header>
+    <div class="mbody" id="animaticBody"></div>
+  </div>
+</div>
+
+<div class="veil" id="veilSceneView">
+  <div class="modal">
+    <header><div><h3>SCENE VIEWS</h3><p>Top plan, front elevation and perspective preview</p></div><button class="x" data-close>&times;</button></header>
+    <div class="mbody" id="sceneViewBody"></div>
   </div>
 </div>
 
@@ -1699,7 +1723,7 @@ CAT.prop = {
   {n:"Living", items:[
     ["couch3","Couch / 3 seat sofa",2.10,0.90,0.85],
     ["sectional","L sectional couch",2.60,1.80,0.85],
-    ["armchair","Armchair / recliner",0.90,0.90,0.95],
+    ["armchair","Armchair / recliner",0.82,0.82,0.95],
     ["coffee","Coffee table",1.20,0.60,0.45],
     ["tvstand","Television and media stand",1.40,0.40,0.55],
     ["tv","Television screen",1.20,0.10,0.70],
@@ -1711,7 +1735,7 @@ CAT.prop = {
     ["dining4","Dining table + 4 chairs",1.80,1.40,0.75],
     ["recttable","Rectangular table",1.80,0.90,0.75],
     ["roundtable","Round dining table + 4 chairs",1.40,1.40,0.75],
-    ["diningchair","Dining chair",0.50,0.50,0.95],
+    ["diningchair","Dining chair",0.48,0.48,0.95],
     ["desk","Executive office desk",1.60,0.80,0.75],
     ["barcounter","Bar counter",2.40,0.60,1.10],
     ["barstool","Bar stool",0.40,0.40,0.75],
@@ -1789,7 +1813,7 @@ CAT.grip = {
     ["boomop","Sound boom operator",0.80,0.80,2.60],
     ["cstandarm","C stand + 40 inch grip arm",1.00,1.00,2.60],
     ["tripodstand","Heavy duty tripod stand",0.90,0.90,2.40],
-    ["dirchair","Director's folding chair",0.60,0.60,1.10],
+    ["dirchair","Director's folding chair",0.55,0.55,1.10],
     ["applebox","Apple box (full / half)",0.50,0.30,0.30],
     ["magliner","Camera magliner cart",1.20,0.60,1.00],
     ["chroma","Chroma green / seamless backdrop",4.00,0.30,3.00],
@@ -2007,7 +2031,8 @@ function posAt(el,beat){
   if(prev===null) return at(next!=null?next:keys[0]);
   if(next===null) return at(prev);
   const a=at(prev), c=at(next), t=(b-prev)/(next-prev);
-  return {x:a.x+(c.x-a.x)*t, y:a.y+(c.y-a.y)*t, rot:a.rot+(c.rot-a.rot)*t};
+  const turn=((((c.rot||0)-(a.rot||0))+540)%360)-180;
+  return {x:a.x+(c.x-a.x)*t, y:a.y+(c.y-a.y)*t, rot:(a.rot||0)+turn*t};
 }
 function setPos(el,x,y){
   if(Object.keys(el.beats||{}).length || state.beat>0){
@@ -2198,7 +2223,8 @@ function planAssetSymbol(el,cx,cy,w,h,col){
   if(/stand|tripod|micstand|jib/.test(a)) return `<circle cx="${cx}" cy="${cy}" r="${Math.min(w,h)*.13}" fill="${col}"/><path d="M${cx} ${cy}L${x+w*.1} ${y+h*.88}M${cx} ${cy}L${x+w*.9} ${y+h*.88}M${cx} ${cy}L${cx} ${y+h*.04}" stroke="${dark}" stroke-width="${sw}" stroke-linecap="round"/><circle cx="${cx}" cy="${y+h*.05}" r="${Math.min(w,h)*.11}" ${base}/>`;
   if(/toilet|wc/.test(a)) return `<ellipse cx="${cx}" cy="${y+h*.62}" rx="${w*.34}" ry="${h*.3}" fill="#fff" stroke="${col}" stroke-width="${sw}"/><rect x="${x+w*.18}" y="${y+h*.05}" width="${w*.64}" height="${h*.3}" rx="5" ${base}/><ellipse cx="${cx}" cy="${y+h*.62}" rx="${w*.16}" ry="${h*.14}" fill="#bfe5f4"/>`;
   if(/basin|sink|bath|shower/.test(a)) return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(12,h*.2)}" fill="#f8fcff" stroke="${col}" stroke-width="${sw}"/><ellipse cx="${cx}" cy="${cy}" rx="${w*.32}" ry="${h*.3}" fill="#bfe5f4" stroke="${dark}" stroke-width="1.2"/><circle cx="${cx}" cy="${y+h*.15}" r="2.5" fill="${dark}"/>`;
-  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(7,Math.max(2,w/8))}" ${base}/><path d="M${x+4} ${y+h-4}L${x+w-4} ${y+4}" stroke="${dark}" stroke-opacity=".36"/><rect x="${x+4}" y="${y+4}" width="${Math.max(1,w-8)}" height="${Math.max(1,h-8)}" rx="3" fill="none" stroke="#fff" stroke-opacity=".45"/>`;
+  const bevel=Math.max(3,Math.min(10,Math.min(w,h)*.14));
+  return `<path d="M${x} ${y}H${x+w}V${y+h-bevel}L${x+w-bevel} ${y+h}H${x}Z" ${base}/><path d="M${x+w} ${y}V${y+h-bevel}L${x+w-bevel} ${y+h}V${y+bevel}Z" fill="${dark}" fill-opacity=".72"/><path d="M${x} ${y}H${x+w}L${x+w-bevel} ${y+bevel}H${x+bevel}Z" fill="#fff" fill-opacity=".42"/><rect x="${x+bevel}" y="${y+bevel}" width="${Math.max(1,w-bevel*2)}" height="${Math.max(1,h-bevel*2)}" rx="3" fill="none" stroke="#fff" stroke-opacity=".32"/>`;
 }
 function drawElement(el,crossing){
   if(!elVisible(el)) return "";
@@ -2280,6 +2306,7 @@ function drawElement(el,crossing){
   case "prop": case "staging": case "grip": case "arch":{
     const w=S(el.w), h=S(el.h), col=el.color||"#12a3b8";
     g = `<g transform="rotate(${r} ${cx} ${cy})">
+      <ellipse cx="${cx+Math.min(8,w*.06)}" cy="${cy+Math.min(9,h*.07)}" rx="${Math.max(5,w*.46)}" ry="${Math.max(4,h*.42)}" fill="#071023" opacity=".16"/>
       ${planAssetSymbol(el,cx,cy,w,h,col)}
       </g>` + label(cx, cy+h/2+13, el.label, {fs:10,bg:col,cat:"props"});
     if(el.safety && el.exclusion>0){
@@ -2437,7 +2464,9 @@ function drawElement(el,crossing){
     break; }
 
   case "actor":{
-    const R = S(0.30), rr = Math.max(11,R), aw=42, ah=72;
+    /* A standing person occupies roughly 0.48 × 0.65 m on the blocking plan.
+       Scale the marker in metres so its relationship to furniture stays true. */
+    const R=S(0.30),rr=Math.max(11,R),aw=clamp(S(0.48),30,120),ah=clamp(S(0.65),42,162);
     const clipId="actorClip"+String(el.id).replace(/[^a-zA-Z0-9_-]/g,"");
     const female=(el.gender||"female")==="female";
     const imageX=female?cx-aw*1.5:cx-aw/2;
@@ -3250,14 +3279,20 @@ function fitBounds(W,H){
 function initKeys(){
   let spacePanPrevious=null;
   document.addEventListener("keydown", ev=>{
+    const k=ev.key.toLowerCase();
+    /* Undo and redo are application-wide, including while an inspector field
+       has focus. This keeps Cmd on macOS and Ctrl on Windows/Linux identical. */
+    if((ev.ctrlKey||ev.metaKey)&&k==="z"){
+      ev.preventDefault(); ev.stopPropagation(); ev.shiftKey?redo():undo(); return;
+    }
+    if((ev.ctrlKey||ev.metaKey)&&k==="y"){
+      ev.preventDefault(); ev.stopPropagation(); redo(); return;
+    }
     const tag=(ev.target.tagName||"").toLowerCase();
     if(tag==="input"||tag==="textarea"||tag==="select"||ev.target.isContentEditable){
       if(ev.key==="Escape") ev.target.blur();
       return;
     }
-    const k=ev.key.toLowerCase();
-    if((ev.ctrlKey||ev.metaKey)&&k==="z"){ ev.preventDefault(); ev.shiftKey?redo():undo(); return; }
-    if((ev.ctrlKey||ev.metaKey)&&k==="y"){ ev.preventDefault(); redo(); return; }
     if((ev.ctrlKey||ev.metaKey)&&k==="d"){ ev.preventDefault(); duplicateSelected(); return; }
     if((ev.ctrlKey||ev.metaKey)&&k==="a"){ ev.preventDefault(); state.sel=els().map(e=>e.id); renderAll(); return; }
     if((ev.ctrlKey||ev.metaKey)&&k==="s"){ ev.preventDefault(); savePlanFile(); return; }
@@ -3357,9 +3392,9 @@ function sectIcon(key){
 function sect(key,title,inner,tagRight){
   const closed = !openSects.has(key);
   return `<div class="sect${closed?" collapsed":""}" data-sect="${key}">
-    <h4>${sectIcon(key)}<span class="stitle">${esc(title)}</span>
+    <h4 role="button" tabindex="0" aria-expanded="${closed?"false":"true"}">${sectIcon(key)}<span class="stitle">${esc(title)}</span>
       ${tagRight?`<span class="tagr">${esc(tagRight)}</span>`:""}
-      <span class="schev">${closed?"&#8250;":"&#8964;"}</span></h4>
+      <span class="schev">&#8964;</span></h4>
     <div class="sbody">${inner}</div></div>`;
 }
 function bindAttr(scope,a,b,num){ return `data-bind="${scope}:${a}${b!=null?":"+b:""}"${num?' data-num="1"':''}`; }
@@ -3640,6 +3675,10 @@ function inspectorActor(el){
       </div></div>`
     + `<div class="row">${fSelect("Presented gender (for the 3D figure)","elem",el.id,"gender",el.gender||"neutral",
         [{v:"neutral",n:"Not specified"},{v:"female",n:"Female"},{v:"male",n:"Male"}])}</div>`
+    + `<div class="row">${fSelect("Pose","elem",el.id,"pose",el.pose||"Standing",
+        ["Standing","Walking","Running","Sitting","Crouching","Pointing","Fighting","Driving"].map(v=>({v,n:v})))}
+        ${fSelect("Expression","elem",el.id,"expression",el.expression||"Neutral",
+        ["Neutral","Happy","Concerned","Angry","Surprised","Sad","Focused"].map(v=>({v,n:v})))}</div>`
     + fToggle("Stance","elem",el.id,"seated",el.seated,"Seated","Standing")
     + `<p class="hint">Gender only changes the proportions of the figure in the viewfinder: standing height, shoulder and
        hip width, and the eye line the camera aims at. It has no effect on anything else in the plan.</p>`
@@ -3825,10 +3864,12 @@ function inspectorGeneric(el){
   let body = fInput("Label","elem",el.id,"label",el.label);
 
   if(["prop","staging","grip","arch"].includes(el.type)){
+    const actual=assetById(el.type,el.asset);
     body += assetPicker(el)
       + `<div class="row">${fInput("Width (m)","elem",el.id,"w",el.w,{type:"number",step:0.05,min:0.05})}
           ${fInput("Depth (m)","elem",el.id,"h",el.h,{type:"number",step:0.05,min:0.05})}
           ${fInput("Height (m)","elem",el.id,"z",el.z,{type:"number",step:0.05,min:0.01})}</div>`
+      + (actual?`<div class="row" style="align-items:center"><span class="hint" style="flex:1">Catalogue size: ${actual.w.toFixed(2)} × ${actual.h.toFixed(2)} m footprint · ${actual.z.toFixed(2)} m high</span><button class="btn" data-act="resetAssetSize" data-id="${el.id}">Restore actual size</button></div>`:"")
       + fInput("Colour","elem",el.id,"color",el.color,{type:"color"});
     if(el.safety){
       body += `<div class="chip warn" style="display:block;margin:8px 0">This item needs a supervised safety brief.
@@ -3942,7 +3983,14 @@ function renderInspector(){
     : el.type==="camera" ? inspectorCamera(el)
     : el.type==="light"  ? inspectorLight(el)
     : inspectorGeneric(el);
-  return inspectorHeader(el)+body;
+  const canElevate=!['wall','road','track','cable','measure','arrow','pen'].includes(el.type);
+  const elevation=canElevate?sect('elevation','Elevation from ground',
+    `<div class="f"><span class="lbl">Elevation <b style="float:right">${(+el.elevation||0).toFixed(2)} m</b></span>
+      <input type="range" min="0" max="8" step="0.05" value="${+el.elevation||0}" ${bindAttr('elem',el.id,'elevation',true)}></div>
+     <div class="row">${fInput('Exact elevation (m)','elem',el.id,'elevation',+el.elevation||0,{type:'number',step:.05,min:0,max:50})}
+       <button class="btn" data-act="groundItem" data-id="${el.id}" style="align-self:end">Place on ground</button></div>
+     <p class="hint">Elevation is measured from the floor to the bottom of the item. Use it for wall-mounted screens, raised platforms, flying props and overhead equipment.</p>`,`${(+el.elevation||0).toFixed(2)} m`):'';
+  return inspectorHeader(el)+body+elevation;
 }
 
 /* ------------------------- shot list tab ------------------------- */
@@ -4239,11 +4287,14 @@ function renderPanel(){
   b.dataset.tab = state.tab;
   if(keepTab===state.tab && keepTop) b.scrollTop = keepTop;
   b.querySelectorAll(".sect>h4").forEach(hd=>{
-    hd.onclick=()=>{
+    const toggleSection=()=>{
       const s=hd.parentElement, k=s.dataset.sect;
       s.classList.toggle("collapsed");
+      hd.setAttribute("aria-expanded",s.classList.contains("collapsed")?"false":"true");
       if(k){ s.classList.contains("collapsed") ? openSects.delete(k) : openSects.add(k); }
     };
+    hd.onclick=toggleSection;
+    hd.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleSection();}};
   });
   b.querySelectorAll("[data-row]").forEach(r=>{
     r.addEventListener("click", ev=>{
@@ -4266,7 +4317,7 @@ function camTilt(cam){
   const p=posAt(cam);
   const near = actors().map(a=>{const q=posAt(a); return {a,d:dist(p.x,p.y,q.x,q.y)};}).sort((x,y)=>x.d-y.d)[0];
   if(!near || near.d<0.3) return 0;
-  return round2(deg(Math.atan2(subjectHeight(near.a)-(cam.height||1.6), near.d)));
+  return round2(deg(Math.atan2((+near.a.elevation||0)+subjectHeight(near.a)-((+cam.elevation||0)+(cam.height||1.6)), near.d)));
 }
 
 /* =====================================================================
@@ -4309,7 +4360,7 @@ function vfSVG(cam,W,H,opt){
   const fw = W, fh = Math.round(W/A), top = Math.max(0,(H-fh)/2);
   const p = posAt(cam);
   const yaw = rad(p.rot||0), pitch = rad(camTilt(cam));
-  const hc = cam.height||1.6;
+  const hc = (+cam.elevation||0)+(cam.height||1.6);
   const hf = rad(hfov(cam.lens,cam.sensor)/2);
   const vf = Math.atan(Math.tan(hf)/A);
   const kx = (fw/2)/Math.tan(hf), ky = (fh/2)/Math.tan(vf);
@@ -4473,29 +4524,29 @@ function vfSVG(cam,W,H,opt){
 
   /* ---- props, staging, grip, architecture ---- */
   els().filter(e=>["prop","staging","grip","arch"].includes(e.type)).forEach(pr=>{
-    const q=posAt(pr), z=pr.z!=null?pr.z:0.8;
+    const q=posAt(pr), z=pr.z!=null?pr.z:0.8, ez=+pr.elevation||0;
     shadow(q.x,q.y,pr.w*0.6,pr.h*0.6);
     const aid=String(pr.asset||"").toLowerCase(),col=pr.color||"#8a93ab";
     if(aid.includes("plant")||aid==="tree"||aid==="bush"){
-      box3(q.x,q.y,0,Math.max(.28,pr.w*.48),Math.max(.28,pr.h*.48),Math.min(.48,z*.34),q.rot,"#8a5a35");
-      box3(q.x,q.y,Math.min(.36,z*.25),.10,.10,Math.max(.35,z*.42),q.rot,"#654126");
-      round3(q.x,q.y,z*.72,Math.max(.25,pr.w*.48),"#3f9b58");
+      box3(q.x,q.y,ez,Math.max(.28,pr.w*.48),Math.max(.28,pr.h*.48),Math.min(.48,z*.34),q.rot,"#8a5a35");
+      box3(q.x,q.y,ez+Math.min(.36,z*.25),.10,.10,Math.max(.35,z*.42),q.rot,"#654126");
+      round3(q.x,q.y,ez+z*.72,Math.max(.25,pr.w*.48),"#3f9b58");
       round3(q.x-pr.w*.22,q.y,z*.62,Math.max(.18,pr.w*.34),"#58ad63");
       round3(q.x+pr.w*.20,q.y,z*.60,Math.max(.18,pr.w*.31),"#2f7f47");
     }else if(aid.includes("couch")||aid.includes("sofa")||aid.includes("armchair")||aid.includes("loveseat")){
-      box3(q.x,q.y,0,pr.w,pr.h*.82,z*.48,q.rot,col);
-      box3(q.x-pr.w*.42*Math.sin(rad(q.rot)),q.y+pr.w*.42*Math.cos(rad(q.rot)),z*.34,pr.w,pr.h*.18,z*.52,q.rot,col);
-      box3(q.x,q.y,z*.42,pr.w*.86,pr.h*.7,z*.10,q.rot,rgb2hex(mixc(hex2rgb(col),[255,255,255],.13)));
+      box3(q.x,q.y,ez,pr.w,pr.h*.82,z*.48,q.rot,col);
+      box3(q.x-pr.w*.42*Math.sin(rad(q.rot)),q.y+pr.w*.42*Math.cos(rad(q.rot)),ez+z*.34,pr.w,pr.h*.18,z*.52,q.rot,col);
+      box3(q.x,q.y,ez+z*.42,pr.w*.86,pr.h*.7,z*.10,q.rot,rgb2hex(mixc(hex2rgb(col),[255,255,255],.13)));
     }else if(aid.includes("table")||aid==="dining4"||aid==="desk"||aid==="coffee"){
-      box3(q.x,q.y,0,pr.w*.08,pr.h*.08,z*.92,q.rot,"#4b3528");
-      box3(q.x,q.y,z*.86,pr.w,pr.h,z*.14,q.rot,col,o.mini?"":pr.label);
+      box3(q.x,q.y,ez,pr.w*.08,pr.h*.08,z*.92,q.rot,"#4b3528");
+      box3(q.x,q.y,ez+z*.86,pr.w,pr.h,z*.14,q.rot,col,o.mini?"":pr.label);
       if(aid==="dining4"||aid.includes("roundtable")){
         [[0,-.62],[0,.62],[-.62,0],[.62,0]].forEach(v=>{const cp=atAsset(q.x,q.y,q.rot,v[1]*pr.h,v[0]*pr.w);box3(cp[0],cp[1],0,pr.w*.18,pr.h*.18,z*.56,q.rot,col);});
       }
     }else if(aid.includes("chair")||aid.includes("stool")){
-      box3(q.x,q.y,0,pr.w*.72,pr.h*.72,z*.48,q.rot,col);
+      box3(q.x,q.y,ez,pr.w*.72,pr.h*.72,z*.48,q.rot,col);
       const back=atAsset(q.x,q.y,q.rot,-pr.h*.34,0);
-      box3(back[0],back[1],z*.42,pr.w*.76,pr.h*.12,z*.58,q.rot,col,o.mini?"":pr.label);
+      box3(back[0],back[1],ez+z*.42,pr.w*.76,pr.h*.12,z*.58,q.rot,col,o.mini?"":pr.label);
     }else if(aid.includes("bed")){
       box3(q.x,q.y,0,pr.w,pr.h,z*.58,q.rot,col);
       const head=atAsset(q.x,q.y,q.rot,-pr.h*.38,0);
@@ -4516,7 +4567,7 @@ function vfSVG(cam,W,H,opt){
     }else if(/stand|tripod|micstand|jib/.test(aid)){
       box3(q.x,q.y,0,.07,.07,z,q.rot,"#273147",o.mini?"":pr.label);
       const a=rad(q.rot);[-1,1].forEach(s=>{const foot=atAsset(q.x,q.y,q.rot,pr.h*.28,s*pr.w*.34);box3(foot[0],foot[1],0,.04,.04,.06,q.rot,"#273147");line3([q.x,q.y,z*.45],[foot[0],foot[1],.04],"#273147",2,1);});
-    }else box3(q.x,q.y,0,pr.w,pr.h,z,q.rot,col,o.mini?"":pr.label);
+    }else box3(q.x,q.y,ez,pr.w,pr.h,z,q.rot,col,o.mini?"":pr.label);
     if(pr.safety && pr.exclusion>0){
       const seg=22, pts=[];
       for(let i=0;i<seg;i++){ const t=i/seg*Math.PI*2;
@@ -4528,22 +4579,22 @@ function vfSVG(cam,W,H,opt){
 
   /* ---- other cameras ---- */
   cameras().filter(c=>c.id!==cam.id).forEach(c=>{
-    const q=posAt(c), h=c.height||1.6;
+    const q=posAt(c), h=c.height||1.6,ez=+c.elevation||0;
     shadow(q.x,q.y,0.34,0.34);
-    box3(q.x,q.y,0,0.09,0.09,h-0.12,0,"#39445e");
-    box3(q.x,q.y,h-0.12,0.30,0.20,0.20,q.rot,"#00249C", o.mini?"":c.label);
+    box3(q.x,q.y,ez,0.09,0.09,h-0.12,0,"#39445e");
+    box3(q.x,q.y,ez+h-0.12,0.30,0.20,0.20,q.rot,"#00249C", o.mini?"":c.label);
   });
 
   /* ---- lights ---- */
   lights().forEach(l=>{
-    const q=posAt(l), h=l.height||2;
+    const q=posAt(l), h=l.height||2,ez=+l.elevation||0;
     const LT = LIGHT_TYPES[l.role]||LIGHT_TYPES.key;
     shadow(q.x,q.y,0.3,0.3);
-    box3(q.x,q.y,0,0.07,0.07,h-0.18,0,"#2b3350");
-    if(l.flag) box3(q.x,q.y,h-0.18,l.width||1.2,0.05,0.9,q.rot,"#1c2233", o.mini?"":l.label);
+    box3(q.x,q.y,ez,0.07,0.07,h-0.18,0,"#2b3350");
+    if(l.flag) box3(q.x,q.y,ez+h-0.18,l.width||1.2,0.05,0.9,q.rot,"#1c2233", o.mini?"":l.label);
     else {
-      box3(q.x,q.y,h-0.18,0.26,0.26,0.26,q.rot,"#2b3350", o.mini?"":l.label);
-      const c=prj([q.x,q.y,h-0.05]);
+      box3(q.x,q.y,ez+h-0.18,0.26,0.26,0.26,q.rot,"#2b3350", o.mini?"":l.label);
+      const c=prj([q.x,q.y,ez+h-0.05]);
       if(c.d>NEAR){
         const S=scr(c), rr=clamp(26/c.d,2,26);
         items.push({d:c.d-0.02, s:`<circle cx="${S[0].toFixed(1)}" cy="${S[1].toFixed(1)}" r="${rr.toFixed(1)}"
@@ -4562,7 +4613,7 @@ function vfSVG(cam,W,H,opt){
   actors().forEach(ac=>{
     const q=posAt(ac);
     const G = GENDER[ac.gender||"neutral"] || GENDER.neutral;
-    const figureH=ac.seated?G.h*.72:G.h,feet=prj([q.x,q.y,0]),head=prj([q.x,q.y,figureH]);
+    const figureH=ac.seated?G.h*.72:G.h,ez=+ac.elevation||0,feet=prj([q.x,q.y,ez]),head=prj([q.x,q.y,ez+figureH]);
     if(feet.d>NEAR&&head.d>NEAR){
       shadow(q.x,q.y,ac.seated?.42:.28,ac.seated?.38:.24);
       const F=scr(feet),Hh=scr(head),ih=Math.max(28,Math.abs(F[1]-Hh[1])),iw=ih*.43;
@@ -4995,7 +5046,7 @@ function renderTemplates(){
 }
 
 /* ------------------------- beats ------------------------- */
-let playTimer=null, playSpeed=1, playLoop=true;
+let playTimer=null, playSpeed=1, playLoop=true, playLast=0, playCursor=0;
 function renderBeats(){
   const sc=scene();
   $("#beatLabel").textContent = `BEAT ${state.beat+1} / ${sc.beats}`;
@@ -5009,20 +5060,29 @@ function renderBeats(){
   tr.querySelectorAll("[data-beat]").forEach(d=>d.onclick=()=>{ state.beat=+d.dataset.beat; renderAll(); });
 }
 function playBeats(){
-  if(playTimer){ clearInterval(playTimer); playTimer=null; $("#beatPlay").innerHTML="&#9654; Play"; return; }
+  if(playTimer){ cancelAnimationFrame(playTimer); playTimer=null; $("#beatPlay").innerHTML="&#9654; Play"; renderBeats(); return; }
   const sc=scene(); if(sc.beats<2) return;
   $("#beatPlay").innerHTML="&#10074;&#10074; Stop";
-  let t = state.beat;
-  playTimer = setInterval(()=>{
-    t += 0.25*playSpeed;
-    if(t >= sc.beats-1+0.25){
-      if(playLoop) t=0;
-      else { clearInterval(playTimer); playTimer=null; $("#beatPlay").innerHTML="&#9654; Play";
-        state.beat=sc.beats-1; renderPlan(); renderBeats(); return; }
+  playCursor=clamp(+state.beat||0,0,sc.beats-1); playLast=0;
+  const frame=now=>{
+    if(!playTimer) return;
+    if(!playLast) playLast=now;
+    const dt=Math.min(.05,(now-playLast)/1000); playLast=now;
+    playCursor+=dt*playSpeed;
+    const end=sc.beats-1;
+    if(playCursor>=end){
+      if(playLoop) playCursor=playCursor%end;
+      else {state.beat=end;cancelAnimationFrame(playTimer);playTimer=null;$("#beatPlay").innerHTML="&#9654; Play";renderPlan();renderBeats();return;}
     }
-    state.beat = t;
-    renderPlan(); renderBeats();
-  }, 90);
+    const base=Math.floor(playCursor), raw=playCursor-base;
+    const eased=raw*raw*(3-2*raw); /* smooth acceleration and deceleration at each beat */
+    state.beat=Math.min(end,base+eased);
+    renderPlan();
+    const label=$("#beatLabel"); if(label) label.textContent=`BEAT ${Math.min(sc.beats,base+1)} / ${sc.beats}`;
+    document.querySelectorAll("#beatTrack .dot").forEach((d,i)=>d.classList.toggle("on",i===Math.round(state.beat)));
+    playTimer=requestAnimationFrame(frame);
+  };
+  playTimer=requestAnimationFrame(frame);
 }
 
 /* ------------------------- scene select ------------------------- */
@@ -6503,7 +6563,7 @@ function renderLauncher(){
         with notes and boards, a lighting plot, thirteen crew and cast, two locations, a two day stripboard, a priced
         budget, a task board and the gear list. Read it, then change it into your own production.</span></label>
     <div class="lnlabel">WORKSPACE PRESET</div>
-    <div class="lnpresets">${PRESETS.map(p=>`<button class="lnpre${LAUNCH.preset===p.id?" on":""}" data-preset="${p.id}" style="--preset:${p.c}"><span class="lnpreicon" aria-hidden="true">${p.i}</span><span class="lnpretext">${esc(p.n)}</span></button>`).join("")}</div>
+    <div class="lnpresets">${PRESETS.map(p=>`<button class="lnpre${LAUNCH.preset===p.id?" on":""}" data-preset="${p.id}" style="--preset:${p.c}"><span class="lnprecopy"><span class="lnpretext">${esc(p.n)}</span><small>${LAUNCH.preset===p.id?"Selected":"Choose preset"} &nbsp;→</small></span><span class="lnpreicon" aria-hidden="true">${p.i}</span></button>`).join("")}</div>
     <p class="lndesc">${esc(P.d)} Every workspace tab stays available whichever preset you pick. The preset only
       decides which tab opens first, and you can hide any module later in Viewing Options.</p>
   </div>`;
@@ -7219,6 +7279,7 @@ function renderStory(){
       <div class="hint">One frame per camera, drawn from the plan. Drop your own artwork over any frame.
         ${withArt} with artwork, ${withDesc} with a description.</div></div>
       <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn solid" data-act="openAnimatic" title="Play the boards on an editorial timeline">&#9654; Animatic</button>
         <button class="btn" data-act="boardFromScript" title="Copy the matching script lines into every frame">Pull from script</button>
         <button class="btn" data-act="printBoard">Export</button>
       </div></div>
@@ -7274,6 +7335,91 @@ function renderStory(){
     reorder it, which renumbers the shot list too.</p>`;
   return h;
 }
+
+/* ------------------------- top / front / perspective scene views ------------------------- */
+let sceneViewMode="front";
+function itemWorldHeight(el){
+  if(el.type==="actor") return el.seated?1.18:((el.gender||"neutral")==="female"?1.66:(el.gender||"neutral")==="male"?1.78:1.72);
+  if(el.type==="camera") return .28;
+  if(el.type==="light") return el.flag?.9:.28;
+  if(el.type==="door") return 2.05;if(el.type==="window")return Math.max(.3,(el.head||2.2)-(el.sill||.9));
+  return +el.z||+el.height||.5;
+}
+function frontElevationSVG(){
+  const list=els().filter(elVisible),W=1000,H=560,pad=55;
+  if(!list.length)return `<svg viewBox="0 0 ${W} ${H}"><rect width="100%" height="100%" fill="#f3f6fc"/><text x="500" y="280" text-anchor="middle" fill="#66728b">Add items to see the front elevation.</text></svg>`;
+  let minx=Infinity,maxx=-Infinity,maxz=3;
+  list.forEach(e=>{const p=posAt(e),w=e.type==="wall"?Math.abs((e.x2||p.x)-p.x):(+e.w||.6);minx=Math.min(minx,p.x-w/2);maxx=Math.max(maxx,p.x+w/2);maxz=Math.max(maxz,(+e.elevation||0)+itemWorldHeight(e));});
+  const sc=Math.min((W-pad*2)/Math.max(2,maxx-minx),(H-pad*2)/Math.max(3,maxz)),ground=H-pad,Xf=x=>pad+(x-minx)*sc,Zf=z=>ground-z*sc;
+  let g=`<defs><linearGradient id="frontSky" x2="0" y2="1"><stop stop-color="#dce9ff"/><stop offset="1" stop-color="#f7f9fd"/></linearGradient><linearGradient id="frontObj" x2="0" y2="1"><stop stop-color="#ffffff" stop-opacity=".55"/><stop offset=".2" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#0b1735" stop-opacity=".28"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#frontSky)"/>`;
+  for(let m=0;m<=Math.ceil(maxz);m++)g+=`<line x1="0" y1="${Zf(m)}" x2="${W}" y2="${Zf(m)}" stroke="#cbd6e8"/><text x="10" y="${Zf(m)-4}" fill="#70809d" font-size="11">${m} m</text>`;
+  g+=`<line x1="0" y1="${ground}" x2="${W}" y2="${ground}" stroke="#263653" stroke-width="3"/>`;
+  list.slice().sort((a,b)=>(posAt(b).y-posAt(a).y)).forEach(e=>{const p=posAt(e),elev=+e.elevation||0,z=itemWorldHeight(e),col=e.color||({actor:"#3479d6",camera:"#173ca7",light:"#e0a106",wall:"#68738b",door:"#8a6f52",window:"#86bce3"}[e.type]||"#75839d");let w=+e.w||.55;
+    if(e.type==="wall")w=Math.max(.12,Math.abs((e.x2||p.x)-p.x));if(e.type==="door"||e.type==="window")w=e.width||.9;
+    const x=Xf(p.x)-w*sc/2,y=Zf(elev+z),ww=Math.max(7,w*sc),hh=Math.max(5,z*sc);
+    if(e.type==="actor")g+=`<ellipse cx="${Xf(p.x)}" cy="${Zf(elev+z*.82)}" rx="${ww*.28}" ry="${hh*.18}" fill="${col}"/><rect x="${x+ww*.3}" y="${y+hh*.3}" width="${ww*.4}" height="${hh*.62}" rx="${ww*.15}" fill="${col}"/><circle cx="${Xf(p.x)}" cy="${y+hh*.14}" r="${Math.min(ww*.24,hh*.12)}" fill="#d8a888"/>`;
+    else g+=`<rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="${col}" stroke="#fff" stroke-opacity=".65"/><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="url(#frontObj)"/>`;
+    g+=`<text x="${Xf(p.x)}" y="${Math.max(14,y-6)}" text-anchor="middle" font-size="11" font-weight="700" fill="#24324c">${esc(e.label||e.type)} · ${elev.toFixed(2)} m</text>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
+}
+function perspectiveSceneSVG(){
+  let cam=cameras()[0];
+  if(!cam){const ps=els().map(posAt),xs=ps.map(p=>p.x),ys=ps.map(p=>p.y),b={minx:xs.length?Math.min(...xs):-2,maxx:xs.length?Math.max(...xs):2,miny:ys.length?Math.min(...ys):-2,maxy:ys.length?Math.max(...ys):2},cx=(b.minx+b.maxx)/2,cy=(b.miny+b.maxy)/2;cam=makeElement("camera",cx,cy+Math.max(6,b.maxy-b.miny+4),{lens:28,focusDist:8,height:1.7});cam.rot=deg(Math.atan2(cy-cam.y,cx-cam.x));}
+  return vfSVG(cam,1000,560,{mini:false});
+}
+function renderSceneView(){
+  const body=$("#sceneViewBody");if(!body)return;
+  const art=sceneViewMode==="top"?planSVGString(1000,560,true):sceneViewMode==="front"?frontElevationSVG():perspectiveSceneSVG();
+  body.innerHTML=`<div class="sceneviewbar"><button class="btn${sceneViewMode==="top"?" on":""}" data-scene-view="top">Top view</button><button class="btn${sceneViewMode==="front"?" on":""}" data-scene-view="front">Front view</button><button class="btn${sceneViewMode==="perspective"?" on":""}" data-scene-view="perspective">Perspective view</button><span style="flex:1"></span><span class="hint">Select an item in Top view to adjust its elevation in the Inspector.</span></div><div class="sceneviewcanvas">${art}</div>`;
+  body.querySelectorAll("[data-scene-view]").forEach(b=>b.onclick=()=>{sceneViewMode=b.dataset.sceneView;renderSceneView();});
+}
+function openSceneView(mode){sceneViewMode=mode||"front";renderSceneView();$("#veilSceneView").classList.add("show");}
+
+/* ------------------------- animatic timeline ------------------------- */
+let animIndex=0,animTimer=null,animPlaying=false,animSpeed=1;
+function stopAnimatic(){ if(animTimer) clearTimeout(animTimer); animTimer=null; animPlaying=false; }
+function animaticFrame(c,w,h){
+  return c.board&&c.board.art?`<img src="${c.board.art}" alt="${esc(c.shotName||c.label)}">`:vfSVG(c,w,h,{mini:true});
+}
+function renderAnimatic(){
+  const rows=shotList(),body=$("#animaticBody");
+  if(!rows.length){body.innerHTML='<div class="empty"><b>No shots to play</b>Add a camera to create the first animatic clip.</div>';return;}
+  animIndex=clamp(animIndex,0,rows.length-1);
+  const r=rows[animIndex],c=r.cam,total=rows.reduce((a,x)=>a+(+x.cam.duration||0),0);
+  body.innerHTML=`<div class="anim-controls">
+      <button class="btn" id="animPrev" ${animIndex===0?"disabled":""}>&#9664; Previous</button>
+      <button class="btn solid" id="animPlay">${animPlaying?"&#10074;&#10074; Pause":"&#9654; Play"}</button>
+      <button class="btn" id="animNext" ${animIndex===rows.length-1?"disabled":""}>Next &#9654;</button>
+      <label class="vbsel">Preview speed <select id="animSpeed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+      <span class="spacer"></span><b>${fmtDur(total)} total</b><span class="hint">${rows.length} shots</span></div>
+    <div class="animatic-layout"><div class="anim-view">${animaticFrame(c,800,450)}
+      <div class="anim-overlay"><div><b>${esc(r.no+" · "+(c.shotName||c.label))}</b><div>${esc(c.size)} · ${c.lens}mm · ${esc(c.move)}</div></div><strong>${+c.duration||0}s</strong></div></div>
+      <aside class="anim-side"><b>CLIP SETTINGS</b>
+        <div class="f"><span class="lbl">Duration (seconds)</span><input id="animDuration" type="number" min="1" step="1" value="${+c.duration||1}"></div>
+        <div class="f"><span class="lbl">Transition into shot</span><select id="animTransition">${selOpts(["Cut","Dissolve","Fade from black","Fade to black","Dip to white"],c.transition||"Cut")}</select></div>
+        <div class="f"><span class="lbl">Editorial note</span><textarea id="animNote" placeholder="Timing, sound or edit note">${esc(c.animaticNote||"")}</textarea></div>
+        <div class="row"><button class="btn full" id="animEarlier" ${animIndex===0?"disabled":""}>&#9664; Earlier</button><button class="btn full" id="animLater" ${animIndex===rows.length-1?"disabled":""}>Later &#9654;</button></div>
+      </aside></div>
+    <div class="anim-track">${rows.map((x,i)=>`<button class="anim-clip${i===animIndex?" on":""}" data-anim-index="${i}" style="--clip-ms:${Math.max(250,(+x.cam.duration||1)*1000/animSpeed)}ms"><div class="anim-thumb">${animaticFrame(x.cam,180,101)}</div><div class="anim-meta"><b>${esc(x.no)}</b><span>${+x.cam.duration||0}s · ${esc(x.cam.transition||"Cut")}</span></div><div class="anim-progress"><i></i></div></button>`).join("")}</div>`;
+  $("#animSpeed").value=String(animSpeed);
+  body.querySelectorAll("[data-anim-index]").forEach(b=>b.onclick=()=>{stopAnimatic();animIndex=+b.dataset.animIndex;renderAnimatic();});
+  $("#animPrev").onclick=()=>{stopAnimatic();animIndex=Math.max(0,animIndex-1);renderAnimatic();};
+  $("#animNext").onclick=()=>{stopAnimatic();animIndex=Math.min(rows.length-1,animIndex+1);renderAnimatic();};
+  $("#animPlay").onclick=()=>animPlaying?stopAnimaticAndRender():playAnimatic();
+  $("#animSpeed").onchange=e=>{animSpeed=+e.target.value||1;if(animPlaying){stopAnimatic();playAnimatic();}else renderAnimatic();};
+  $("#animDuration").onchange=e=>{c.duration=Math.max(1,+e.target.value||1);save();renderAnimatic();};
+  $("#animTransition").onchange=e=>{c.transition=e.target.value;save();renderAnimatic();};
+  $("#animNote").onchange=e=>{c.animaticNote=e.target.value;save();};
+  $("#animEarlier").onclick=()=>{moveShot(c.id,-1);animIndex=Math.max(0,animIndex-1);renderAnimatic();};
+  $("#animLater").onclick=()=>{moveShot(c.id,1);animIndex=Math.min(rows.length-1,animIndex+1);renderAnimatic();};
+}
+function stopAnimaticAndRender(){stopAnimatic();renderAnimatic();}
+function playAnimatic(){
+  const rows=shotList(); if(!rows.length)return; animPlaying=true; renderAnimatic();
+  const ms=Math.max(250,(+rows[animIndex].cam.duration||1)*1000/animSpeed);
+  animTimer=setTimeout(()=>{if(animIndex<rows.length-1){animIndex++;playAnimatic();}else{stopAnimatic();animIndex=0;renderAnimatic();}},ms);
+}
+function openAnimatic(){stopAnimatic();animIndex=0;renderAnimatic();$("#veilAnimatic").classList.add("show");}
 
 /* ------------------------- script ------------------------- */
 const SCRIPT_TABS=[["lined","Lined coverage"],["editor","Screenplay editor"],["av","AV script (2 column)"],
@@ -7799,6 +7945,12 @@ const ACTIONS = {
   tSnap(){   state.view.snap  =!state.view.snap;   syncHud(); renderAll(); save(); },
   fit(){ fitView(); },
   actorColor(b){ const el=byId(b.dataset.id); if(!el) return; pushHistory(); el.color=b.dataset.c; renderAll(); save(); },
+  resetAssetSize(b){
+    const el=byId(b.dataset.id); if(!el) return;
+    const a=assetById(el.type,el.asset); if(!a) return;
+    pushHistory(); el.w=a.w; el.h=a.h; el.z=a.z; renderAll(); save();
+  },
+  groundItem(b){const el=byId(b.dataset.id);if(!el)return;pushHistory();el.elevation=0;renderAll();save();},
   setLens(b){ const el=byId(b.dataset.id); if(!el) return; pushHistory(); el.lens=parseFloat(b.dataset.l); renderAll(); save(); },
   aimAt(b){
     const el=byId(b.dataset.id), t=byId(b.dataset.t); if(!el||!t) return;
@@ -7820,6 +7972,7 @@ const ACTIONS = {
     pushHistory(); delete el.beats[b.dataset.k]; renderAll(); save();
   },
   viewfinder(b){ openViewfinder(b.dataset.id); },
+  openAnimatic(){ openAnimatic(); },
   autoTilt(b){ const el=byId(b.dataset.id); if(!el) return; pushHistory(); el.tilt=null; renderAll(); save(); },
   lock(b){ const el=byId(b.dataset.id); if(!el) return; pushHistory(); el.locked=!el.locked; renderAll(); save(); },
   dup(){ duplicateSelected(); },
@@ -8312,7 +8465,7 @@ function initUI(){
       const veil = cl.closest(".veil");
       if(veil && veil.id==="veilLaunch"){
         if(LIB.activeId && LIB.projects.some(p=>p.id===LIB.activeId)) closeLauncher();
-      } else if(veil) veil.classList.remove("show");
+      } else if(veil){ if(veil.id==="veilAnimatic") stopAnimatic(); veil.classList.remove("show"); }
     }
   });
   document.addEventListener("mousedown", ev=>{
@@ -8506,6 +8659,9 @@ function initUI(){
   $("#hLabels").onclick = ()=>ACTIONS.tLabels();
   $("#hCones").onclick  = ()=>ACTIONS.tCones();
   $("#h180").onclick    = ()=>ACTIONS.toggleAxis();
+  $("#hViewTop").onclick=()=>{$("#veilSceneView").classList.remove("show");};
+  $("#hViewFront").onclick=()=>openSceneView("front");
+  $("#hViewPerspective").onclick=()=>openSceneView("perspective");
 
   $("#beatAdd").onclick = ()=>{ pushHistory(); scene().beats++; state.beat=scene().beats-1; renderAll(); save(); };
   $("#beatDel").onclick = ()=>{
