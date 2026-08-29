@@ -2542,7 +2542,7 @@ function drawElement(el,crossing){
     g = `<ellipse cx="${cx}" cy="${cy+ah*.42}" rx="${aw*.46}" ry="7" fill="#091126" opacity=".25"/>
       <defs><clipPath id="${clipId}"><rect x="${cx-aw/2}" y="${cy-ah/2}" width="${aw}" height="${ah}" rx="11"/></clipPath></defs>
       <g clip-path="url(#${clipId})">
-        <image x="${imageX}" y="${cy-ah/2}" width="${imageW}" height="${ah}" href="${imageHref}" preserveAspectRatio="xMidYMax meet"/>
+        <image x="${imageX}" y="${cy-ah/2}" width="${imageW}" height="${ah}" href="${imageHref}" preserveAspectRatio="${profile?"none":"xMidYMax meet"}"/>
         <path d="M${cx-aw/2+3} ${cy-ah/2+5} Q${cx} ${cy-ah/2-3} ${cx+aw/2-4} ${cy-ah/2+8}" fill="none" stroke="#fff" stroke-width="3" opacity=".55"/>
       </g>
       <g pointer-events="none"><circle cx="${cx-aw*.38}" cy="${cy-ah*.32}" r="10" fill="${el.color}" stroke="#fff" stroke-width="2"/>
@@ -4604,7 +4604,7 @@ function vfSVG(cam,W,H,opt){
     if(exactAsset){
       const feet=prj([q.x,q.y,ez]),top3=prj([q.x,q.y,ez+z]);
       if(feet.d>NEAR&&top3.d>NEAR){const F=scr(feet),T=scr(top3),ih=Math.max(16,Math.abs(F[1]-T[1])),iw=clamp(ih*(Math.max(pr.w,pr.h)/Math.max(.15,z)),18,ih*3.2),clip="vfAsset"+String(pr.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);
-        items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${exactAsset}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(pr.label)}</text>`:""}`});
+        items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${exactAsset}" preserveAspectRatio="none"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(pr.label)}</text>`:""}`});
       }
       return;
     }
@@ -4657,7 +4657,7 @@ function vfSVG(cam,W,H,opt){
     }
   });
   function atAsset(x,y,rotDeg,fwd,side){const a=rad(rotDeg||0);return [x+Math.cos(a)*fwd-Math.sin(a)*side,y+Math.sin(a)*fwd+Math.cos(a)*side];}
-  function exactBillboard(q,ez,w,h,href,label,id){const feet=prj([q.x,q.y,ez]),top3=prj([q.x,q.y,ez+h]);if(feet.d<=NEAR||top3.d<=NEAR)return false;const F=scr(feet),T=scr(top3),ih=Math.max(18,Math.abs(F[1]-T[1])),iw=clamp(ih*w/Math.max(.15,h),20,ih*2.8),clip="vfExact"+String(id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${href}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(label)}</text>`:""}`});return true;}
+  function exactBillboard(q,ez,w,h,href,label,id){const feet=prj([q.x,q.y,ez]),top3=prj([q.x,q.y,ez+h]);if(feet.d<=NEAR||top3.d<=NEAR)return false;const F=scr(feet),T=scr(top3),ih=Math.max(18,Math.abs(F[1]-T[1])),iw=clamp(ih*w/Math.max(.15,h),20,ih*2.8),clip="vfExact"+String(id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${href}" preserveAspectRatio="none"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(label)}</text>`:""}`});return true;}
 
   /* ---- other cameras ---- */
   cameras().filter(c=>c.id!==cam.id).forEach(c=>{
@@ -4697,13 +4697,14 @@ function vfSVG(cam,W,H,opt){
   actors().forEach(ac=>{
     const q=posAt(ac);
     const G = GENDER[ac.gender||"neutral"] || GENDER.neutral;
-    const figureH=G.h*poseHeightFactor(ac),ez=+ac.elevation||0,feet=prj([q.x,q.y,ez]),head=prj([q.x,q.y,ez+figureH]);
+    const profile=actorProfile(ac),standingH=(+ac.heightM||profile.h||G.h);
+    const figureH=standingH*poseHeightFactor(ac),ez=+ac.elevation||0,feet=prj([q.x,q.y,ez]),head=prj([q.x,q.y,ez+figureH]);
     if(feet.d>NEAR&&head.d>NEAR){
       shadow(q.x,q.y,ac.seated?.42:.28,ac.seated?.38:.24);
-      const F=scr(feet),Hh=scr(head),ih=Math.max(28,Math.abs(F[1]-Hh[1])),iw=ih*.43;
+      const F=scr(feet),Hh=scr(head),ih=Math.max(28,Math.abs(F[1]-Hh[1])),bodyRatio=ac.profile==="baby"?.52:ac.profile==="child"?.40:.43,iw=ih*bodyRatio;
       const clip="vfActor"+String(ac.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,5);
-      const female=(ac.gender||"female")==="female",profile=ac.profile&&actorProfile(ac),ix=profile?F[0]-iw*.5:(female?F[0]-iw*1.5:F[0]-iw*.5),imgW=profile?iw:iw*2,imgHref=profile?profile.file:"shotcraft-characters-cutout.png";
-      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${imgW.toFixed(1)}" height="${ih.toFixed(1)}" href="${imgHref}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)}</text>`:""}`});
+      const female=(ac.gender||"female")==="female",hasProfile=!!ac.profile,ix=hasProfile?F[0]-iw*.5:(female?F[0]-iw*1.5:F[0]-iw*.5),imgW=hasProfile?iw:iw*2,imgHref=hasProfile?profile.file:"shotcraft-characters-cutout.png";
+      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${imgW.toFixed(1)}" height="${ih.toFixed(1)}" href="${imgHref}" preserveAspectRatio="none"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)}</text>`:""}`});
       return;
     }
     const skin = (ac.gender||"neutral")==="female" ? "#d9a07f" : (ac.gender||"neutral")==="male" ? "#b97857" : "#c98d6d";
@@ -7458,7 +7459,7 @@ function frontElevationSVG(){
     const x=Xf(p.x)-w*sc/2,y=Zf(elev+z),ww=Math.max(7,w*sc),hh=Math.max(5,z*sc);
     if(e.type==="actor"){
       const clip="frontActor"+String(e.id).replace(/[^a-zA-Z0-9_-]/g,"")+"_"+Math.random().toString(36).slice(2,8),female=(e.gender||"female")==="female",profile=e.profile&&actorProfile(e),imageX=profile?Xf(p.x)-ww*.5:(female?Xf(p.x)-ww*1.5:Xf(p.x)-ww*.5),imageW=profile?ww:ww*2,imageHref=profile?profile.file:"shotcraft-characters-cutout.png";
-      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${imageX}" y="${y}" width="${imageW}" height="${hh}" href="${imageHref}" preserveAspectRatio="xMidYMax meet"/></g>`;
+      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${imageX}" y="${y}" width="${imageW}" height="${hh}" href="${imageHref}" preserveAspectRatio="${profile?"none":"xMidYMax meet"}"/></g>`;
     }
     else g+=`<rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="${col}" stroke="#fff" stroke-opacity=".65"/><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="url(#frontObj)"/>`;
     g+=`<text x="${Xf(p.x)}" y="${Math.max(18,y-8)}" text-anchor="middle" font-size="12" font-weight="800" fill="#f7f9ff" stroke="#101a30" stroke-width="3" paint-order="stroke">${esc(e.label||e.type)} · ${elev.toFixed(2)} m</text>`;});
