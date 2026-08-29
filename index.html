@@ -4689,7 +4689,7 @@ function vfSVG(cam,W,H,opt){
 
   /* ---- props, staging, grip, architecture ---- */
   els().filter(e=>["prop","staging","grip","arch"].includes(e.type)).forEach(pr=>{
-    const q=posAt(pr), z=pr.z!=null?pr.z:0.8, ez=+pr.elevation||0;
+    const q=posAt(pr),baseZ=pr.z!=null?pr.z:0.8,baseAsset=assetById(pr.type,pr.asset),heightScale=baseAsset&&baseAsset.h?Math.max(.12,(+pr.h||baseAsset.h)/baseAsset.h):1,z=baseZ*heightScale,ez=+pr.elevation||0;
     shadow(q.x,q.y,pr.w*0.6,pr.h*0.6);
     const aid=String(pr.asset||"").toLowerCase(),kind=symbolKind(aid),col=pr.color||"#8a93ab";
     /* Anything flatter than 12 cm (rugs, envelopes, phones) is drawn as real geometry.
