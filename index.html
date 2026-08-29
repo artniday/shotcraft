@@ -1165,6 +1165,11 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
 .layerbtn:hover{background:var(--soft2);color:var(--hct-blue)}.layerbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.layerthumb{width:30px;height:30px;border-radius:8px;background:var(--soft2);display:grid;place-items:center;font-weight:800;color:var(--hct-blue);font-size:10px}
 .layername{min-width:0;text-align:left;border:0;background:transparent;color:inherit;cursor:pointer;padding:2px}.layername b,.layername small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.layername b{font-size:12px}.layername small{font-size:9px;color:var(--muted);margin-top:2px}.layergroups{margin-top:12px}
 
+
+.storyscene{margin:0 0 18px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);box-shadow:0 8px 22px rgba(19,34,75,.07)}
+.storyscenehead{display:flex;align-items:center;gap:10px;padding:11px 13px;background:linear-gradient(135deg,var(--soft2),var(--panel));border-bottom:1px solid var(--line)}
+.storyscenehead .scnum{width:38px;height:38px;border-radius:11px;background:var(--hct-blue);color:#fff;display:grid;place-items:center;font-weight:900}.storyscenehead .scinfo{min-width:0;flex:1}.storyscenehead b,.storyscenehead span{display:block}.storyscenehead b{font-size:13px}.storyscenehead span{font-size:10px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.storyscene .boardgrid{padding:12px}.boardcamlabel{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted)}.boardcamlabel select{max-width:145px}.storysummary{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-top:1px solid var(--line);background:var(--soft)}
+
 </style>
 </head>
 <body>
@@ -1616,7 +1621,7 @@ function blankState(){
 }
 function scene(){ return state.scenes[state.sceneIndex]; }
 function els(){ return scene().elements; }
-function byId(id){ return els().find(e=>e.id===id); }
+function byId(id){ return els().find(e=>e.id===id) || state.scenes.flatMap(s=>s.elements||[]).find(e=>e.id===id); }
 function selected(){ return state.sel.map(byId).filter(Boolean); }
 function cameras(){ return els().filter(e=>e.type==="camera"); }
 function actors(){ return els().filter(e=>e.type==="actor"); }
@@ -4436,7 +4441,7 @@ function renderPanel(){
   renderTabs();
   const b=$("#pbody");
   const keepTab=b.dataset.tab, keepTop=b.scrollTop;
-  const map={inspector:renderInspector,layers:renderLayers,shots:renderShots,story:renderStory,script:renderScript,
+  const map={inspector:renderInspector,layers:renderLayers,shots:renderShots,story:renderStoryV2,script:renderScript,
              gear:renderGear,prod:renderProd,
              schedule:renderSchedule,crew:renderCrew,budget:renderBudget,locations:renderLocations,
              power:renderPower,rigging:renderRigging,dmx:renderDmx,continuity:renderContinuity,
@@ -7550,6 +7555,43 @@ function renderStory(){
   return h;
 }
 
+
+function storyboardSceneSvg(sc,cam,w,h,opt){
+  const keep=state.sceneIndex,idx=state.scenes.indexOf(sc);
+  if(idx>=0) state.sceneIndex=idx;
+  try{return vfSVG(cam,w,h,opt||{});}finally{state.sceneIndex=keep;}
+}
+function renderStoryV2(){
+  const U=ui(); if(!U.boardScene) U.boardScene="all";
+  const ratio=U.boardRatio||state.project.aspect, selectedScenes=U.boardScene==="all"?state.scenes:state.scenes.filter(s=>s.id===U.boardScene);
+  const total=state.scenes.reduce((n,s)=>n+(s.elements||[]).filter(e=>e.type==="camera").length,0);
+  let h=`<div class="modhead"><div><b>FILM STORYBOARD</b><span class="cnt">${total} frames · ${state.scenes.length} scenes</span>
+    <div class="hint">Boards are grouped by scene. Each frame is a shot and can preview any camera placed in that scene.</div></div>
+    <div style="display:flex;gap:6px"><button class="btn solid" data-act="openAnimatic">&#9654; Animatic</button><button class="btn" data-act="printBoard">Export</button></div></div>
+    <div class="viewbar"><label class="vbsel">Show <select data-ui="boardScene"><option value="all">All scenes / whole film</option>${state.scenes.map(s=>`<option value="${s.id}"${U.boardScene===s.id?" selected":""}>Scene ${esc(s.number)} · ${esc(s.name)}</option>`).join("")}</select></label>
+    <label class="vbsel">Ratio <select data-ui="boardRatio">${selOpts([{v:"",n:"Follow project"}].concat(Object.keys(RATIOS).map(k=>({v:k,n:RATIOS[k].n}))),U.boardRatio)}</select></label>
+    <div class="seg" style="width:180px"><button class="${U.boardSize==="s"?"on":""}" data-act="uiSet" data-k="boardSize" data-v="s">Small</button><button class="${(U.boardSize||"m")==="m"?"on":""}" data-act="uiSet" data-k="boardSize" data-v="m">Medium</button><button class="${U.boardSize==="l"?"on":""}" data-act="uiSet" data-k="boardSize" data-v="l">Large</button></div>
+    <span style="flex:1"></span><button class="btn${U.boardOmit?" solid":""}" data-act="uiToggle" data-k="boardOmit">Only completed boards</button></div>`;
+  selectedScenes.forEach((sc,si)=>{
+    const cams=(sc.elements||[]).filter(e=>e.type==="camera"),rows=cams.map((c,i)=>({cam:c,no:(sc.number||si+1)+"/"+(i+1)}));
+    const shown=U.boardOmit?rows.filter(r=>r.cam.board&&(r.cam.board.art||r.cam.board.desc||r.cam.board.fromScript)):rows;
+    h+=`<section class="storyscene"><div class="storyscenehead"><span class="scnum">${esc(sc.number||si+1)}</span><div class="scinfo"><b>${esc(sc.name)}</b><span>${esc(sc.slug||"No slugline")} · ${cams.length} shot${cams.length===1?"":"s"}</span></div>
+      <button class="btn" data-act="gotoScene" data-i="${state.scenes.indexOf(sc)}">Open scene</button><button class="btn solid" data-act="boardAddCamera" data-scene="${sc.id}">+ Camera shot</button></div>`;
+    if(!shown.length){h+=`<div class="empty"><b>${cams.length?"No completed boards in this scene":"No camera shots in this scene"}</b>${cams.length?"Turn off Only completed boards to see every shot.":"Add a camera shot to begin this scene's storyboard."}</div>`;}
+    else {h+=`<div class="boardgrid sz-${esc(U.boardSize||"m")}">`;shown.forEach((r,fi)=>{const c=r.cam,b=c.board||(c.board={art:"",desc:"",fromScript:""}),displayCam=cams.find(x=>x.id===(b.viewCamId||c.id))||c;
+      h+=`<div class="frame" data-row="${c.id}"><div class="frtop"><span class="shotno">${r.no}</span><span class="camchip" style="background:#00249C;color:#fff">${esc(c.camId)}</span>${sizeChip(c.size)}<span style="flex:1"></span>
+        <button class="btn ib" data-act="boardMove" data-id="${c.id}" data-scene="${sc.id}" data-dir="-1" title="Move earlier" ${fi===0?"disabled":""}>&#9664;</button><button class="btn ib" data-act="boardMove" data-id="${c.id}" data-scene="${sc.id}" data-dir="1" title="Move later" ${fi===shown.length-1?"disabled":""}>&#9654;</button>
+        <button class="btn ib" data-act="boardViewfinder" data-id="${displayCam.id}" data-scene="${sc.id}">VF</button><button class="btn ib" data-act="boardArt" data-id="${c.id}">Art</button>${b.art?`<button class="btn ib danger" data-act="boardClear" data-id="${c.id}">&#10005;</button>`:""}</div>
+        <div class="frart" data-act="boardArt" data-id="${c.id}">${b.art?`<img src="${b.art}" alt="">`:storyboardSceneSvg(sc,displayCam,320,Math.round(320/(RATIOS[ratio]?RATIOS[ratio].v:16/9)),{mini:true})}</div>
+        <input class="frname" value="${esc(c.shotName)}" placeholder="Frame title" ${bindAttr("elem",c.id,"shotName")}><textarea class="frdesc" placeholder="What the audience sees and hears" ${bindAttr("elem",c.id,"board.desc")}>${esc(b.desc||"")}</textarea>
+        <input class="frscript" value="${esc(b.fromScript||"")}" placeholder="Dialogue or script reference" ${bindAttr("elem",c.id,"board.fromScript")}><div class="frctl"><label class="boardcamlabel">Preview camera <select data-boardcam="${c.id}" data-scene="${sc.id}">${cams.map(x=>`<option value="${x.id}"${x.id===displayCam.id?" selected":""}>${esc(x.camId)} · ${esc(x.shotName||x.label)}</option>`).join("")}</select></label>
+        <select ${bindAttr("elem",c.id,"size")} class="tiny">${selOpts(SHOT_SIZES.map(x=>({v:x.c,n:x.c+" "+x.n})),c.size)}</select><select ${bindAttr("elem",c.id,"lens")} data-num="1" class="tiny">${selOpts(LENSES.map(l=>({v:l,n:l+"mm"})),c.lens)}</select><input type="number" min="0" step="1" class="tinynum" value="${+c.duration||0}" title="Seconds" ${bindAttr("elem",c.id,"duration",true)}></div>
+        <div class="frfoot"><span class="frmeta">Scene ${esc(sc.number)} · ${esc(c.size)} · ${c.lens}mm · ${c.duration||0}s</span><span style="flex:1"></span><select ${bindAttr("elem",c.id,"status")} class="stsel tiny">${selOpts(STATUS,c.status)}</select></div></div>`;});h+=`</div>`;}
+    h+=`<div class="storysummary"><b>Scene ${esc(sc.number)}:</b><span class="hint">${cams.length} frames · ${fmtDur(sceneSeconds(sc))}</span><span style="flex:1"></span><button class="btn" data-act="boardPullScene" data-scene="${sc.id}">Pull scene script</button></div></section>`;
+  });
+  return h;
+}
+
 /* ------------------------- top / front / perspective scene views ------------------------- */
 let sceneViewMode="front";
 function itemWorldHeight(el){
@@ -7592,14 +7634,27 @@ function renderSceneView(){
 }
 function openSceneView(mode){sceneViewMode=mode||"front";renderSceneView();$("#veilSceneView").classList.add("show");}
 
+
+function storyboardRows(){
+  const U=ui(),scenes=U.boardScene&&U.boardScene!=="all"?state.scenes.filter(s=>s.id===U.boardScene):state.scenes,rows=[];
+  scenes.forEach(sc=>(sc.elements||[]).filter(e=>e.type==="camera").forEach((cam,i)=>rows.push({cam,scene:sc,no:(sc.number||"1")+"/"+(i+1),idx:i+1})));
+  return rows;
+}
+function moveStoryboardShot(id,dir,sceneId){
+  const sc=state.scenes.find(s=>s.id===sceneId);if(!sc)return;
+  const cams=(sc.elements||[]).filter(e=>e.type==="camera"),i=cams.findIndex(c=>c.id===id),j=i+dir;
+  if(i<0||j<0||j>=cams.length)return;
+  pushHistory();const ai=sc.elements.indexOf(cams[i]),bi=sc.elements.indexOf(cams[j]);[sc.elements[ai],sc.elements[bi]]=[sc.elements[bi],sc.elements[ai]];save();
+}
+
 /* ------------------------- animatic timeline ------------------------- */
 let animIndex=0,animTimer=null,animPlaying=false,animSpeed=1;
 function stopAnimatic(){ if(animTimer) clearTimeout(animTimer); animTimer=null; animPlaying=false; }
-function animaticFrame(c,w,h){
-  return c.board&&c.board.art?`<img src="${c.board.art}" alt="${esc(c.shotName||c.label)}">`:vfSVG(c,w,h,{mini:true});
+function animaticFrame(c,w,h,sc){
+  return c.board&&c.board.art?`<img src="${c.board.art}" alt="${esc(c.shotName||c.label)}">`:storyboardSceneSvg(sc||scene(),c,w,h,{mini:true});
 }
 function renderAnimatic(){
-  const rows=shotList(),body=$("#animaticBody");
+  const rows=storyboardRows(),body=$("#animaticBody");
   if(!rows.length){body.innerHTML='<div class="empty"><b>No shots to play</b>Add a camera to create the first animatic clip.</div>';return;}
   animIndex=clamp(animIndex,0,rows.length-1);
   const r=rows[animIndex],c=r.cam,total=rows.reduce((a,x)=>a+(+x.cam.duration||0),0);
@@ -7609,7 +7664,7 @@ function renderAnimatic(){
       <button class="btn" id="animNext" ${animIndex===rows.length-1?"disabled":""}>Next &#9654;</button>
       <label class="vbsel">Preview speed <select id="animSpeed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
       <span class="spacer"></span><b>${fmtDur(total)} total</b><span class="hint">${rows.length} shots</span></div>
-    <div class="animatic-layout"><div class="anim-view">${animaticFrame(c,800,450)}
+    <div class="animatic-layout"><div class="anim-view">${animaticFrame(c,800,450,r.scene)}
       <div class="anim-overlay"><div><b>${esc(r.no+" · "+(c.shotName||c.label))}</b><div>${esc(c.size)} · ${c.lens}mm · ${esc(c.move)}</div></div><strong>${+c.duration||0}s</strong></div></div>
       <aside class="anim-side"><b>CLIP SETTINGS</b>
         <div class="f"><span class="lbl">Duration (seconds)</span><input id="animDuration" type="number" min="1" step="1" value="${+c.duration||1}"></div>
@@ -7617,7 +7672,7 @@ function renderAnimatic(){
         <div class="f"><span class="lbl">Editorial note</span><textarea id="animNote" placeholder="Timing, sound or edit note">${esc(c.animaticNote||"")}</textarea></div>
         <div class="row"><button class="btn full" id="animEarlier" ${animIndex===0?"disabled":""}>&#9664; Earlier</button><button class="btn full" id="animLater" ${animIndex===rows.length-1?"disabled":""}>Later &#9654;</button></div>
       </aside></div>
-    <div class="anim-track">${rows.map((x,i)=>`<button class="anim-clip${i===animIndex?" on":""}" data-anim-index="${i}" style="--clip-ms:${Math.max(250,(+x.cam.duration||1)*1000/animSpeed)}ms"><div class="anim-thumb">${animaticFrame(x.cam,180,101)}</div><div class="anim-meta"><b>${esc(x.no)}</b><span>${+x.cam.duration||0}s · ${esc(x.cam.transition||"Cut")}</span></div><div class="anim-progress"><i></i></div></button>`).join("")}</div>`;
+    <div class="anim-track">${rows.map((x,i)=>`<button class="anim-clip${i===animIndex?" on":""}" data-anim-index="${i}" style="--clip-ms:${Math.max(250,(+x.cam.duration||1)*1000/animSpeed)}ms"><div class="anim-thumb">${animaticFrame(x.cam,180,101,x.scene)}</div><div class="anim-meta"><b>${esc(x.no)}</b><span>${+x.cam.duration||0}s · ${esc(x.cam.transition||"Cut")}</span></div><div class="anim-progress"><i></i></div></button>`).join("")}</div>`;
   $("#animSpeed").value=String(animSpeed);
   body.querySelectorAll("[data-anim-index]").forEach(b=>b.onclick=()=>{stopAnimatic();animIndex=+b.dataset.animIndex;renderAnimatic();});
   $("#animPrev").onclick=()=>{stopAnimatic();animIndex=Math.max(0,animIndex-1);renderAnimatic();};
@@ -7627,12 +7682,12 @@ function renderAnimatic(){
   $("#animDuration").onchange=e=>{c.duration=Math.max(1,+e.target.value||1);save();renderAnimatic();};
   $("#animTransition").onchange=e=>{c.transition=e.target.value;save();renderAnimatic();};
   $("#animNote").onchange=e=>{c.animaticNote=e.target.value;save();};
-  $("#animEarlier").onclick=()=>{moveShot(c.id,-1);animIndex=Math.max(0,animIndex-1);renderAnimatic();};
-  $("#animLater").onclick=()=>{moveShot(c.id,1);animIndex=Math.min(rows.length-1,animIndex+1);renderAnimatic();};
+  $("#animEarlier").onclick=()=>{moveStoryboardShot(c.id,-1,r.scene.id);animIndex=Math.max(0,animIndex-1);renderAnimatic();};
+  $("#animLater").onclick=()=>{moveStoryboardShot(c.id,1,r.scene.id);animIndex=Math.min(rows.length-1,animIndex+1);renderAnimatic();};
 }
 function stopAnimaticAndRender(){stopAnimatic();renderAnimatic();}
 function playAnimatic(){
-  const rows=shotList(); if(!rows.length)return; animPlaying=true; renderAnimatic();
+  const rows=storyboardRows(); if(!rows.length)return; animPlaying=true; renderAnimatic();
   const ms=Math.max(250,(+rows[animIndex].cam.duration||1)*1000/animSpeed);
   animTimer=setTimeout(()=>{if(animIndex<rows.length-1){animIndex++;playAnimatic();}else{stopAnimatic();animIndex=0;renderAnimatic();}},ms);
 }
@@ -8323,6 +8378,11 @@ const ACTIONS = {
     n.x=round2(n.x+0.4); n.y=round2(n.y+0.4);
     els().push(n); state.sel=[n.id]; renderAll(); save();
   },
+
+  boardMove(b){ const sc=state.scenes.find(s=>s.id===b.dataset.scene); if(!sc)return; const cams=(sc.elements||[]).filter(e=>e.type==="camera"),i=cams.findIndex(c=>c.id===b.dataset.id),j=i+(+b.dataset.dir||0); if(i<0||j<0||j>=cams.length)return; pushHistory(); const ai=sc.elements.indexOf(cams[i]),bi=sc.elements.indexOf(cams[j]); [sc.elements[ai],sc.elements[bi]]=[sc.elements[bi],sc.elements[ai]]; renderPanel(); save(); },
+  boardViewfinder(b){ const i=state.scenes.findIndex(s=>s.id===b.dataset.scene); if(i<0)return; state.sceneIndex=i; state.sel=[b.dataset.id]; renderAll(); openViewfinder(b.dataset.id); save(); },
+  boardAddCamera(b){ const sc=state.scenes.find(s=>s.id===b.dataset.scene); if(!sc)return; pushHistory(); const n=(sc.elements||[]).filter(e=>e.type==="camera").length,e=makeElement("camera",0,3+n*.5,{camId:String.fromCharCode(65+(n%26)),label:"Cam "+String.fromCharCode(65+(n%26)),shotName:"New shot"}); sc.elements.push(e); renderPanel(); save(); },
+  boardPullScene(b){ const keep=state.sceneIndex,i=state.scenes.findIndex(s=>s.id===b.dataset.scene); if(i<0)return; state.sceneIndex=i; ACTIONS.boardFromScript(); state.sceneIndex=keep; renderPanel(); save(); },
   boardArt(b){ boardTarget=b.dataset.id; $("#fileBoard").click(); },
   boardClear(b){ const c=byId(b.dataset.id); if(c){ pushHistory(); c.board=c.board||{}; c.board.art=""; renderPanel(); save(); } },
   addGearItem(){
@@ -8740,6 +8800,7 @@ function initUI(){
   });
 
   document.addEventListener("change", ev=>{
+    const bc=ev.target.closest("[data-boardcam]"); if(bc){const c=byId(bc.dataset.boardcam);if(c){pushHistory();c.board=c.board||{};c.board.viewCamId=bc.value;renderPanel();save();}return;}
     const sr=ev.target.closest("[data-script-revision]");if(sr){ui().scriptRevision=sr.value;const ed=$("#scriptProEditor");if(ed)ed.className=ed.className.replace(/revision-\w+/,"revision-"+sr.value);save();return;}
     const rc = ev.target.closest("[data-reccheck]");
     if(rc){ const p=rc.dataset.reccheck.split(":"); const r=rec(p[0],p[1]); if(r){ r[p[2]]=rc.checked; renderPanel(); save(); } return; }
