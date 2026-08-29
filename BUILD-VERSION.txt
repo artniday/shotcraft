@@ -1,0 +1,2 @@
+ShotCraft build 2026-08-29-1428
+Layers is permanently visible beside Inspector.

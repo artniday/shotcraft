@@ -1162,7 +1162,7 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
 .layeritem{display:grid;grid-template-columns:34px 32px minmax(0,1fr) 30px 30px;align-items:center;gap:5px;min-height:46px;padding:5px 8px;border-top:1px solid var(--line);background:var(--panel);color:var(--ink)}
 .layeritem:first-child{border-top:0}.layeritem.selected{background:color-mix(in srgb,var(--hct-blue) 10%,var(--panel));box-shadow:inset 3px 0 var(--hct-blue)}
 .layeritem.muted{opacity:.5}.layerbtn{height:30px;border:0;border-radius:8px;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;font-size:15px}
-.layerbtn:hover{background:var(--soft2);color:var(--hct-blue)}.layerthumb{width:30px;height:30px;border-radius:8px;background:var(--soft2);display:grid;place-items:center;font-weight:800;color:var(--hct-blue);font-size:10px}
+.layerbtn:hover{background:var(--soft2);color:var(--hct-blue)}.layerbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.layerthumb{width:30px;height:30px;border-radius:8px;background:var(--soft2);display:grid;place-items:center;font-weight:800;color:var(--hct-blue);font-size:10px}
 .layername{min-width:0;text-align:left;border:0;background:transparent;color:inherit;cursor:pointer;padding:2px}.layername b,.layername small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.layername b{font-size:12px}.layername small{font-size:9px;color:var(--muted);margin-top:2px}.layergroups{margin-top:12px}
 
 </style>
@@ -4415,10 +4415,13 @@ function checkReport(){
 
 
 function renderLayers(){
-  const items=els();
+  const source=els();
+  const items=source.slice().sort((a,b)=>(Number.isFinite(a.stack)?a.stack:source.indexOf(a))-(Number.isFinite(b.stack)?b.stack:source.indexOf(b)));
   const icon=e=>({actor:"ACT",camera:"CAM",light:"LGT",wall:"WALL",door:"DOOR",window:"WIN",prop:"PROP",staging:"STG",grip:"GRIP",arch:"SET",track:"TRK",cable:"CBL",text:"TXT",image:"IMG"}[e.type]||String(e.type||"ITEM").slice(0,4).toUpperCase());
+  const eyeOpen=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"/><circle cx="12" cy="12" r="2.8"/></svg>`;
+  const eyeClosed=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M9.8 6.3A10.8 10.8 0 0112 6c6 0 9.5 6 9.5 6a17 17 0 01-2.2 2.8M6.2 7.4C3.8 9.1 2.5 12 2.5 12s3.5 6 9.5 6a10 10 0 004.1-.9M10.2 10.2a2.8 2.8 0 003.6 3.6"/></svg>`;
   const rows=items.length?items.map((e,i)=>{const selected=state.sel.includes(e.id),hidden=e.hidden===true,group=e.layer||layerOf(e.type);return `<div class="layeritem${selected?" selected":""}${hidden?" muted":""}" data-layer-id="${e.id}">
-    <button class="layerbtn" data-act="layerEye" data-id="${e.id}" title="${hidden?"Show":"Hide"} layer">${hidden?"○":"●"}</button>
+    <button class="layerbtn" data-act="layerEye" data-id="${e.id}" title="${hidden?"Show":"Hide"} layer">${hidden?eyeClosed:eyeOpen}</button>
     <span class="layerthumb">${esc(icon(e))}</span>
     <button class="layername" data-act="layerSelect" data-id="${e.id}" title="Select layer; double-click Rename"><b>${esc(e.label||e.type||"Item")}</b><small>${esc(group)} · ${esc(e.type)}</small></button>
     <button class="layerbtn" data-act="layerDown" data-id="${e.id}" title="Move backward">↓</button>
@@ -8440,8 +8443,8 @@ const ACTIONS = {
 
   layerSelect(b){ const e=byId(b.dataset.id); if(!e)return; state.sel=[e.id]; renderPlan(); renderPanel(); },
   layerEye(b){ const e=byId(b.dataset.id); if(!e)return; pushHistory(); e.hidden=!e.hidden; renderAll(); save(); },
-  layerUp(b){ const e=byId(b.dataset.id),a=els(); if(!e)return; pushHistory(); a.forEach((x,i)=>x.stack=Number.isFinite(x.stack)?x.stack:i); e.stack=Math.max(...a.map(x=>x.stack))+1; renderAll(); save(); },
-  layerDown(b){ const e=byId(b.dataset.id),a=els(); if(!e)return; pushHistory(); a.forEach((x,i)=>x.stack=Number.isFinite(x.stack)?x.stack:i); e.stack=Math.min(...a.map(x=>x.stack))-1; renderAll(); save(); },
+  layerUp(b){ const e=byId(b.dataset.id),a=els(); if(!e)return; const o=a.slice().sort((x,y)=>(Number.isFinite(x.stack)?x.stack:a.indexOf(x))-(Number.isFinite(y.stack)?y.stack:a.indexOf(y))),i=o.indexOf(e); if(i<0||i===o.length-1)return; pushHistory(); [o[i],o[i+1]]=[o[i+1],o[i]]; o.forEach((x,n)=>x.stack=n); renderAll(); save(); },
+  layerDown(b){ const e=byId(b.dataset.id),a=els(); if(!e)return; const o=a.slice().sort((x,y)=>(Number.isFinite(x.stack)?x.stack:a.indexOf(x))-(Number.isFinite(y.stack)?y.stack:a.indexOf(y))),i=o.indexOf(e); if(i<=0)return; pushHistory(); [o[i],o[i-1]]=[o[i-1],o[i]]; o.forEach((x,n)=>x.stack=n); renderAll(); save(); },
   layerRename(b){ const e=byId(b.dataset.id); if(!e)return; const n=prompt("Layer name",e.label||e.type); if(!n)return; pushHistory(); e.label=n.trim(); renderAll(); save(); },
   layersAll(){ Object.keys(state.view.layers).forEach(k=>state.view.layers[k]=true); renderAll(); save(); },
   layersOnlyPlan(){
