@@ -6356,6 +6356,7 @@ function printSheet(){
    ===================================================================== */
 const TICON = {
   inspector:"M4 6h16M4 12h10M4 18h7M18 15l3 3-3 3",
+  layers   :"M12 3L3 7.5 12 12l9-4.5zM3 12l9 4.5 9-4.5M3 16.5l9 4.5 9-4.5",
   shots    :"M3 7h10v10H3zM13 10l8-3v10l-8-3z",
   story    :"M3 5h18v14H3zM9 5v14M15 5v14",
   script   :"M6 3h9l3 3v15H6zM15 3v3h3M9 12h6M9 16h6",
@@ -6390,7 +6391,7 @@ function tabBadge(id){
   if(id==="locations" && recs("locations").length) return recs("locations").length;
   return "";
 }
-const MAIN_TABS = ["inspector","shots","story","script","gear"];
+const MAIN_TABS = ["inspector","layers","shots","story","script","gear"];
 const PROD_MENU = [
   {g:"Planning",        ids:["schedule","locations","moodboard"]},
   {g:"People and money",ids:["crew","tasks","budget"]},
@@ -6398,7 +6399,7 @@ const PROD_MENU = [
   {g:"Technical",       ids:["power","rigging","dmx"]},
   {g:"Project",         ids:["prod"]}
 ];
-const TAB_COLOUR = {inspector:"#00249C",shots:"#00249C",story:"#00249C",script:"#8b53d6",light:"#e0a106",
+const TAB_COLOUR = {inspector:"#00249C",layers:"#6f4bd8",shots:"#00249C",story:"#00249C",script:"#8b53d6",light:"#e0a106",
   gear:"#12a3b8",power:"#c4342a",rigging:"#e2762a",dmx:"#12a3b8",schedule:"#2fa35f",crew:"#2f7de1",
   budget:"#2fa35f",locations:"#12a3b8",continuity:"#8b53d6",runofshow:"#2fa35f",tasks:"#e0a106",
   logistics:"#5b6478",moodboard:"#d1478e",prod:"#00249C"};
