@@ -1253,9 +1253,9 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
         <button id="hLabels" class="on" title="Toggle labels"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7"/></svg></button>
         <button id="hCones" class="on" title="Toggle camera and light cones"><svg viewBox="0 0 24 24"><path d="M12 4L4 20h16z"/></svg></button>
         <button id="h180" title="Toggle the 180 degree axis overlay"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M8.5 12h7"/></svg></button>
-        <button class="viewmode on" id="hViewTop" title="Top editing view">TOP</button>
         
-        <button class="viewmode" id="hViewPerspective" title="Perspective scene view">3D</button>
+        
+        
       </div>
     </div>
 
@@ -1384,7 +1384,7 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
 
 <div class="veil" id="veilSceneView">
   <div class="modal">
-    <header><div><h3>SCENE VIEWS</h3><p>Top plan, front elevation and perspective preview</p></div><button class="x" data-close>&times;</button></header>
+    <header><div><h3>SCENE VIEWS</h3><p>Top plan and perspective preview</p></div><button class="x" data-close>&times;</button></header>
     <div class="mbody" id="sceneViewBody"></div>
   </div>
 </div>
@@ -1627,24 +1627,22 @@ function cameras(){ return els().filter(e=>e.type==="camera"); }
 function actors(){ return els().filter(e=>e.type==="actor"); }
 function lights(){ return els().filter(e=>e.type==="light"); }
 
+function historySnapshot(){
+  return JSON.stringify({project:state.project,view:state.view,scenes:state.scenes,sceneIndex:state.sceneIndex,tab:state.tab,beat:state.beat,axisPair:state.axisPair,ui:state.ui});
+}
+function restoreHistorySnapshot(raw){
+  const s=JSON.parse(raw);state.project=s.project;state.view=s.view;state.scenes=s.scenes;
+  state.sceneIndex=Math.min(s.sceneIndex||0,s.scenes.length-1);state.tab=s.tab||state.tab;state.beat=s.beat||0;
+  state.axisPair=s.axisPair||[];state.ui=s.ui||state.ui;state.sel=[];applyTheme();applyPanelW();renderAll();save();
+}
 function pushHistory(){
-  history.push(JSON.stringify({scenes:state.scenes,sceneIndex:state.sceneIndex}));
-  if(history.length>60) history.shift();
-  future.length=0;
+  history.push(historySnapshot());if(history.length>60)history.shift();future.length=0;
 }
 function undo(){
-  if(!history.length) return;
-  future.push(JSON.stringify({scenes:state.scenes,sceneIndex:state.sceneIndex}));
-  const s = JSON.parse(history.pop());
-  state.scenes=s.scenes; state.sceneIndex=Math.min(s.sceneIndex,s.scenes.length-1);
-  state.sel=[]; renderAll();
+  if(!history.length)return;future.push(historySnapshot());restoreHistorySnapshot(history.pop());
 }
 function redo(){
-  if(!future.length) return;
-  history.push(JSON.stringify({scenes:state.scenes,sceneIndex:state.sceneIndex}));
-  const s = JSON.parse(future.pop());
-  state.scenes=s.scenes; state.sceneIndex=Math.min(s.sceneIndex,s.scenes.length-1);
-  state.sel=[]; renderAll();
+  if(!future.length)return;history.push(historySnapshot());restoreHistorySnapshot(future.pop());
 }
 let saveTimer=null;
 function save(){
@@ -5023,7 +5021,7 @@ function drawVF(){
     b.classList.toggle("on",VF[k]);
     b.onclick=()=>{ VF[k]=!VF[k]; drawVF(); };
   });
-  $("#vfCam").onchange=drawVF;
+  $("#vfCam").onchange=e=>{state.sel=[e.target.value];drawVF();renderPlan();renderPanel();save();};
   $("#vfBoard").onclick=()=>{ state.tab="story"; $("#veilVF").classList.remove("show"); renderPanel(); };
 }
 
@@ -7586,11 +7584,12 @@ function renderStoryV2(){
         <button class="btn ib" data-act="boardMove" data-id="${c.id}" data-scene="${sc.id}" data-dir="-1" title="Move earlier" ${fi===0?"disabled":""}>&#9664;</button><button class="btn ib" data-act="boardMove" data-id="${c.id}" data-scene="${sc.id}" data-dir="1" title="Move later" ${fi===shown.length-1?"disabled":""}>&#9654;</button>
         <button class="btn ib boardchev" data-act="boardToggleDetails" data-id="${c.id}" title="${b.collapsed?"Show frame details":"Hide frame details"}" aria-expanded="${b.collapsed?"false":"true"}">${b.collapsed?"&#8250;":"&#8964;"}</button><button class="btn ib composebtn" data-act="boardViewfinder" data-id="${displayCam.id}" data-scene="${selectedScene.id}" title="Compose shot · drag to pan · wheel to zoom" aria-label="Open shot composition viewfinder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5M9 12h6M12 9v6"/></svg></button><button class="btn ib" data-act="boardArt" data-id="${c.id}" title="Add artwork">Art</button><button class="btn ib" data-act="boardToggleHidden" data-id="${c.id}" title="${b.hidden?"Show this shot":"Hide this shot from export"}">${b.hidden?"Show":"Hide"}</button><button class="btn ib danger" data-act="boardRemoveShot" data-id="${c.id}" data-scene="${sc.id}" title="Remove this camera shot">&#128465;</button></div>
         <div class="frart" data-act="boardArt" data-id="${c.id}">${b.art?`<img src="${b.art}" alt="">`:storyboardSceneSvg(selectedScene,displayCam,320,Math.round(320/(RATIOS[ratio]?RATIOS[ratio].v:16/9)),{mini:true})}</div>
-        <div class="frdetails"${b.collapsed?" hidden":""}><div class="boardpickers"><label class="boardpicker">Scene<select data-boardscene="${c.id}">${state.scenes.map(x=>`<option value="${x.id}"${x.id===selectedScene.id?" selected":""}>Scene ${esc(x.number)} · ${esc(x.name)}</option>`).join("")}</select></label><label class="boardpicker">Camera<select data-boardcam="${c.id}">${sceneCams.map(x=>`<option value="${x.id}"${x.id===displayCam.id?" selected":""}>${esc(x.camId)} · ${esc(x.shotName||x.label)}</option>`).join("")}</select></label></div>
+        <div class="frdetails"${b.collapsed?" hidden":""}><div class="boardpickers"><label class="boardpicker">Composition scene<select data-boardscene="${c.id}">${state.scenes.map(x=>`<option value="${x.id}"${x.id===selectedScene.id?" selected":""}>Scene ${esc(x.number)} · ${esc(x.name)}</option>`).join("")}</select></label><label class="boardpicker">Composition camera<select data-boardcam="${c.id}">${sceneCams.map(x=>`<option value="${x.id}"${x.id===displayCam.id?" selected":""}>${esc(x.camId)} · ${esc(x.shotName||x.label)}</option>`).join("")}</select></label></div>
         <input class="frname" value="${esc(c.shotName)}" placeholder="Frame title" ${bindAttr("elem",c.id,"shotName")}><textarea class="frdesc" placeholder="What the audience sees and hears" ${bindAttr("elem",c.id,"board.desc")}>${esc(b.desc||"")}</textarea>
-        <input class="frscript" value="${esc(b.fromScript||"")}" placeholder="Dialogue or script reference" ${bindAttr("elem",c.id,"board.fromScript")}><div class="boardsettings"><label class="boardpicker">Shot size<select ${bindAttr("elem",c.id,"size")}>${selOpts(SHOT_SIZES.map(x=>({v:x.c,n:x.c+" · "+x.n})),c.size)}</select></label><label class="boardpicker">Lens<select ${bindAttr("elem",c.id,"lens")} data-num="1">${selOpts(LENSES.map(l=>({v:l,n:l+" mm"})),c.lens)}</select></label><label class="boardpicker">Duration<input type="number" min="0" step="1" value="${+c.duration||0}" title="Seconds" ${bindAttr("elem",c.id,"duration",true)}></label></div>
-        <div class="frfoot"><span class="frmeta">Scene ${esc(sc.number)} · ${esc(c.size)} · ${c.lens}mm · ${c.duration||0}s</span><span style="flex:1"></span><select ${bindAttr("elem",c.id,"status")} class="stsel tiny">${selOpts(STATUS,c.status)}</select></div></div></div>`;});h+=`</div>`;}
-    h+=`<div class="storysummary"><b>Scene ${esc(sc.number)}:</b><span class="hint">${cams.length} frames · ${fmtDur(sceneSeconds(sc))}</span><span style="flex:1"></span><button class="btn" data-act="boardPullScene" data-scene="${sc.id}">Pull scene script</button></div></section>`;
+        <input class="frscript" value="${esc(b.fromScript||"")}" placeholder="Dialogue or script reference" ${bindAttr("elem",c.id,"board.fromScript")}><div class="boardsettings"><label class="boardpicker">Shot size<select ${bindAttr("elem",displayCam.id,"size")}>${selOpts(SHOT_SIZES.map(x=>({v:x.c,n:x.c+" · "+x.n})),displayCam.size)}</select></label><label class="boardpicker">Lens<select ${bindAttr("elem",displayCam.id,"lens")} data-num="1">${selOpts(LENSES.map(l=>({v:l,n:l+" mm"})),displayCam.lens)}</select></label><label class="boardpicker">Duration<input type="number" min="0" step="1" value="${+c.duration||0}" title="Seconds" ${bindAttr("elem",c.id,"duration",true)}></label></div>
+        <div class="frfoot"><span class="frmeta">Source: Scene ${esc(selectedScene.number)} · Cam ${esc(displayCam.camId)} · ${esc(displayCam.size)} · ${displayCam.lens}mm · ${c.duration||0}s</span><span style="flex:1"></span><select ${bindAttr("elem",c.id,"status")} class="stsel tiny">${selOpts(STATUS,c.status)}</select></div></div></div>`;});h+=`</div>`;}
+    const activeSeconds=cams.filter(x=>!(x.board&&x.board.hidden)).reduce((n,x)=>n+(+x.duration||0),0);
+    h+=`<div class="storysummary"><b>Scene ${esc(sc.number)}:</b><span class="hint">${activeCount} active frames · ${fmtDur(activeSeconds)}</span><span style="flex:1"></span><button class="btn" data-act="boardPullScene" data-scene="${sc.id}">Pull scene script</button></div></section>`;
   });
   return h;
 }
@@ -7602,7 +7601,7 @@ function sheetStoryboardV2(){
     if(!cams.length)return; total+=cams.length;
     h+=`<h2>Scene ${esc(sc.number)} · ${esc(sc.name)} <span style="font-weight:400;color:#555">(${cams.length} active)</span></h2><div class="p-board">`;
     cams.forEach((c,i)=>{const b=c.board||{},sourceScene=state.scenes.find(s=>s.id===(b.sceneId||sc.id))||sc,sourceCams=(sourceScene.elements||[]).filter(x=>x.type==="camera"),displayCam=sourceCams.find(x=>x.id===(b.viewCamId||c.id))||sourceCams[0]||c;
-      h+=`<div class="p-frame"><div class="p-frameimg">${b.art?`<img src="${b.art}" alt="" style="width:100%;height:100%;object-fit:cover">`:storyboardSceneSvg(sourceScene,displayCam,320,180,{mini:true})}</div><div class="p-framemeta"><b>${esc(sc.number)}/${i+1} · ${esc(c.shotName||c.label)}</b><span>Scene ${esc(sourceScene.number)} · Camera ${esc(displayCam.camId)} · ${esc(c.size)} · ${c.lens}mm · ${c.duration||0}s</span><span>${esc(b.desc||"")}</span>${b.fromScript?`<span style="color:#7542c8">${esc(b.fromScript)}</span>`:""}</div></div>`;
+      h+=`<div class="p-frame"><div class="p-frameimg">${b.art?`<img src="${b.art}" alt="" style="width:100%;height:100%;object-fit:cover">`:storyboardSceneSvg(sourceScene,displayCam,320,180,{mini:true})}</div><div class="p-framemeta"><b>${esc(sc.number)}/${i+1} · ${esc(c.shotName||c.label)}</b><span>Source: Scene ${esc(sourceScene.number)} · Camera ${esc(displayCam.camId)} · ${esc(displayCam.size)} · ${displayCam.lens}mm · ${c.duration||0}s</span><span>${esc(b.desc||"")}</span>${b.fromScript?`<span style="color:#7542c8">${esc(b.fromScript)}</span>`:""}</div></div>`;
     });h+=`</div>`;
   });
   return h+(total?`<p style="font-size:10px;margin-top:12px"><b>${total}</b> active camera shots across all scenes. Hidden shots are excluded.</p>`:`<p>No active camera shots.</p>`);
@@ -8395,7 +8394,7 @@ const ACTIONS = {
     els().push(n); state.sel=[n.id]; renderAll(); save();
   },
 
-  boardMove(b){ const sc=state.scenes.find(s=>s.id===b.dataset.scene); if(!sc)return; const cams=(sc.elements||[]).filter(e=>e.type==="camera"),i=cams.findIndex(c=>c.id===b.dataset.id),j=i+(+b.dataset.dir||0); if(i<0||j<0||j>=cams.length)return; pushHistory(); const ai=sc.elements.indexOf(cams[i]),bi=sc.elements.indexOf(cams[j]); [sc.elements[ai],sc.elements[bi]]=[sc.elements[bi],sc.elements[ai]]; renderPanel(); save(); },
+  boardMove(b){ const sc=state.scenes.find(s=>s.id===b.dataset.scene);if(!sc)return;const all=(sc.elements||[]).filter(e=>e.type==="camera"),cams=ui().boardOmit?all.filter(c=>c.board&&(c.board.art||c.board.desc||c.board.fromScript)):all,i=cams.findIndex(c=>c.id===b.dataset.id),j=i+(+b.dataset.dir||0);if(i<0||j<0||j>=cams.length)return;pushHistory();const ai=sc.elements.indexOf(cams[i]),bi=sc.elements.indexOf(cams[j]);[sc.elements[ai],sc.elements[bi]]=[sc.elements[bi],sc.elements[ai]];renderPanel();save(); },
   boardViewfinder(b){ const i=state.scenes.findIndex(s=>s.id===b.dataset.scene); if(i<0)return; state.sceneIndex=i; state.sel=[b.dataset.id]; renderAll(); openViewfinder(b.dataset.id); save(); },
   boardAddCamera(b){ const sc=state.scenes.find(s=>s.id===b.dataset.scene); if(!sc)return; pushHistory(); const n=(sc.elements||[]).filter(e=>e.type==="camera").length,e=makeElement("camera",0,3+n*.5,{camId:String.fromCharCode(65+(n%26)),label:"Cam "+String.fromCharCode(65+(n%26)),shotName:"New shot"}); sc.elements.push(e); renderPanel(); save(); },
   boardPullScene(b){ const keep=state.sceneIndex,i=state.scenes.findIndex(s=>s.id===b.dataset.scene); if(i<0)return; state.sceneIndex=i; ACTIONS.boardFromScript(); state.sceneIndex=keep; renderPanel(); save(); },
@@ -8658,17 +8657,11 @@ function applyTheme(){
 function getPath(obj,path){ return path.split(".").reduce((o,k)=>o?o[k]:undefined, obj); }
 let callSheetDay=null, moodTarget=null, boardTarget=null;
 function moveShot(id,dir){
-  const cams=cameras();
-  const i=cams.findIndex(c=>c.id===id);
-  if(i<0) return;
-  const j=i+dir;
-  if(j<0||j>=cams.length) return;
-  pushHistory();
-  const list=els();
-  const ai=list.indexOf(cams[i]), bi=list.indexOf(cams[j]);
-  const t=list[ai]; list[ai]=list[bi]; list[bi]=t;
-  ui().shotSort="manual";
-  renderAll(); save();
+  const owner=state.scenes.find(sc=>(sc.elements||[]).some(e=>e.id===id));if(!owner)return;
+  const visible=shotRows().filter(r=>r.scene===owner).map(r=>r.cam),i=visible.findIndex(c=>c.id===id),j=i+dir;
+  if(i<0||j<0||j>=visible.length)return;
+  pushHistory();const list=owner.elements,ai=list.indexOf(visible[i]),bi=list.indexOf(visible[j]);
+  [list[ai],list[bi]]=[list[bi],list[ai]];ui().shotSort="manual";renderAll();save();
 }
 function syncHud(){
   $("#hGrid").classList.toggle("on",state.view.grid);
@@ -8995,8 +8988,6 @@ function initUI(){
   $("#hLabels").onclick = ()=>ACTIONS.tLabels();
   $("#hCones").onclick  = ()=>ACTIONS.tCones();
   $("#h180").onclick    = ()=>ACTIONS.toggleAxis();
-  $("#hViewTop").onclick=()=>{$("#veilSceneView").classList.remove("show");};
-  $("#hViewPerspective").onclick=()=>openSceneView("perspective");
 
   $("#beatAdd").onclick = ()=>{ pushHistory(); scene().beats++; state.beat=scene().beats-1; renderAll(); save(); };
   $("#beatDel").onclick = ()=>{
