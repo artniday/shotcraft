@@ -1106,7 +1106,7 @@ body.dark .launchnew{background:rgba(20,27,51,.94);border-color:#303a60}.dark .l
 .actoravatar.female::after{left:12px;width:26px;border-radius:12px 12px 18px 18px;background:linear-gradient(110deg,#bd5bd4,#6d2b9b)}.actoravatar.female::before{box-shadow:-5px 2px 0 #3c2431,5px 2px 0 #3c2431,inset -3px -2px 4px rgba(70,30,20,.22)}
 .actoravatar.male::after{left:8px;width:34px;border-radius:8px 8px 11px 11px}
 .actorphoto{display:block;width:72px;height:72px;border-radius:50%;overflow:hidden;background-image:url("shotcraft-characters-cutout.png");background-repeat:no-repeat;background-size:400% auto;background-color:#edf2ff;border:3px solid #fff;box-shadow:0 7px 17px rgba(18,29,62,.18),0 0 0 2px rgba(49,89,219,.15)}
-.actorchoice img.actorphoto{object-fit:cover;object-position:center top;background-image:none}
+.actorchoice img.actorphoto{object-fit:cover;object-position:50% 50%;background-image:none}
 .actorphoto.male{background-position:22% 7%}.actorphoto.female{background-position:80% 7%}
 .dirham-symbol{position:relative;display:inline-block;width:.82em;height:1em;margin-right:.2em;vertical-align:-.1em;font-family:Georgia,"Times New Roman",serif;font-size:1.16em;font-weight:900;line-height:.92;color:currentColor}
 .dirham-symbol::before,.dirham-symbol::after{content:"";position:absolute;left:-.08em;right:-.05em;height:.075em;border-radius:1em;background:currentColor;z-index:2}
@@ -1662,12 +1662,12 @@ const ACTOR_NAMES={
 };
 function poseHeightFactor(el){return el.seated?.72:1}
 const ACTOR_PROFILES={
-  "adult-woman":{n:"Adult woman",gender:"female",h:1.66,file:"assets/3d/characters/adult-woman.png",face:"assets/3d/characters/faces/adult-woman.png"},
-  "adult-man":{n:"Adult man",gender:"male",h:1.78,file:"assets/3d/characters/adult-man.png",face:"assets/3d/characters/faces/adult-man.png"},
-  baby:{n:"Baby",gender:"neutral",h:.72,file:"assets/3d/characters/baby.png",face:"assets/3d/characters/faces/baby.png"},
-  "senior-woman":{n:"Senior woman",gender:"female",h:1.58,file:"assets/3d/characters/senior-woman.png",face:"assets/3d/characters/faces/senior-woman.png"},
-  "senior-man":{n:"Senior man",gender:"male",h:1.70,file:"assets/3d/characters/senior-man.png",face:"assets/3d/characters/faces/senior-man.png"},
-  child:{n:"Child",gender:"neutral",h:1.28,file:"assets/3d/characters/child.png",face:"assets/3d/characters/faces/child.png"}
+  "adult-woman":{n:"Adult woman",gender:"female",h:1.66,file:"assets/3d/characters/adult-woman.png?v=20260829-library-v4",face:"assets/3d/characters/faces/adult-woman.png?v=20260829-library-v4"},
+  "adult-man":{n:"Adult man",gender:"male",h:1.78,file:"assets/3d/characters/adult-man.png?v=20260829-library-v4",face:"assets/3d/characters/faces/adult-man.png?v=20260829-library-v4"},
+  baby:{n:"Baby",gender:"neutral",h:.72,file:"assets/3d/characters/baby.png?v=20260829-library-v4",face:"assets/3d/characters/faces/baby.png?v=20260829-library-v4"},
+  "senior-woman":{n:"Senior woman",gender:"female",h:1.58,file:"assets/3d/characters/senior-woman.png?v=20260829-library-v4",face:"assets/3d/characters/faces/senior-woman.png?v=20260829-library-v4"},
+  "senior-man":{n:"Senior man",gender:"male",h:1.70,file:"assets/3d/characters/senior-man.png?v=20260829-library-v4",face:"assets/3d/characters/faces/senior-man.png?v=20260829-library-v4"},
+  child:{n:"Child",gender:"neutral",h:1.28,file:"assets/3d/characters/child.png?v=20260829-library-v4",face:"assets/3d/characters/faces/child.png?v=20260829-library-v4"}
 };
 function actorProfile(el){return ACTOR_PROFILES[el.profile||((el.gender||"female")==="male"?"adult-man":"adult-woman")]}
 function nextActorName(gender){
@@ -2003,7 +2003,8 @@ Object.assign(ASSET_3D,{
   linearray:"live-event/line-array",subs:"live-event/subwoofers",wedge:"live-event/floor-wedge",foh:"live-event/foh-console",monmix:"live-event/monitor-console",
   micstand:"live-event/mic-stand",barrier:"live-event/barrier",obtruck:"live-event/ob-truck",engvan:"live-event/eng-van",uplink:"live-event/uplink-truck",comms:"live-event/comms-rack"
 });
-function asset3d(id){const p=ASSET_3D[id];return p?`assets/3d/${p}.png`:""}
+const ASSET_RENDER_REV="20260829-library-v4";
+function asset3d(id){const p=ASSET_3D[id];return p?`assets/3d/${p}.png?v=${ASSET_RENDER_REV}`:""}
 
 /* =====================================================================
    TOOL RAIL
@@ -4662,7 +4663,7 @@ function vfSVG(cam,W,H,opt){
   cameras().filter(c=>c.id!==cam.id).forEach(c=>{
     const q=posAt(c), h=c.height||1.6,ez=+c.elevation||0;
     shadow(q.x,q.y,0.34,0.34);
-    if(exactBillboard(q,ez,.8,h,"assets/3d/production/cinema-camera.png",c.label,c.id))return;
+    if(exactBillboard(q,ez,.8,h,`assets/3d/production/cinema-camera.png?v=${ASSET_RENDER_REV}`,c.label,c.id))return;
     box3(q.x,q.y,ez,0.09,0.09,h-0.12,0,"#39445e");
     box3(q.x,q.y,ez+h-0.12,0.30,0.20,0.20,q.rot,"#00249C", o.mini?"":c.label);
   });
