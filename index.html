@@ -1158,9 +1158,10 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
 
 .layerpanel{padding:14px}.layerhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .layerhead h3{margin:0;font-size:17px}.layerhead p{margin:3px 0 0;color:var(--muted);font-size:11px}
-.layerlist{display:flex;flex-direction:column-reverse;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+.layerlist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
 .layeritem{display:grid;grid-template-columns:34px 32px minmax(0,1fr) 30px 30px;align-items:center;gap:5px;min-height:46px;padding:5px 8px;border-top:1px solid var(--line);background:var(--panel);color:var(--ink)}
 .layeritem:first-child{border-top:0}.layeritem.selected{background:color-mix(in srgb,var(--hct-blue) 10%,var(--panel));box-shadow:inset 3px 0 var(--hct-blue)}
+.layeritem[draggable="true"]{cursor:grab}.layeritem.dragging{opacity:.35;cursor:grabbing}.layeritem.drop-before{box-shadow:inset 0 3px var(--hct-blue)}.layeritem.drop-after{box-shadow:inset 0 -3px var(--hct-blue)}
 .layeritem.muted{opacity:.5}.layerbtn{height:30px;border:0;border-radius:8px;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;font-size:15px}
 .layerbtn:hover{background:var(--soft2);color:var(--hct-blue)}.layerbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.layerthumb{width:30px;height:30px;border-radius:8px;background:var(--soft2);display:grid;place-items:center;font-weight:800;color:var(--hct-blue);font-size:10px}
 .layername{min-width:0;text-align:left;border:0;background:transparent;color:inherit;cursor:pointer;padding:2px}.layername b,.layername small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.layername b{font-size:12px}.layername small{font-size:9px;color:var(--muted);margin-top:2px}.layergroups{margin-top:12px}
@@ -4421,11 +4422,11 @@ function checkReport(){
 
 function renderLayers(){
   const source=els();
-  const items=source.slice().sort((a,b)=>(Number.isFinite(a.stack)?a.stack:source.indexOf(a))-(Number.isFinite(b.stack)?b.stack:source.indexOf(b)));
+  const items=source.slice().sort((a,b)=>(Number.isFinite(b.stack)?b.stack:source.indexOf(b))-(Number.isFinite(a.stack)?a.stack:source.indexOf(a)));
   const icon=e=>({actor:"ACT",camera:"CAM",light:"LGT",wall:"WALL",door:"DOOR",window:"WIN",prop:"PROP",staging:"STG",grip:"GRIP",arch:"SET",track:"TRK",cable:"CBL",text:"TXT",image:"IMG"}[e.type]||String(e.type||"ITEM").slice(0,4).toUpperCase());
   const eyeOpen=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"/><circle cx="12" cy="12" r="2.8"/></svg>`;
   const eyeClosed=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M9.8 6.3A10.8 10.8 0 0112 6c6 0 9.5 6 9.5 6a17 17 0 01-2.2 2.8M6.2 7.4C3.8 9.1 2.5 12 2.5 12s3.5 6 9.5 6a10 10 0 004.1-.9M10.2 10.2a2.8 2.8 0 003.6 3.6"/></svg>`;
-  const rows=items.length?items.map((e,i)=>{const selected=state.sel.includes(e.id),hidden=e.hidden===true,group=e.layer||layerOf(e.type);return `<div class="layeritem${selected?" selected":""}${hidden?" muted":""}" data-layer-id="${e.id}">
+  const rows=items.length?items.map((e,i)=>{const selected=state.sel.includes(e.id),hidden=e.hidden===true,group=e.layer||layerOf(e.type);return `<div class="layeritem${selected?" selected":""}${hidden?" muted":""}" data-layer-id="${e.id}" draggable="true" title="Drag to change layer order">
     <button class="layerbtn" data-act="layerEye" data-id="${e.id}" title="${hidden?"Show":"Hide"} layer">${hidden?eyeClosed:eyeOpen}</button>
     <span class="layerthumb">${esc(icon(e))}</span>
     <button class="layername" data-act="layerSelect" data-id="${e.id}" title="Select layer; double-click Rename"><b>${esc(e.label||e.type||"Item")}</b><small>${esc(group)} · ${esc(e.type)}</small></button>
@@ -8794,6 +8795,12 @@ function initUI(){
     }
   });
   document.addEventListener("dblclick", ev=>{ const b=ev.target.closest(".layername[data-id]"); if(b){ ev.preventDefault(); ACTIONS.layerRename(b); } });
+  let layerDragId="";
+  const clearLayerDrop=()=>document.querySelectorAll(".layeritem.drop-before,.layeritem.drop-after").forEach(x=>x.classList.remove("drop-before","drop-after"));
+  document.addEventListener("dragstart",ev=>{const row=ev.target.closest(".layeritem[draggable=true]");if(!row)return;layerDragId=row.dataset.layerId||"";row.classList.add("dragging");if(ev.dataTransfer){ev.dataTransfer.effectAllowed="move";ev.dataTransfer.setData("text/plain",layerDragId);}});
+  document.addEventListener("dragover",ev=>{const row=ev.target.closest(".layeritem[data-layer-id]");if(!row||!layerDragId||row.dataset.layerId===layerDragId)return;ev.preventDefault();clearLayerDrop();const r=row.getBoundingClientRect(),after=ev.clientY>r.top+r.height/2;row.classList.add(after?"drop-after":"drop-before");if(ev.dataTransfer)ev.dataTransfer.dropEffect="move";});
+  document.addEventListener("drop",ev=>{const row=ev.target.closest(".layeritem[data-layer-id]");if(!row||!layerDragId||row.dataset.layerId===layerDragId){clearLayerDrop();return;}ev.preventDefault();const targetId=row.dataset.layerId,after=row.classList.contains("drop-after"),source=els(),visual=source.slice().sort((a,b)=>(Number.isFinite(b.stack)?b.stack:source.indexOf(b))-(Number.isFinite(a.stack)?a.stack:source.indexOf(a))),from=visual.findIndex(x=>x.id===layerDragId);if(from<0){clearLayerDrop();return;}const moved=visual.splice(from,1)[0],target=visual.findIndex(x=>x.id===targetId);pushHistory();visual.splice(target+(after?1:0),0,moved);visual.forEach((x,n)=>x.stack=visual.length-1-n);layerDragId="";clearLayerDrop();renderAll();save();});
+  document.addEventListener("dragend",ev=>{const row=ev.target.closest(".layeritem");if(row)row.classList.remove("dragging");layerDragId="";clearLayerDrop();});
   document.addEventListener("mousedown", ev=>{
     const p=$("#palette");
     if(p.classList.contains("show") && !ev.target.closest("#palette") && !ev.target.closest("#toolbar")) closePalette();
