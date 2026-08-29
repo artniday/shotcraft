@@ -1165,6 +1165,8 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
 .layeritem.muted{opacity:.5}.layerbtn{height:30px;border:0;border-radius:8px;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;font-size:15px}
 .layerbtn:hover{background:var(--soft2);color:var(--hct-blue)}.layerbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.layerthumb{width:30px;height:30px;border-radius:8px;background:var(--soft2);display:grid;place-items:center;font-weight:800;color:var(--hct-blue);font-size:10px}
 .layername{min-width:0;text-align:left;border:0;background:transparent;color:inherit;cursor:pointer;padding:2px}.layername b,.layername small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.layername b{font-size:12px}.layername small{font-size:9px;color:var(--muted);margin-top:2px}.layergroups{margin-top:12px}
+.envpanel{padding:14px}.envhero{padding:16px;border-radius:16px;color:#fff;background:linear-gradient(135deg,#062d57,#159e91);box-shadow:0 12px 28px #0b536733;margin-bottom:14px}.envhero h3{margin:0 0 4px;font-size:18px}.envhero p{margin:0;font-size:11px;opacity:.82}.envgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.envcard{position:relative;min-height:92px;padding:0;border:2px solid transparent;border-radius:13px;overflow:hidden;background:var(--soft);cursor:pointer;box-shadow:0 5px 14px #14234816}.envcard img{width:100%;height:68px;display:block;object-fit:cover}.envcard span{display:block;padding:7px 9px;text-align:left;font-size:10px;font-weight:800;color:var(--ink)}.envcard.on{border-color:#159e91;box-shadow:0 0 0 3px #159e9122}.envcard.none{display:grid;place-items:center;min-height:105px;background:linear-gradient(145deg,#20304f,#6f93c4)}.envcard.none span{color:#fff}.weathergrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.weatherbtn{padding:10px 5px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font-size:10px;font-weight:750;cursor:pointer}.weatherbtn.on{background:#159e91;color:#fff;border-color:#159e91}.envpreview{aspect-ratio:16/7;border-radius:13px;overflow:hidden;background:#172541 center/cover no-repeat;position:relative;margin-bottom:12px}.envpreview:after{content:attr(data-weather);position:absolute;right:8px;bottom:8px;padding:4px 7px;border-radius:999px;background:#07152bbb;color:#fff;font-size:9px;font-weight:800}
+.floorgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.floorbtn{display:flex;align-items:center;gap:9px;padding:8px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--ink);font-size:10px;font-weight:800;cursor:pointer;text-align:left}.floorbtn.on{border-color:#159e91;box-shadow:0 0 0 2px #159e9122}.floorswatch{width:38px;height:30px;flex:0 0 auto;border-radius:7px;background:var(--floor);box-shadow:inset 0 0 0 1px #0002}.axisbtn{font:800 10px/1 ui-monospace,monospace!important;min-width:32px}.axisbtn[data-axis="x"].on{background:#d84b42!important;color:#fff!important}.axisbtn[data-axis="y"].on{background:#2d9b68!important;color:#fff!important}.axisbtn[data-axis="z"].on{background:#3478db!important;color:#fff!important}
 
 
 .storyscene{margin:0 0 18px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);box-shadow:0 8px 22px rgba(19,34,75,.07)}
@@ -1254,6 +1256,10 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
         <button id="hLabels" class="on" title="Toggle labels"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7"/></svg></button>
         <button id="hCones" class="on" title="Toggle camera and light cones"><svg viewBox="0 0 24 24"><path d="M12 4L4 20h16z"/></svg></button>
         <button id="h180" title="Toggle the 180 degree axis overlay"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M8.5 12h7"/></svg></button>
+        <button id="hMoveFree" class="axisbtn on" data-axis="free" title="Free move on X and Y axes">FREE</button>
+        <button id="hMoveX" class="axisbtn" data-axis="x" title="Constrain movement to the X axis">X</button>
+        <button id="hMoveY" class="axisbtn" data-axis="y" title="Constrain movement to the Y axis">Y</button>
+        <button id="hMoveZ" class="axisbtn" data-axis="z" title="Elevation mode — drag vertically to raise or lower">Z</button>
         
         
         
@@ -1580,7 +1586,7 @@ let state, history=[], future=[], pendingTool="select", drag=null, mouseWorld={x
 function blankScene(name){
   return {
     id:uid(), name:name||"Scene 1", number:"1", page:"", slug:"INT. LOCATION - DAY",
-    tod:"dayint", beats:1, elements:[], script:"", notes:""
+    tod:"dayint", beats:1, elements:[], script:"", notes:"", environment:{backdrop:"none",sky:"auto",weather:"clear",strength:55,backdropOpacity:82}
   };
 }
 function blankState(){
@@ -3170,7 +3176,7 @@ function initCanvas(){
         renderAll();return;
       }
       pushHistory();
-      drag={mode:"move",items:selected().filter(e=>!e.locked).map(e=>{const hp=posAt(e);return {el:e,dx:world.x-hp.x,dy:world.y-hp.y,d2:(e.x2!=null?{dx:world.x-e.x2,dy:world.y-e.y2}:null)};})};
+      drag={mode:"move",sy:py,axis:state.view.transformAxis||"free",items:selected().filter(e=>!e.locked).map(e=>{const hp=posAt(e);return {el:e,sx:hp.x,sy:hp.y,elevation:+e.elevation||0,dx:world.x-hp.x,dy:world.y-hp.y,d2:(e.x2!=null?{dx:world.x-e.x2,dy:world.y-e.y2}:null)};})};
       renderAll();return;
     }
     if(pendingTool!=="select"){
@@ -3245,9 +3251,9 @@ function initCanvas(){
       renderAll(); return;
     }
     pushHistory();
-    drag={mode:"move",items:selected().filter(e=>!e.locked).map(e=>{
+    drag={mode:"move",sy:py,axis:state.view.transformAxis||"free",items:selected().filter(e=>!e.locked).map(e=>{
       const p=posAt(e);
-      return {el:e,dx:world.x-p.x,dy:world.y-p.y,
+      return {el:e,sx:p.x,sy:p.y,elevation:+e.elevation||0,dx:world.x-p.x,dy:world.y-p.y,
         d2:(e.x2!=null?{dx:world.x-e.x2,dy:world.y-e.y2}:null)};
     })};
     renderAll();
@@ -3304,7 +3310,13 @@ function initCanvas(){
     }
     if(drag.mode==="move"){
       for(const it of drag.items){
+        if(drag.axis==="z"){
+          it.el.elevation=round2(Math.max(0,it.elevation+(drag.sy-py)/Math.max(8,state.view.ppm)));
+          continue;
+        }
         let nx=snapVal(mouseWorld.x-it.dx), ny=snapVal(mouseWorld.y-it.dy);
+        if(drag.axis==="x")ny=it.sy;
+        if(drag.axis==="y")nx=it.sx;
         if(it.el.type==="door"||it.el.type==="window"){
           const nw=nearestWall(nx,ny,1.2);
           if(nw){ nx=round2(nw.px); ny=round2(nw.py); it.el.rot=round2(nw.ang); it.el.wallId=nw.w.id; }
@@ -3314,7 +3326,7 @@ function initCanvas(){
         setPos(it.el,nx,ny);
         if(it.el.x2!=null){ it.el.x2=round2(it.el.x2+ddx); it.el.y2=round2(it.el.y2+ddy); }
       }
-      renderPlan(); return;
+      renderPlan(); if(drag.axis==="z")renderPanel(); return;
     }
   });
 
@@ -3611,7 +3623,7 @@ function applyBind(path,value,isNum){
     state.project.titlePage = state.project.titlePage||{};
     state.project.titlePage[parts[1]] = value;
   } else if(scope==="ui"){ ui()[parts[1]] = value; }
-  else if(scope==="scene"){ scene()[parts[1]] = isNum?(parseFloat(value)||0):value; }
+  else if(scope==="scene"){ const v=isNum?(parseFloat(value)||0):value;if(parts[1].includes("."))setDeep(scene(),parts[1],v);else scene()[parts[1]]=v; }
   else if(scope==="proj"){ state.project[parts[1]] = isNum?(parseFloat(value)||0):value; }
   else if(scope==="student"){ state.project.student[parts[1]] = value; }
   else if(scope==="view"){ state.view[parts[1]] = isNum?(parseFloat(value)||0):value; }
@@ -3621,6 +3633,7 @@ function applyBind(path,value,isNum){
 const TABS = [
   {id:"inspector", n:"Inspector", always:true},
   {id:"layers",    n:"Layers", always:true},
+  {id:"environment",n:"Environment", always:true},
   {id:"shots",     n:"Shots"},
   {id:"story",     n:"Board"},
   {id:"script",    n:"Script"},
@@ -4437,12 +4450,27 @@ function renderLayers(){
     <div class="layerlist">${rows}</div><div class="layergroups">${sect("layergroups","Layer groups",LAYER_DEFS.map(([k,n])=>`<label class="chkrow"><input type="checkbox" ${state.view.layers[k]!==false?"checked":""} data-vcheck2="layers.${k}"><span><b>${esc(n)}</b><i>${items.filter(e=>(e.layer||layerOf(e.type))===k).length} items</i></span></label>`).join(""))}</div></div>`;
 }
 
+
+const ENVIRONMENTS=[{id:"none",name:"Procedural sky",file:""},{id:"city",name:"City · golden hour",file:"assets/environments/city-golden-hour.jpg"},{id:"desert",name:"Desert · clear day",file:"assets/environments/desert-clear-day.jpg"},{id:"forest",name:"Forest · overcast",file:"assets/environments/forest-overcast.jpg"},{id:"soundstage",name:"Dark soundstage",file:"assets/environments/soundstage-dark.jpg"}];
+const ENV_SKIES=[{v:"auto",n:"Automatic from time of day"},{v:"day",n:"Clear daylight"},{v:"sunset",n:"Golden sunset"},{v:"night",n:"Night sky"},{v:"overcast",n:"Overcast"}];
+const ENV_WEATHER=[{id:"clear",n:"Clear",i:"☀"},{id:"rain",n:"Rain",i:"☂"},{id:"snow",n:"Snow",i:"❄"},{id:"fog",n:"Fog",i:"≋"},{id:"dust",n:"Dust",i:"◌"},{id:"storm",n:"Storm",i:"ϟ"}];
+const ENV_FLOORS=[{id:"studio",n:"Studio floor",c:"linear-gradient(135deg,#303746,#151923)"},{id:"concrete",n:"Concrete",c:"repeating-linear-gradient(45deg,#9ca1a4 0 8px,#8b9094 8px 9px)"},{id:"wood",n:"Wood planks",c:"repeating-linear-gradient(90deg,#8b5d39 0 15px,#603c25 15px 17px)"},{id:"tile",n:"Ceramic tile",c:"linear-gradient(90deg,#d9dde0 48%,#9ba4ad 49% 52%,#d9dde0 53%),linear-gradient(#d9dde0 48%,#9ba4ad 49% 52%,#d9dde0 53%)"},{id:"grass",n:"Grass",c:"linear-gradient(135deg,#397b3e,#78a64c)"},{id:"sand",n:"Sand / desert",c:"linear-gradient(135deg,#d7b77b,#aa7e45)"},{id:"asphalt",n:"Asphalt",c:"linear-gradient(135deg,#4b5056,#25282d)"},{id:"earth",n:"Earth / ground",c:"linear-gradient(135deg,#76573d,#4e392c)"}];
+function environmentState(sc){sc.environment=Object.assign({backdrop:"none",sky:"auto",weather:"clear",strength:55,backdropOpacity:82,floor:"studio",floorScale:100},sc.environment||{});return sc.environment;}
+function renderEnvironment(){
+  const sc=scene(),e=environmentState(sc),current=ENVIRONMENTS.find(x=>x.id===e.backdrop)||ENVIRONMENTS[0];
+  return `<div class="envpanel"><div class="envhero"><h3>Scene Environment</h3><p>Set the world behind this scene. It appears in the viewfinder, storyboard and animatic.</p></div><div class="envpreview" data-weather="${esc(ENV_WEATHER.find(x=>x.id===e.weather)?.n||"Clear")}" style="${current.file?`background-image:url('${current.file}')`:""}"></div>
+  ${sect("envbackdrop","Background plate",`<div class="envgrid">${ENVIRONMENTS.map(x=>x.id==="none"?`<button class="envcard none${e.backdrop===x.id?" on":""}" data-act="envBackdrop" data-v="${x.id}"><span>${x.name}</span></button>`:`<button class="envcard${e.backdrop===x.id?" on":""}" data-act="envBackdrop" data-v="${x.id}"><img src="${x.file}" alt=""><span>${x.name}</span></button>`).join("")}</div><label class="f"><span>Background opacity <b style="float:right">${e.backdropOpacity}%</b></span><input type="range" min="0" max="100" step="1" value="${e.backdropOpacity}" data-envrange="backdropOpacity"></label>`)}
+  ${sect("envsky","Sky and time",fSelect("Sky treatment","scene","environment.sky",null,e.sky,ENV_SKIES))}
+  ${sect("envfloor","Floor and ground",`<div class="floorgrid">${ENV_FLOORS.map(x=>`<button class="floorbtn${e.floor===x.id?" on":""}" data-act="envFloor" data-v="${x.id}"><i class="floorswatch" style="--floor:${x.c}"></i><span>${x.n}</span></button>`).join("")}</div><label class="f"><span>Material scale <b style="float:right">${e.floorScale}%</b></span><input type="range" min="50" max="200" step="5" value="${e.floorScale}" data-envrange="floorScale"></label><p class="hint">The chosen surface is used by the viewfinder, storyboard and perspective preview.</p>`)}
+  ${sect("envweather","Weather and atmosphere",`<div class="weathergrid">${ENV_WEATHER.map(x=>`<button class="weatherbtn${e.weather===x.id?" on":""}" data-act="envWeather" data-v="${x.id}">${x.i} ${x.n}</button>`).join("")}</div><label class="f"><span>Effect strength <b style="float:right">${e.strength}%</b></span><input type="range" min="0" max="100" step="1" value="${e.strength}" data-envrange="strength"></label><p class="hint">Weather is a visual planning overlay; it does not alter geometry.</p>`)}</div>`;
+}
+
 /* ------------------------- panel dispatch ------------------------- */
 function renderPanel(){
   renderTabs();
   const b=$("#pbody");
   const keepTab=b.dataset.tab, keepTop=b.scrollTop;
-  const map={inspector:renderInspector,layers:renderLayers,shots:renderShots,story:renderStoryV2,script:renderScript,
+  const map={inspector:renderInspector,layers:renderLayers,environment:renderEnvironment,shots:renderShots,story:renderStoryV2,script:renderScript,
              gear:renderGear,prod:renderProd,
              schedule:renderSchedule,crew:renderCrew,budget:renderBudget,locations:renderLocations,
              power:renderPower,rigging:renderRigging,dmx:renderDmx,continuity:renderContinuity,
@@ -4518,6 +4546,19 @@ function clipNear(cs,N){
   return out;
 }
 
+
+function vfEnvironmentArt(W,top,fw,fh,cid,e){
+  const entry=ENVIRONMENTS.find(x=>x.id===e.backdrop),op=clamp((+e.backdropOpacity||0)/100,0,1),strength=clamp((+e.strength||0)/100,0,1);
+  const back=entry&&entry.file?`<image href="${entry.file}" x="0" y="${top}" width="${fw}" height="${fh}" preserveAspectRatio="xMidYMid slice" opacity="${op}"/>`:`<rect x="0" y="${top}" width="${fw}" height="${fh}" fill="url(#sky${cid})"/>`;
+  let over="";const n=Math.max(10,Math.round(45*strength));
+  if(e.weather==="rain")over=Array.from({length:n},(_,i)=>{const x=(i*83%Math.max(1,fw)),y=top+(i*47%Math.max(1,fh));return `<path d="M${x} ${y}l-8 18" stroke="#b9dcff" stroke-width="1.4" opacity="${.2+.55*strength}"/>`;}).join("");
+  else if(e.weather==="snow")over=Array.from({length:n},(_,i)=>{const x=(i*97%Math.max(1,fw)),y=top+(i*59%Math.max(1,fh)),r=1+(i%3);return `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity="${.25+.6*strength}"/>`;}).join("");
+  else if(e.weather==="fog")over=`<rect x="0" y="${top}" width="${fw}" height="${fh}" fill="#dce5e8" opacity="${.15+.55*strength}"/>`;
+  else if(e.weather==="dust")over=`<rect x="0" y="${top}" width="${fw}" height="${fh}" fill="#c99b62" opacity="${.12+.45*strength}"/>`;
+  else if(e.weather==="storm")over=`<rect x="0" y="${top}" width="${fw}" height="${fh}" fill="#101827" opacity="${.18+.45*strength}"/><path d="M${fw*.7} ${top+10}l-34 ${fh*.42}h24l-34 ${fh*.42}" fill="none" stroke="#f5f1c7" stroke-width="3" opacity="${.35+.6*strength}"/>`;
+  return {back,over};
+}
+
 function vfSVG(cam,W,H,opt){
   const o = opt||{};
   const A = RATIOS[state.project.aspect] ? RATIOS[state.project.aspect].v : 16/9;
@@ -4548,13 +4589,18 @@ function vfSVG(cam,W,H,opt){
   const night = tod==="nightint"||tod==="nightext";
   const studio = tod==="studio";
   const ext = tod==="dayext"||tod==="nightext";
-  const skyTop  = night?"#070b18":studio?"#0b0e18":ext?"#6f93c4":"#20304f";
-  const skyBot  = night?"#0d1424":studio?"#12161f":ext?"#b9cde4":"#33445f";
-  const floorCol= night?"#1c2136":studio?"#171a22":ext?"#5d5f63":"#3a3f52";
-  const wallCol = night?"#2b3352":studio?"#22262f":ext?"#7b7f88":"#4a5573";
+  let skyTop  = night?"#070b18":studio?"#0b0e18":ext?"#6f93c4":"#20304f";
+  let skyBot  = night?"#0d1424":studio?"#12161f":ext?"#b9cde4":"#33445f";
+  let floorCol= night?"#1c2136":studio?"#171a22":ext?"#5d5f63":"#3a3f52";
+  let wallCol = night?"#2b3352":studio?"#22262f":ext?"#7b7f88":"#4a5573";
   const amb     = night?0.42:studio?0.5:ext?0.95:0.72;
   const fogCol  = hex2rgb(night?"#0a1020":studio?"#0d1017":ext?"#a9bed6":"#1b2540");
   const fogAmt  = o.mini?0.55:0.8;
+  const env=environmentState(scene());
+  if(env.sky==="day"){skyTop="#62a8e5";skyBot="#d8ecfa";}else if(env.sky==="sunset"){skyTop="#563d85";skyBot="#f2a05f";}else if(env.sky==="night"){skyTop="#030817";skyBot="#17233e";}else if(env.sky==="overcast"){skyTop="#7f8b96";skyBot="#c9d0d4";}
+  const envArt=vfEnvironmentArt(W,top,fw,fh,cid,env);
+  const floorPalette={studio:"#252b38",concrete:"#858b90",wood:"#765036",tile:"#c8cdd1",grass:"#4f8047",sand:"#b9945d",asphalt:"#3c4147",earth:"#604936"};
+  floorCol=floorPalette[env.floor]||floorCol;
 
   /* dominant light direction for the lambert term */
   const keyL = lights().filter(l=>!l.flag).sort((x,y)=>(y.watts*y.dimmer)-(x.watts*x.dimmer))[0];
@@ -4601,8 +4647,14 @@ function vfSVG(cam,W,H,opt){
        floorCol, amb+0.18, ' opacity="1"');
   if(!o.mini){
     const gx0=Math.floor(CX-14), gx1=Math.ceil(CX+14), gy0=Math.floor(CY-14), gy1=Math.ceil(CY+14);
-    for(let x=gx0;x<=gx1;x++) line3([x,gy0,0],[x,gy1,0], night?"#39456b":"#8e9ab5", 1, 0.16);
-    for(let y=gy0;y<=gy1;y++) line3([gx0,y,0],[gx1,y,0], night?"#39456b":"#8e9ab5", 1, 0.16);
+    const floorStep=Math.max(.25,(+env.floorScale||100)/100),floorLine=env.floor==="wood"?"#d0a478":env.floor==="tile"?"#f3f6f8":env.floor==="grass"?"#79a56b":env.floor==="sand"||env.floor==="earth"?"#e0c18c":night?"#39456b":"#8e9ab5";
+    if(env.floor==="wood"){
+      for(let y=gy0;y<=gy1;y+=floorStep*.45)line3([gx0,y,0],[gx1,y,0],floorLine,1,.22);
+      for(let x=gx0;x<=gx1;x+=floorStep*2.4)line3([x,gy0,0],[x,gy1,0],floorLine,1,.12);
+    }else{
+      for(let x=gx0;x<=gx1;x+=floorStep) line3([x,gy0,0],[x,gy1,0],floorLine,1,env.floor==="tile"?.28:.16);
+      for(let y=gy0;y<=gy1;y+=floorStep) line3([gx0,y,0],[gx1,y,0],floorLine,1,env.floor==="tile"?.28:.16);
+    }
   }
 
   /* ---- helper: an axis aligned box rotated about z ---- */
@@ -4939,8 +4991,7 @@ function vfSVG(cam,W,H,opt){
         <stop offset="0" stop-color="${skyTop}"/><stop offset="1" stop-color="${skyBot}"/></linearGradient>
     </defs>
     <rect width="${W}" height="${H}" fill="#05070f"/>
-    <rect x="0" y="${top}" width="${fw}" height="${fh}" fill="url(#sky${cid})"/>
-    <g clip-path="url(#${cid})">${items.map(i=>i.s).join("")}${ov}</g>
+    <g clip-path="url(#${cid})">${envArt.back}${items.map(i=>i.s).join("")}${ov}${envArt.over}</g>
     ${hud}
     <rect x="0.5" y="${top+0.5}" width="${fw-1}" height="${fh-1}" fill="none" stroke="#2c3557" stroke-width="1"/>
   </svg>`;
@@ -6366,6 +6417,7 @@ function printSheet(){
 const TICON = {
   inspector:"M4 6h16M4 12h10M4 18h7M18 15l3 3-3 3",
   layers   :"M12 3L3 7.5 12 12l9-4.5zM3 12l9 4.5 9-4.5M3 16.5l9 4.5 9-4.5",
+  environment:"M4 18h16M5 15l4-5 3 3 3-5 4 7M7 7h.01",
   shots    :"M3 7h10v10H3zM13 10l8-3v10l-8-3z",
   story    :"M3 5h18v14H3zM9 5v14M15 5v14",
   script   :"M6 3h9l3 3v15H6zM15 3v3h3M9 12h6M9 16h6",
@@ -6400,7 +6452,7 @@ function tabBadge(id){
   if(id==="locations" && recs("locations").length) return recs("locations").length;
   return "";
 }
-const MAIN_TABS = ["inspector","layers","shots","story","script","gear"];
+const MAIN_TABS = ["inspector","layers","environment","shots","story","script","gear"];
 const PROD_MENU = [
   {g:"Planning",        ids:["schedule","locations","moodboard"]},
   {g:"People and money",ids:["crew","tasks","budget"]},
@@ -6408,7 +6460,7 @@ const PROD_MENU = [
   {g:"Technical",       ids:["power","rigging","dmx"]},
   {g:"Project",         ids:["prod"]}
 ];
-const TAB_COLOUR = {inspector:"#00249C",layers:"#6f4bd8",shots:"#00249C",story:"#00249C",script:"#8b53d6",light:"#e0a106",
+const TAB_COLOUR = {inspector:"#00249C",layers:"#6f4bd8",environment:"#159e91",shots:"#00249C",story:"#00249C",script:"#8b53d6",light:"#e0a106",
   gear:"#12a3b8",power:"#c4342a",rigging:"#e2762a",dmx:"#12a3b8",schedule:"#2fa35f",crew:"#2f7de1",
   budget:"#2fa35f",locations:"#12a3b8",continuity:"#8b53d6",runofshow:"#2fa35f",tasks:"#e0a106",
   logistics:"#5b6478",moodboard:"#d1478e",prod:"#00249C"};
@@ -8525,6 +8577,10 @@ const ACTIONS = {
   layerUp(b){ const e=byId(b.dataset.id),a=els(); if(!e)return; const o=a.slice().sort((x,y)=>(Number.isFinite(x.stack)?x.stack:a.indexOf(x))-(Number.isFinite(y.stack)?y.stack:a.indexOf(y))),i=o.indexOf(e); if(i<0||i===o.length-1)return; pushHistory(); [o[i],o[i+1]]=[o[i+1],o[i]]; o.forEach((x,n)=>x.stack=n); renderAll(); save(); },
   layerDown(b){ const e=byId(b.dataset.id),a=els(); if(!e)return; const o=a.slice().sort((x,y)=>(Number.isFinite(x.stack)?x.stack:a.indexOf(x))-(Number.isFinite(y.stack)?y.stack:a.indexOf(y))),i=o.indexOf(e); if(i<=0)return; pushHistory(); [o[i],o[i-1]]=[o[i-1],o[i]]; o.forEach((x,n)=>x.stack=n); renderAll(); save(); },
   layerRename(b){ const e=byId(b.dataset.id); if(!e)return; const n=prompt("Layer name",e.label||e.type); if(!n)return; pushHistory(); e.label=n.trim(); renderAll(); save(); },
+
+  envBackdrop(b){pushHistory();environmentState(scene()).backdrop=b.dataset.v;renderAll();save();},
+  envWeather(b){pushHistory();environmentState(scene()).weather=b.dataset.v;renderAll();save();},
+  envFloor(b){pushHistory();environmentState(scene()).floor=b.dataset.v;renderAll();save();},
   layersAll(){ Object.keys(state.view.layers).forEach(k=>state.view.layers[k]=true); renderAll(); save(); },
   layersOnlyPlan(){
     const used={}; els().forEach(e=>used[e.layer||layerOf(e.type)]=true);
@@ -8670,6 +8726,7 @@ function syncHud(){
   $("#hLabels").classList.toggle("on",state.view.labels);
   $("#hCones").classList.toggle("on",state.view.cones);
   $("#h180").classList.toggle("on",state.view.axis);
+  ["free","x","y","z"].forEach(a=>$("#hMove"+(a==="free"?"Free":a.toUpperCase())).classList.toggle("on",(state.view.transformAxis||"free")===a));
 }
 
 /* ------------------------- help ------------------------- */
@@ -8861,6 +8918,7 @@ function initUI(){
     if(lc2){ const k=lc2.dataset.labcol;
       state.view.labelCol = state.view.labelCol||{}; state.view.labelAuto = state.view.labelAuto||{};
       state.view.labelCol[k]=lc2.value; state.view.labelAuto[k]=false; renderPlan(); save(); return; }
+    const er=ev.target.closest("[data-envrange]");if(er){const e=environmentState(scene());e[er.dataset.envrange]=+er.value;const b=er.parentElement&&er.parentElement.querySelector("b");if(b)b.textContent=er.value+"%";renderPlan();save();return;}
     const r2 = ev.target.closest("[data-vrange2]");
     if(r2){ const path=r2.dataset.vrange2, raw=parseFloat(r2.value);
       setPath(state.view, path, path.indexOf("opacity.")===0 ? raw/100 : raw);
@@ -8995,6 +9053,7 @@ function initUI(){
   $("#hLabels").onclick = ()=>ACTIONS.tLabels();
   $("#hCones").onclick  = ()=>ACTIONS.tCones();
   $("#h180").onclick    = ()=>ACTIONS.toggleAxis();
+  ["free","x","y","z"].forEach(a=>$("#hMove"+(a==="free"?"Free":a.toUpperCase())).onclick=()=>{state.view.transformAxis=a;syncHud();renderPlan();save();});
 
   $("#beatAdd").onclick = ()=>{ pushHistory(); scene().beats++; state.beat=scene().beats-1; renderAll(); save(); };
   $("#beatDel").onclick = ()=>{
