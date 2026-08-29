@@ -1,0 +1,6 @@
+ShotCraft GitHub Pages package
+
+1. Extract this ZIP.
+2. Upload index.html, the assets folder, and the three shotcraft PNG files to the repository root.
+3. Do not upload the ZIP itself as the website; GitHub Pages does not extract ZIP archives.
+4. In repository Settings > Pages, publish from the main branch / root.
