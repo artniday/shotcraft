@@ -241,6 +241,7 @@ body.dark #btnTheme .ic-moon{display:block}
 .pitem:hover{background:#eef1f9}
 .pitem.on{background:var(--hct-blue);color:#fff}
 .pitem i{width:8px;height:8px;border-radius:2px;flex:0 0 8px}
+.pitem .assetthumb{width:42px;height:34px;flex:0 0 42px;object-fit:contain;border-radius:7px;background:linear-gradient(145deg,#f8faff,#e8edf7);box-shadow:inset 0 0 0 1px #dfe5f0;filter:drop-shadow(0 3px 3px rgba(15,25,55,.12))}.pitem.on .assetthumb{background:#fff}
 .pitem .pn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pitem .pm{font-size:9.5px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
 .pitem.on .pm{color:rgba(255,255,255,.75)}
@@ -1100,6 +1101,7 @@ body.dark .launchnew{background:rgba(20,27,51,.94);border-color:#303a60}.dark .l
 .actoravatar.female::after{left:12px;width:26px;border-radius:12px 12px 18px 18px;background:linear-gradient(110deg,#bd5bd4,#6d2b9b)}.actoravatar.female::before{box-shadow:-5px 2px 0 #3c2431,5px 2px 0 #3c2431,inset -3px -2px 4px rgba(70,30,20,.22)}
 .actoravatar.male::after{left:8px;width:34px;border-radius:8px 8px 11px 11px}
 .actorphoto{display:block;width:72px;height:72px;border-radius:50%;overflow:hidden;background-image:url("shotcraft-characters-cutout.png");background-repeat:no-repeat;background-size:400% auto;background-color:#edf2ff;border:3px solid #fff;box-shadow:0 7px 17px rgba(18,29,62,.18),0 0 0 2px rgba(49,89,219,.15)}
+.actorchoice img.actorphoto{object-fit:cover;object-position:center top;background-image:none}
 .actorphoto.male{background-position:22% 7%}.actorphoto.female{background-position:80% 7%}
 .dirham-symbol{position:relative;display:inline-block;width:.82em;height:1em;margin-right:.2em;vertical-align:-.1em;font-family:Georgia,"Times New Roman",serif;font-size:1.16em;font-weight:900;line-height:.92;color:currentColor}
 .dirham-symbol::before,.dirham-symbol::after{content:"";position:absolute;left:-.08em;right:-.05em;height:.075em;border-radius:1em;background:currentColor;z-index:2}
@@ -1664,6 +1666,15 @@ const ACTOR_POSES=[
 function poseKey(el){return String(el.pose||((el.seated)?"Sitting":"Standing neutral")).toLowerCase()}
 function poseHeightFactor(el){const p=poseKey(el);if(/lying|sleeping|fallen/.test(p))return .28;if(/crouch|squat|crawl/.test(p))return .58;if(/kneel/.test(p))return .68;if(/sitting|driving|wheelchair/.test(p))return .72;if(/jump/.test(p))return 1.04;return 1}
 function poseTransform(el,cx,bottom){const p=poseKey(el);let skew=0,rot=0;if(/sprint|running/.test(p)){skew=-10;rot=-4}else if(/walk|jog/.test(p))skew=-5;else if(/climb|descend/.test(p)){skew=-7;rot=-3}else if(/fallen|lying|sleeping/.test(p))rot=-90;else if(/reach|push|pull/.test(p))skew=-4;return `translate(${cx} ${bottom}) rotate(${rot}) skewX(${skew}) translate(${-cx} ${-bottom})`}
+const ACTOR_PROFILES={
+  "adult-woman":{n:"Adult woman",gender:"female",h:1.66,file:"assets/3d/characters/adult-woman.png"},
+  "adult-man":{n:"Adult man",gender:"male",h:1.78,file:"assets/3d/characters/adult-man.png"},
+  baby:{n:"Baby",gender:"neutral",h:.72,file:"assets/3d/characters/baby.png"},
+  "senior-woman":{n:"Senior woman",gender:"female",h:1.58,file:"assets/3d/characters/senior-woman.png"},
+  "senior-man":{n:"Senior man",gender:"male",h:1.70,file:"assets/3d/characters/senior-man.png"},
+  child:{n:"Child",gender:"neutral",h:1.28,file:"assets/3d/characters/child.png"}
+};
+function actorProfile(el){return ACTOR_PROFILES[el.profile||((el.gender||"female")==="male"?"adult-man":"adult-woman")]}
 function nextActorName(gender){
   const list=ACTOR_NAMES[gender]||ACTOR_NAMES.neutral;
   const used=new Set(actors().flatMap(a=>[a.character,a.label]).filter(Boolean).map(x=>String(x).toLowerCase()));
@@ -1684,9 +1695,9 @@ function makeElement(type,x,y,extra){
       safety:it.flag==="safety",exclusion:it.flag==="safety"?3:0};
   };
   const T = {
-    actor:()=>{const gender=pendingActorGender||"female",name=nextActorName(gender),letter=nextLetter();return {letter,color:ACTOR_COLORS[actors().length%ACTOR_COLORS.length],
+    actor:()=>{const profile=pendingActorProfile||"adult-woman",gender=(ACTOR_PROFILES[profile]||ACTOR_PROFILES["adult-woman"]).gender,name=nextActorName(gender),letter=nextLetter();return {letter,color:ACTOR_COLORS[actors().length%ACTOR_COLORS.length],
       label:name,character:name,autoActorName:true,seated:false,pose:"Standing neutral",action:"",lines:"",wardrobe:"",
-      gender, heightM:0, castNo:actors().length+1};},
+      profile,gender, heightM:0, castNo:actors().length+1};},
     camera:()=>{
       const cid = nextCamId();
       return {camId:cid,label:"Cam "+cid,lens:35,sensor:"s35",rig:"Tripod",height:1.6,tilt:null,
@@ -1967,6 +1978,37 @@ LIGHT_CATALOG.forEach(g=>g.items.forEach(it=>{
 CABLES.forEach(c=>ASSET_INDEX.push({tool:"cable", id:c[0], n:c[1], code:c[2], group:"Cable runs", cat:"Signal and power", colour:c[3]}));
 SHAPES.forEach(s=>ASSET_INDEX.push({tool:"shape", id:s[0], n:s[1], group:"Shapes", cat:"Geometry", colour:"#8b53d6"}));
 function assetById(tool,id){ return ASSET_INDEX.find(a=>a.tool===tool && a.id===id); }
+/* Generated realistic 3D thumbnails. The mapping stays separate from project
+   data so older saved productions automatically gain the improved artwork. */
+const ASSET_3D={
+  couch3:"furniture/sofa-3",armchair:"furniture/armchair",diningchair:"furniture/dining-chair",coffee:"furniture/coffee-table",
+  recttable:"furniture/dining-table",desk:"furniture/executive-desk",kingbed:"furniture/king-bed",wardrobe:"furniture/wardrobe",
+  bookshelf:"furniture/bookshelf",floorlamp:"furniture/floor-lamp",plant:"furniture/potted-plant",bench:"furniture/park-bench",
+  sedan:"furniture/sedan",bicycle:"furniture/bicycle",suitcase:"furniture/suitcase",clapper:"furniture/clapperboard",
+  camera:"production/cinema-camera",broadcastcamera:"production/broadcast-camera",dslr:"production/dslr-camera",gimbal:"production/gimbal-camera",
+  jib:"production/camera-crane",dollyplat:"production/doorway-dolly",track:"production/dolly-track",dirchair:"production/director-chair",
+  cstandarm:"production/c-stand",tripodstand:"production/light-stand",boomop:"production/boom-microphone",monitor:"production/field-monitor",
+  videovillage:"production/video-village",dit:"production/dit-cart",crate:"production/road-case",sandbag:"production/sandbag",
+  fresnel:"lighting/fresnel",ledpanel:"lighting/led-panel",softbox:"lighting/softbox",tube:"lighting/tube-light",leko:"lighting/leko",
+  hmi:"lighting/hmi",parcan:"lighting/par-can",china:"lighting/china-ball",bounce:"lighting/bounce-board",flagsolid:"lighting/solid-flag",
+  flagsilk:"lighting/silk-frame",cucoloris:"lighting/cucoloris",stageplatform:"lighting/stage-platform",trusstower:"lighting/truss-tower",
+  paspeaker:"lighting/pa-speaker",ledwall:"lighting/led-video-wall",stairs:"architecture/staircase",door:"architecture/door",
+  window:"architecture/window",column:"architecture/column",railing:"architecture/railing",fireplace:"architecture/fireplace",
+  fridge:"architecture/refrigerator",counterrun:"architecture/kitchen-counter",island:"architecture/kitchen-island",wc:"architecture/toilet",
+  basin:"architecture/wash-basin",bath:"architecture/bathtub",shower:"architecture/shower",tree:"architecture/tree",bush:"architecture/hedge",rock:"architecture/boulder"
+};
+Object.assign(ASSET_3D,{
+  sectional:"props-extra/sectional",tvstand:"props-extra/tv-stand",tv:"props-extra/television",rug:"props-extra/rug",dining4:"props-extra/dining-set",
+  roundtable:"props-extra/round-dining-set",barcounter:"props-extra/bar-counter",barstool:"props-extra/bar-stool",filing:"props-extra/filing-cabinet",
+  queenbed:"props-extra/queen-bed",nightstand:"props-extra/nightstand",suv:"props-extra/suv",griptruck:"props-extra/grip-truck",police:"props-extra/police-cruiser",
+  laptop:"props-extra/laptop",phone:"props-extra/phone",book:"hand-stunt/book",mug:"hand-stunt/mug",letter:"hand-stunt/envelope",briefcase:"hand-stunt/briefcase",
+  propfirearm:"hand-stunt/prop-handgun",proprifle:"hand-stunt/prop-rifle",pyro:"hand-stunt/pyro-marker",stuntmat:"hand-stunt/stunt-mat",breakaway:"hand-stunt/breakaway-glass",
+  lamppost:"hand-stunt/lamp-post",bin:"hand-stunt/litter-bin",box:"hand-stunt/box",pillar:"hand-stunt/pillar",platform:"hand-stunt/platform",
+  stageriser:"live-event/stage-riser",runway:"live-event/runway",drumriser:"live-event/drum-riser",keysrig:"live-event/keyboard-rig",ampstack:"live-event/amp-stack",
+  linearray:"live-event/line-array",subs:"live-event/subwoofers",wedge:"live-event/floor-wedge",foh:"live-event/foh-console",monmix:"live-event/monitor-console",
+  micstand:"live-event/mic-stand",barrier:"live-event/barrier",obtruck:"live-event/ob-truck",engvan:"live-event/eng-van",uplink:"live-event/uplink-truck",comms:"live-event/comms-rack"
+});
+function asset3d(id){const p=ASSET_3D[id];return p?`assets/3d/${p}.png`:""}
 
 /* =====================================================================
    TOOL RAIL
@@ -2499,12 +2541,12 @@ function drawElement(el,crossing){
     /* Scene Views can display a second plan beside the editor. A unique clip id
        keeps that copy from borrowing the editor actor's clipping rectangle. */
     const clipId="actorClip"+String(el.id).replace(/[^a-zA-Z0-9_-]/g,"")+"_"+Math.random().toString(36).slice(2,8);
-    const female=(el.gender||"female")==="female";
-    const imageX=female?cx-aw*1.5:cx-aw/2;
+    const female=(el.gender||"female")==="female",profile=el.profile&&actorProfile(el);
+    const imageX=profile?cx-aw/2:(female?cx-aw*1.5:cx-aw/2),imageW=profile?aw:aw*2,imageHref=profile?profile.file:"shotcraft-characters-cutout.png";
     g = `<ellipse cx="${cx}" cy="${cy+ah*.42}" rx="${aw*.46}" ry="7" fill="#091126" opacity=".25"/>
       <defs><clipPath id="${clipId}"><rect x="${cx-aw/2}" y="${cy-ah/2}" width="${aw}" height="${ah}" rx="11"/></clipPath></defs>
       <g clip-path="url(#${clipId})">
-        <image x="${imageX}" y="${cy-ah/2}" width="${aw*2}" height="${ah}" href="shotcraft-characters-cutout.png" preserveAspectRatio="none"/>
+        <image x="${imageX}" y="${cy-ah/2}" width="${imageW}" height="${ah}" href="${imageHref}" preserveAspectRatio="xMidYMid slice"/>
         <path d="M${cx-aw/2+3} ${cy-ah/2+5} Q${cx} ${cy-ah/2-3} ${cx+aw/2-4} ${cy-ah/2+8}" fill="none" stroke="#fff" stroke-width="3" opacity=".55"/>
       </g>
       <g pointer-events="none"><circle cx="${cx-aw*.38}" cy="${cy-ah*.32}" r="10" fill="${el.color}" stroke="#fff" stroke-width="2"/>
@@ -2721,7 +2763,7 @@ function renderStageNotes(crossing){
 }
 
 /* ------------------------- toolbar ------------------------- */
-let pendingAsset = null, paletteOpen = null, railWide = false, pendingActorGender = "female";
+let pendingAsset = null, paletteOpen = null, railWide = false, pendingActorGender = "female", pendingActorProfile = "adult-woman";
 
 function renderToolbar(){
   const tb=$("#toolbar");
@@ -2761,17 +2803,14 @@ function renderToolbar(){
 function openActorChooser(anchor){
   const p=$("#palette");
   paletteOpen="actor";
-  p.innerHTML=`<div class="phead"><b>Choose character</b><span class="pcount">3D figure</span><button class="x" id="palClose">&times;</button></div>
-    <div style="padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:stretch">
-      <button class="actorchoice${pendingActorGender==="female"?" on":""}" data-gender="female" aria-label="Add female actor">
-        <span class="actorphoto female" aria-hidden="true"></span><b>Female actor</b><small>Realistic female proportions</small></button>
-      <button class="actorchoice${pendingActorGender==="male"?" on":""}" data-gender="male" aria-label="Add male actor">
-        <span class="actorphoto male" aria-hidden="true"></span><b>Male actor</b><small>Realistic male proportions</small></button>
+  p.innerHTML=`<div class="phead"><b>Choose character</b><span class="pcount">6 realistic figures</span><button class="x" id="palClose">&times;</button></div>
+    <div style="padding:10px;display:grid;grid-template-columns:repeat(2,1fr);gap:9px;align-items:stretch">
+      ${Object.entries(ACTOR_PROFILES).map(([id,a])=>`<button class="actorchoice${pendingActorProfile===id?" on":""}" data-profile="${id}" aria-label="Add ${a.n}"><img class="actorphoto" src="${a.file}" alt=""><b>${a.n}</b><small>Realistic 3D character</small></button>`).join("")}
     </div><p class="hint" style="padding:1px 12px 12px;margin:0;text-align:center;font-size:10px">Choose a character, then click the floor plan to place it.</p>`;
   p.style.top=Math.max(66,Math.min(innerHeight-300,anchor.getBoundingClientRect().top-40))+"px";
   p.classList.add("show");
-  p.querySelectorAll("[data-gender]").forEach(b=>b.onclick=()=>{
-    pendingActorGender=b.dataset.gender; p.classList.remove("show"); paletteOpen=null; setTool("actor");
+  p.querySelectorAll("[data-profile]").forEach(b=>b.onclick=()=>{
+    pendingActorProfile=b.dataset.profile;pendingActorGender=ACTOR_PROFILES[pendingActorProfile].gender;p.classList.remove("show"); paletteOpen=null; setTool("actor");
   });
   $("#palClose").onclick=closePalette;
 }
@@ -2840,8 +2879,9 @@ function openPalette(key,anchor){
       if(!items.length) return;
       h += `<div class="pgroup"><span style="background:${d.colour}"></span>${esc(g.n)}</div>`;
       items.forEach(i=>{
+        const thumb=asset3d(i.id);
         h += `<button class="pitem${pendingAsset===i.id?" on":""}" data-asset="${i.id}">
-          <i style="background:${i.col||d.colour}"></i>
+          ${thumb?`<img class="assetthumb" src="${thumb}" alt="">`:`<i style="background:${i.col||d.colour}"></i>`}
           <span class="pn">${esc(i.n)}</span>
           <span class="pm"${i.warn?' style="color:#c4342a;font-weight:700"':""}>${esc(i.meta||"")}</span></button>`;
       });
@@ -3471,6 +3511,9 @@ function applyBind(path,value,isNum){
     if(el.type==="actor"&&parts[2]==="gender"&&el.autoActorName){
       const name=nextActorName(value);el.character=name;el.label=name;
     }
+    if(el.type==="actor"&&parts[2]==="profile"){
+      const a=ACTOR_PROFILES[value];if(a){el.gender=a.gender;if(el.autoActorName){const name=nextActorName(a.gender);el.character=name;el.label=name;}}
+    }
     if(el.type==="actor"&&parts[2]==="pose") el.seated=/sitting|driving|wheelchair|kneeling/i.test(value);
     if(parts[2]==="asset" && CAT[el.type]){
       const a = assetById(el.type,value);
@@ -3713,6 +3756,7 @@ function inspectorActor(el){
       </div></div>`
     + `<div class="row">${fSelect("Presented gender (for the 3D figure)","elem",el.id,"gender",el.gender||"neutral",
         [{v:"neutral",n:"Not specified"},{v:"female",n:"Female"},{v:"male",n:"Male"}])}</div>`
+    + fSelect("3D character model","elem",el.id,"profile",el.profile||((el.gender||"female")==="male"?"adult-man":"adult-woman"),Object.entries(ACTOR_PROFILES).map(([v,a])=>({v,n:a.n})))
     + `<div class="row">${fSelect("Pose","elem",el.id,"pose",el.pose||(el.seated?"Sitting":"Standing neutral"),
         ACTOR_POSES.map(v=>({v,n:v})))}
         ${fSelect("Expression","elem",el.id,"expression",el.expression||"Neutral",
@@ -4654,8 +4698,8 @@ function vfSVG(cam,W,H,opt){
       shadow(q.x,q.y,ac.seated?.42:.28,ac.seated?.38:.24);
       const F=scr(feet),Hh=scr(head),ih=Math.max(28,Math.abs(F[1]-Hh[1])),iw=ih*.43;
       const clip="vfActor"+String(ac.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,5);
-      const female=(ac.gender||"female")==="female",ix=female?F[0]-iw*1.5:F[0]-iw*.5;
-      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><g transform="${poseTransform(ac,F[0],F[1])}"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${(iw*2).toFixed(1)}" height="${ih.toFixed(1)}" href="shotcraft-characters-cutout.png" preserveAspectRatio="none"/></g></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)} · ${esc(ac.pose||"Standing")}</text>`:""}`});
+      const female=(ac.gender||"female")==="female",profile=ac.profile&&actorProfile(ac),ix=profile?F[0]-iw*.5:(female?F[0]-iw*1.5:F[0]-iw*.5),imgW=profile?iw:iw*2,imgHref=profile?profile.file:"shotcraft-characters-cutout.png";
+      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><g transform="${poseTransform(ac,F[0],F[1])}"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${imgW.toFixed(1)}" height="${ih.toFixed(1)}" href="${imgHref}" preserveAspectRatio="xMidYMid slice"/></g></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)} · ${esc(ac.pose||"Standing")}</text>`:""}`});
       return;
     }
     const skin = (ac.gender||"neutral")==="female" ? "#d9a07f" : (ac.gender||"neutral")==="male" ? "#b97857" : "#c98d6d";
@@ -7390,7 +7434,7 @@ function renderStory(){
 /* ------------------------- top / front / perspective scene views ------------------------- */
 let sceneViewMode="front";
 function itemWorldHeight(el){
-  if(el.type==="actor") return ((el.gender||"neutral")==="female"?1.66:(el.gender||"neutral")==="male"?1.78:1.72)*poseHeightFactor(el);
+  if(el.type==="actor") return ((el.profile&&actorProfile(el).h)||((el.gender||"neutral")==="female"?1.66:(el.gender||"neutral")==="male"?1.78:1.72))*poseHeightFactor(el);
   if(el.type==="camera") return .28;
   if(el.type==="light") return el.flag?.9:.28;
   if(el.type==="door") return 2.05;if(el.type==="window")return Math.max(.3,(el.head||2.2)-(el.sill||.9));
@@ -7409,8 +7453,8 @@ function frontElevationSVG(){
     if(e.type==="wall")w=Math.max(.12,Math.abs((e.x2||p.x)-p.x));if(e.type==="door"||e.type==="window")w=e.width||.9;
     const x=Xf(p.x)-w*sc/2,y=Zf(elev+z),ww=Math.max(7,w*sc),hh=Math.max(5,z*sc);
     if(e.type==="actor"){
-      const clip="frontActor"+String(e.id).replace(/[^a-zA-Z0-9_-]/g,"")+"_"+Math.random().toString(36).slice(2,8),female=(e.gender||"female")==="female",imageX=female?Xf(p.x)-ww*1.5:Xf(p.x)-ww*.5;
-      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})"><g transform="${poseTransform(e,Xf(p.x),ground-elev*sc)}"><image x="${imageX}" y="${y}" width="${ww*2}" height="${hh}" href="shotcraft-characters-cutout.png" preserveAspectRatio="none"/></g></g>`;
+      const clip="frontActor"+String(e.id).replace(/[^a-zA-Z0-9_-]/g,"")+"_"+Math.random().toString(36).slice(2,8),female=(e.gender||"female")==="female",profile=e.profile&&actorProfile(e),imageX=profile?Xf(p.x)-ww*.5:(female?Xf(p.x)-ww*1.5:Xf(p.x)-ww*.5),imageW=profile?ww:ww*2,imageHref=profile?profile.file:"shotcraft-characters-cutout.png";
+      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})"><g transform="${poseTransform(e,Xf(p.x),ground-elev*sc)}"><image x="${imageX}" y="${y}" width="${imageW}" height="${hh}" href="${imageHref}" preserveAspectRatio="xMidYMid slice"/></g></g>`;
     }
     else g+=`<rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="${col}" stroke="#fff" stroke-opacity=".65"/><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="url(#frontObj)"/>`;
     g+=`<text x="${Xf(p.x)}" y="${Math.max(18,y-8)}" text-anchor="middle" font-size="12" font-weight="800" fill="#f7f9ff" stroke="#101a30" stroke-width="3" paint-order="stroke">${esc(e.label||e.type)} · ${elev.toFixed(2)} m</text>`;});
