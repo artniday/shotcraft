@@ -928,6 +928,11 @@ body.dark .helpcontrols,body.dark .helpchips button,body.dark #helpBody kbd{back
 .p-callhead span{display:block;font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.5px}
 .p-callhead b{font-size:14px}
 .mono{font-family:var(--mono)}
+.scriptprobar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:9px 0;padding:8px;border:1px solid var(--line);border-radius:11px;background:var(--soft)}.scriptprobar .btn{padding:6px 9px}.scriptprobar .sep{width:1px;height:24px;background:var(--line)}
+.scriptworkspace{display:grid;grid-template-columns:220px minmax(0,1fr);gap:12px}.scriptnav{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden;align-self:start;max-height:650px;position:sticky;top:8px}.scriptnav h5{margin:0;padding:10px 12px;background:var(--soft);font-size:10px;letter-spacing:.12em}.scriptnav button{display:block;width:100%;padding:9px 11px;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;color:var(--ink)}.scriptnav button:hover{background:var(--soft)}.scriptnav button b{display:block;font-size:10px}.scriptnav button span{font-size:9px;color:var(--muted)}
+.smartstrip{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:7px 0}.smartstrip b{font-size:9px;letter-spacing:.1em;color:var(--muted)}.smartchip{border:1px solid #c9d5ed;border-radius:999px;background:#fff;color:#29416d;padding:4px 8px;font-size:9.5px;font-weight:700}.smartchip:hover{border-color:var(--hct-blue);color:var(--hct-blue)}
+.scriptdiag{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:9px 0}.scriptdiag div{padding:8px 9px;border:1px solid var(--line);border-radius:9px;background:var(--card)}.scriptdiag span{display:block;font-size:8px;letter-spacing:.09em;color:var(--muted)}.scriptdiag b{font-size:13px}.scriptbox.revision-blue{color:#2460bd}.scriptbox.revision-pink{color:#c33170}.scriptbox.revision-yellow{color:#9a6900}.scriptbox.focusmode{min-height:68vh;font-size:15px;line-height:1.55;background:#fff;color:#111;box-shadow:0 12px 35px #0b163b1c}
+@media(max-width:850px){.scriptworkspace{grid-template-columns:1fr}.scriptnav{position:static;max-height:180px}.scriptdiag{grid-template-columns:repeat(2,1fr)}}
 
 /* project launcher */
 .gridbtn{padding:7px 9px}
@@ -1655,24 +1660,14 @@ const ACTOR_NAMES={
   male:["Alex","Omar","Daniel","Samir","Adam","Michael","Yousef","Elias","Karim","Rami"],
   neutral:["Jordan","Taylor","Morgan","Casey","Riley","Avery","Jamie","Robin"]
 };
-const ACTOR_POSES=[
-  "Standing neutral","Standing relaxed","Standing alert","Hands on hips","Arms crossed","Hands in pockets",
-  "Walking","Walking carefully","Running","Jogging","Sprinting","Stopping","Turning","Looking back",
-  "Sitting","Sitting relaxed","Sitting upright","Driving","Wheelchair seated","Kneeling","Crouching","Squatting",
-  "Lying down","Sleeping","Fallen","Crawling","Climbing","Descending","Jumping","Balancing",
-  "Pointing","Reaching","Lifting","Carrying","Pushing","Pulling","Fighting stance","Dancing","Presenting",
-  "Using phone","Reading","Writing","Talking","Listening","Waving","Embracing"
-];
-function poseKey(el){return String(el.pose||((el.seated)?"Sitting":"Standing neutral")).toLowerCase()}
-function poseHeightFactor(el){const p=poseKey(el);if(/lying|sleeping|fallen/.test(p))return .28;if(/crouch|squat|crawl/.test(p))return .58;if(/kneel/.test(p))return .68;if(/sitting|driving|wheelchair/.test(p))return .72;if(/jump/.test(p))return 1.04;return 1}
-function poseTransform(el,cx,bottom){const p=poseKey(el);let skew=0,rot=0;if(/sprint|running/.test(p)){skew=-10;rot=-4}else if(/walk|jog/.test(p))skew=-5;else if(/climb|descend/.test(p)){skew=-7;rot=-3}else if(/fallen|lying|sleeping/.test(p))rot=-90;else if(/reach|push|pull/.test(p))skew=-4;return `translate(${cx} ${bottom}) rotate(${rot}) skewX(${skew}) translate(${-cx} ${-bottom})`}
+function poseHeightFactor(el){return el.seated?.72:1}
 const ACTOR_PROFILES={
-  "adult-woman":{n:"Adult woman",gender:"female",h:1.66,file:"assets/3d/characters/adult-woman.png"},
-  "adult-man":{n:"Adult man",gender:"male",h:1.78,file:"assets/3d/characters/adult-man.png"},
-  baby:{n:"Baby",gender:"neutral",h:.72,file:"assets/3d/characters/baby.png"},
-  "senior-woman":{n:"Senior woman",gender:"female",h:1.58,file:"assets/3d/characters/senior-woman.png"},
-  "senior-man":{n:"Senior man",gender:"male",h:1.70,file:"assets/3d/characters/senior-man.png"},
-  child:{n:"Child",gender:"neutral",h:1.28,file:"assets/3d/characters/child.png"}
+  "adult-woman":{n:"Adult woman",gender:"female",h:1.66,file:"assets/3d/characters/adult-woman.png",face:"assets/3d/characters/faces/adult-woman.png"},
+  "adult-man":{n:"Adult man",gender:"male",h:1.78,file:"assets/3d/characters/adult-man.png",face:"assets/3d/characters/faces/adult-man.png"},
+  baby:{n:"Baby",gender:"neutral",h:.72,file:"assets/3d/characters/baby.png",face:"assets/3d/characters/faces/baby.png"},
+  "senior-woman":{n:"Senior woman",gender:"female",h:1.58,file:"assets/3d/characters/senior-woman.png",face:"assets/3d/characters/faces/senior-woman.png"},
+  "senior-man":{n:"Senior man",gender:"male",h:1.70,file:"assets/3d/characters/senior-man.png",face:"assets/3d/characters/faces/senior-man.png"},
+  child:{n:"Child",gender:"neutral",h:1.28,file:"assets/3d/characters/child.png",face:"assets/3d/characters/faces/child.png"}
 };
 function actorProfile(el){return ACTOR_PROFILES[el.profile||((el.gender||"female")==="male"?"adult-man":"adult-woman")]}
 function nextActorName(gender){
@@ -2546,7 +2541,7 @@ function drawElement(el,crossing){
     g = `<ellipse cx="${cx}" cy="${cy+ah*.42}" rx="${aw*.46}" ry="7" fill="#091126" opacity=".25"/>
       <defs><clipPath id="${clipId}"><rect x="${cx-aw/2}" y="${cy-ah/2}" width="${aw}" height="${ah}" rx="11"/></clipPath></defs>
       <g clip-path="url(#${clipId})">
-        <image x="${imageX}" y="${cy-ah/2}" width="${imageW}" height="${ah}" href="${imageHref}" preserveAspectRatio="xMidYMid slice"/>
+        <image x="${imageX}" y="${cy-ah/2}" width="${imageW}" height="${ah}" href="${imageHref}" preserveAspectRatio="xMidYMax meet"/>
         <path d="M${cx-aw/2+3} ${cy-ah/2+5} Q${cx} ${cy-ah/2-3} ${cx+aw/2-4} ${cy-ah/2+8}" fill="none" stroke="#fff" stroke-width="3" opacity=".55"/>
       </g>
       <g pointer-events="none"><circle cx="${cx-aw*.38}" cy="${cy-ah*.32}" r="10" fill="${el.color}" stroke="#fff" stroke-width="2"/>
@@ -2555,8 +2550,6 @@ function drawElement(el,crossing){
         <path d="M${cx+aw/2+10} ${cy} L${cx+aw/2+1} ${cy-7} L${cx+aw/2+1} ${cy+7} Z" fill="${el.color}" stroke="#fff" stroke-width="1.5"/>
         <line x1="${cx+aw/2+7}" y1="${cy}" x2="${cx+aw/2+S(0.9)}" y2="${cy}" stroke="${el.color}" stroke-width="2" stroke-dasharray="4 3" opacity="0.7"/>
       </g>` + selRing(Math.max(aw,ah)/2+7);
-    const poseLabel=(el.pose||(el.seated?"Sitting":"Standing neutral")).replace(/standing /i,"").toUpperCase();
-    g += `<g pointer-events="none"><rect x="${cx-aw/2}" y="${cy-ah/2-19}" width="${Math.max(42,poseLabel.length*5.8+12)}" height="15" rx="7.5" fill="#fff" stroke="${el.color}" stroke-width="1.2"/><text x="${cx-aw/2+7}" y="${cy-ah/2-8.3}" font-size="8.3" font-weight="800" fill="${el.color}" font-family="Tahoma,sans-serif">${esc(poseLabel)}</text></g>`;
     if(el.seated) g += `<g pointer-events="none"><rect x="${cx-16}" y="${cy-ah/2-17}" width="32" height="15" rx="4" fill="#e0a106"/>
       <text x="${cx}" y="${cy-ah/2-6}" text-anchor="middle" font-size="10" font-weight="700" fill="${textOn("#e0a106")}" font-family="Tahoma,sans-serif">SIT</text></g>`;
     g += label(cx, cy+ah/2+15, el.label, {fs:11,bg:"#0d1330",cat:"actors"});
@@ -2805,7 +2798,7 @@ function openActorChooser(anchor){
   paletteOpen="actor";
   p.innerHTML=`<div class="phead"><b>Choose character</b><span class="pcount">6 realistic figures</span><button class="x" id="palClose">&times;</button></div>
     <div style="padding:10px;display:grid;grid-template-columns:repeat(2,1fr);gap:9px;align-items:stretch">
-      ${Object.entries(ACTOR_PROFILES).map(([id,a])=>`<button class="actorchoice${pendingActorProfile===id?" on":""}" data-profile="${id}" aria-label="Add ${a.n}"><img class="actorphoto" src="${a.file}" alt=""><b>${a.n}</b><small>Realistic 3D character</small></button>`).join("")}
+      ${Object.entries(ACTOR_PROFILES).map(([id,a])=>`<button class="actorchoice${pendingActorProfile===id?" on":""}" data-profile="${id}" aria-label="Add ${a.n}"><img class="actorphoto" src="${a.face}" alt=""><b>${a.n}</b><small>Realistic 3D character</small></button>`).join("")}
     </div><p class="hint" style="padding:1px 12px 12px;margin:0;text-align:center;font-size:10px">Choose a character, then click the floor plan to place it.</p>`;
   p.style.top=Math.max(66,Math.min(innerHeight-300,anchor.getBoundingClientRect().top-40))+"px";
   p.classList.add("show");
@@ -3362,6 +3355,9 @@ function initKeys(){
       ev.preventDefault(); ev.stopPropagation(); redo(); return;
     }
     const tag=(ev.target.tagName||"").toLowerCase();
+    if(ev.target.id==="scriptProEditor"&&(ev.ctrlKey||ev.metaKey)&&/^[1-6]$/.test(ev.key)){
+      ev.preventDefault();scriptInsertText(({1:"scene",2:"action",3:"character",4:"parenthetical",5:"dialogue",6:"transition"})[ev.key]);return;
+    }
     if(tag==="input"||tag==="textarea"||tag==="select"||ev.target.isContentEditable){
       if(ev.key==="Escape") ev.target.blur();
       return;
@@ -3757,11 +3753,7 @@ function inspectorActor(el){
     + `<div class="row">${fSelect("Presented gender (for the 3D figure)","elem",el.id,"gender",el.gender||"neutral",
         [{v:"neutral",n:"Not specified"},{v:"female",n:"Female"},{v:"male",n:"Male"}])}</div>`
     + fSelect("3D character model","elem",el.id,"profile",el.profile||((el.gender||"female")==="male"?"adult-man":"adult-woman"),Object.entries(ACTOR_PROFILES).map(([v,a])=>({v,n:a.n})))
-    + `<div class="row">${fSelect("Pose","elem",el.id,"pose",el.pose||(el.seated?"Sitting":"Standing neutral"),
-        ACTOR_POSES.map(v=>({v,n:v})))}
-        ${fSelect("Expression","elem",el.id,"expression",el.expression||"Neutral",
-        ["Neutral","Happy","Concerned","Angry","Surprised","Sad","Focused"].map(v=>({v,n:v})))}</div>`
-    + `<p class="hint">The selected pose updates the actor's stance, apparent height and presentation in Top, Front and Perspective views.</p>`
+    + `<p class="hint">Choose the character model here. Its matching full-body 3D asset is used consistently in Top, Front and Viewfinder views.</p>`
     + fArea("Action / blocking note","elem",el.id,"action",el.action,"What does this character do in the beat")
     + fArea("Dialogue cue","elem",el.id,"lines",el.lines,"Key line or cue for this position"), el.letter);
 
@@ -4607,6 +4599,14 @@ function vfSVG(cam,W,H,opt){
     const q=posAt(pr), z=pr.z!=null?pr.z:0.8, ez=+pr.elevation||0;
     shadow(q.x,q.y,pr.w*0.6,pr.h*0.6);
     const aid=String(pr.asset||"").toLowerCase(),col=pr.color||"#8a93ab";
+    const exactAsset=asset3d(pr.asset);
+    if(exactAsset){
+      const feet=prj([q.x,q.y,ez]),top3=prj([q.x,q.y,ez+z]);
+      if(feet.d>NEAR&&top3.d>NEAR){const F=scr(feet),T=scr(top3),ih=Math.max(16,Math.abs(F[1]-T[1])),iw=clamp(ih*(Math.max(pr.w,pr.h)/Math.max(.15,z)),18,ih*3.2),clip="vfAsset"+String(pr.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);
+        items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${exactAsset}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(pr.label)}</text>`:""}`});
+      }
+      return;
+    }
     if(aid.includes("plant")||aid==="tree"||aid==="bush"){
       box3(q.x,q.y,ez,Math.max(.28,pr.w*.48),Math.max(.28,pr.h*.48),Math.min(.48,z*.34),q.rot,"#8a5a35");
       box3(q.x,q.y,ez+Math.min(.36,z*.25),.10,.10,Math.max(.35,z*.42),q.rot,"#654126");
@@ -4656,11 +4656,13 @@ function vfSVG(cam,W,H,opt){
     }
   });
   function atAsset(x,y,rotDeg,fwd,side){const a=rad(rotDeg||0);return [x+Math.cos(a)*fwd-Math.sin(a)*side,y+Math.sin(a)*fwd+Math.cos(a)*side];}
+  function exactBillboard(q,ez,w,h,href,label,id){const feet=prj([q.x,q.y,ez]),top3=prj([q.x,q.y,ez+h]);if(feet.d<=NEAR||top3.d<=NEAR)return false;const F=scr(feet),T=scr(top3),ih=Math.max(18,Math.abs(F[1]-T[1])),iw=clamp(ih*w/Math.max(.15,h),20,ih*2.8),clip="vfExact"+String(id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${href}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(label)}</text>`:""}`});return true;}
 
   /* ---- other cameras ---- */
   cameras().filter(c=>c.id!==cam.id).forEach(c=>{
     const q=posAt(c), h=c.height||1.6,ez=+c.elevation||0;
     shadow(q.x,q.y,0.34,0.34);
+    if(exactBillboard(q,ez,.8,h,"assets/3d/production/cinema-camera.png",c.label,c.id))return;
     box3(q.x,q.y,ez,0.09,0.09,h-0.12,0,"#39445e");
     box3(q.x,q.y,ez+h-0.12,0.30,0.20,0.20,q.rot,"#00249C", o.mini?"":c.label);
   });
@@ -4670,6 +4672,7 @@ function vfSVG(cam,W,H,opt){
     const q=posAt(l), h=l.height||2,ez=+l.elevation||0;
     const LT = LIGHT_TYPES[l.role]||LIGHT_TYPES.key;
     shadow(q.x,q.y,0.3,0.3);
+    const exactLight=asset3d(l.asset);if(exactLight&&exactBillboard(q,ez,l.flag?(l.width||1.2):.75,h,exactLight,l.label,l.id))return;
     box3(q.x,q.y,ez,0.07,0.07,h-0.18,0,"#2b3350");
     if(l.flag) box3(q.x,q.y,ez+h-0.18,l.width||1.2,0.05,0.9,q.rot,"#1c2233", o.mini?"":l.label);
     else {
@@ -4699,7 +4702,7 @@ function vfSVG(cam,W,H,opt){
       const F=scr(feet),Hh=scr(head),ih=Math.max(28,Math.abs(F[1]-Hh[1])),iw=ih*.43;
       const clip="vfActor"+String(ac.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,5);
       const female=(ac.gender||"female")==="female",profile=ac.profile&&actorProfile(ac),ix=profile?F[0]-iw*.5:(female?F[0]-iw*1.5:F[0]-iw*.5),imgW=profile?iw:iw*2,imgHref=profile?profile.file:"shotcraft-characters-cutout.png";
-      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><g transform="${poseTransform(ac,F[0],F[1])}"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${imgW.toFixed(1)}" height="${ih.toFixed(1)}" href="${imgHref}" preserveAspectRatio="xMidYMid slice"/></g></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)} · ${esc(ac.pose||"Standing")}</text>`:""}`});
+      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${imgW.toFixed(1)}" height="${ih.toFixed(1)}" href="${imgHref}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)}</text>`:""}`});
       return;
     }
     const skin = (ac.gender||"neutral")==="female" ? "#d9a07f" : (ac.gender||"neutral")==="male" ? "#b97857" : "#c98d6d";
@@ -7454,7 +7457,7 @@ function frontElevationSVG(){
     const x=Xf(p.x)-w*sc/2,y=Zf(elev+z),ww=Math.max(7,w*sc),hh=Math.max(5,z*sc);
     if(e.type==="actor"){
       const clip="frontActor"+String(e.id).replace(/[^a-zA-Z0-9_-]/g,"")+"_"+Math.random().toString(36).slice(2,8),female=(e.gender||"female")==="female",profile=e.profile&&actorProfile(e),imageX=profile?Xf(p.x)-ww*.5:(female?Xf(p.x)-ww*1.5:Xf(p.x)-ww*.5),imageW=profile?ww:ww*2,imageHref=profile?profile.file:"shotcraft-characters-cutout.png";
-      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})"><g transform="${poseTransform(e,Xf(p.x),ground-elev*sc)}"><image x="${imageX}" y="${y}" width="${imageW}" height="${hh}" href="${imageHref}" preserveAspectRatio="xMidYMid slice"/></g></g>`;
+      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${imageX}" y="${y}" width="${imageW}" height="${hh}" href="${imageHref}" preserveAspectRatio="xMidYMax meet"/></g>`;
     }
     else g+=`<rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="${col}" stroke="#fff" stroke-opacity=".65"/><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="url(#frontObj)"/>`;
     g+=`<text x="${Xf(p.x)}" y="${Math.max(18,y-8)}" text-anchor="middle" font-size="12" font-weight="800" fill="#f7f9ff" stroke="#101a30" stroke-width="3" paint-order="stroke">${esc(e.label||e.type)} · ${elev.toFixed(2)} m</text>`;});
@@ -7622,11 +7625,29 @@ function scriptStatStrip(text){
     <span class="cvstat">about <b>${st.minutes}</b> min on screen at a page a minute</span>
   </div>`;
 }
+function scriptSceneIndex(text){
+  const out=[];String(text||"").split("\n").forEach((line,i)=>{const t=line.trim();if(/^(INT|EXT|INT\/EXT)[\. ]/i.test(t))out.push({line:i+1,title:t.toUpperCase()});});return out;
+}
+function scriptSmartType(text){
+  const chars=new Set(),locations=new Set();String(text||"").split("\n").forEach(line=>{const t=line.trim();
+    if(/^[A-Z][A-Z0-9 .'()-]{1,30}$/.test(t)&&!/^(INT|EXT|CUT|FADE|DISSOLVE)/.test(t))chars.add(t.replace(/\(.*\)/,"").trim());
+    const m=t.match(/^(?:INT|EXT|INT\/EXT)\.\s*(.+?)(?:\s+-\s+(?:DAY|NIGHT|MORNING|EVENING|CONTINUOUS|LATER))?$/i);if(m)locations.add(m[1].trim().toUpperCase());
+  });actors().forEach(a=>chars.add(String(a.character||a.label).toUpperCase()));return {chars:[...chars].slice(0,10),locations:[...locations].slice(0,8)};
+}
+function scriptDiagnostics(text){
+  const lines=String(text||"").split("\n"),scenes=scriptSceneIndex(text),chars=scriptSmartType(text).chars;
+  let longAction=0,badSlug=0,orphans=0;lines.forEach((l,i)=>{const t=l.trim();if(t.length>180&&!/^[A-Z][A-Z0-9 .'()-]{1,30}$/.test(t))longAction++;if(/^(INT|EXT)/i.test(t)&&!/^(INT|EXT|INT\/EXT)\..+\s-\s.+/i.test(t))badSlug++;if(/^\(.*\)$/.test(t)&&!lines[i-1]?.trim())orphans++;});
+  return {scenes:scenes.length,characters:chars.length,longAction,badSlug,orphans};
+}
+function scriptInsertText(kind,text){
+  const ed=$("#scriptProEditor");if(!ed)return;const templates={scene:"INT. LOCATION - DAY",action:"Action description.",character:"CHARACTER",parenthetical:"(quietly)",dialogue:"Dialogue.",transition:"CUT TO:"};
+  const value=text||templates[kind]||"",a=ed.selectionStart,b=ed.selectionEnd,before=ed.value.slice(0,a),after=ed.value.slice(b),lead=before&&!before.endsWith("\n")?"\n":"",tail=after&&!after.startsWith("\n")?"\n":"";
+  pushHistory();ed.value=before+lead+value+tail+after;scene().script=ed.value;const pos=(before+lead).length;ed.focus();ed.setSelectionRange(pos,pos+value.length);save();
+}
 function scriptEditor(){
-  const sc=scene();
+  const sc=scene(),U=ui(),idx=scriptSceneIndex(sc.script),smart=scriptSmartType(sc.script),diag=scriptDiagnostics(sc.script),rev=U.scriptRevision||"none",focus=!!U.scriptFocus;
   return `<div class="modhead"><div><b>SCREENPLAY EDITOR</b>
-      <div class="hint">Standard screenplay layout in Courier. Type the scene and the formatting is applied by the shape
-      of each line, exactly as a reader expects it.</div></div>
+      <div class="hint">Professional screenplay formatting, navigation, autocomplete and revision tools.</div></div>
       <div style="display:flex;gap:6px">
         <button class="btn" data-act="importScript" title="Load a .txt or .fountain file">Import</button>
         <button class="btn" data-act="pasteScript">Paste</button>
@@ -7634,14 +7655,17 @@ function scriptEditor(){
         <button class="btn" data-act="printScript">Print PDF</button>
         <button class="btn danger" data-act="clearScript">Clear</button></div></div>
     ${scriptStatStrip(sc.script)}
-    <div class="fmtbar"><b>Format:</b>
-      <span class="fmt sl-scene">Scene heading</span><span class="fmt">Action</span>
-      <span class="fmt sl-char">Character</span><span class="fmt sl-paren">Parenthetical</span>
-      <span class="fmt sl-dial">Dialogue</span><span class="fmt sl-trans">Transition</span></div>
-    <p class="hint" style="margin:0 0 8px">A line starting INT. or EXT. becomes a scene heading. A line in capitals
-      becomes a character cue and the line under it becomes their dialogue. A line in brackets becomes a parenthetical.
-      CUT TO: and FADE OUT. become transitions.</p>
-    <textarea class="ui scriptbox tall" ${bindAttr("scene","script")}>${esc(sc.script||"")}</textarea>
+    <div class="scriptprobar"><b>ELEMENT</b>
+      <button class="btn" data-act="scriptInsert" data-kind="scene" title="Ctrl/Cmd+1">Scene</button><button class="btn" data-act="scriptInsert" data-kind="action" title="Ctrl/Cmd+2">Action</button>
+      <button class="btn" data-act="scriptInsert" data-kind="character" title="Ctrl/Cmd+3">Character</button><button class="btn" data-act="scriptInsert" data-kind="parenthetical" title="Ctrl/Cmd+4">Parenthetical</button>
+      <button class="btn" data-act="scriptInsert" data-kind="dialogue" title="Ctrl/Cmd+5">Dialogue</button><button class="btn" data-act="scriptInsert" data-kind="transition" title="Ctrl/Cmd+6">Transition</button><i class="sep"></i>
+      <label class="vbsel">Revision <select data-script-revision>${[{v:"none",n:"Black"},{v:"blue",n:"Blue"},{v:"pink",n:"Pink"},{v:"yellow",n:"Yellow"}].map(x=>`<option value="${x.v}"${rev===x.v?" selected":""}>${x.n}</option>`).join("")}</select></label>
+      <button class="btn${focus?" solid":""}" data-act="scriptFocus">${focus?"Exit focus":"Focus mode"}</button><button class="btn" data-act="scriptSprint">25 min sprint</button><b id="scriptSprintClock"></b></div>
+    <div class="smartstrip"><b>SMART SUGGESTIONS</b>${smart.chars.map(x=>`<button class="smartchip" data-act="scriptSmart" data-text="${esc(x)}">${esc(x)}</button>`).join("")}${smart.locations.map(x=>`<button class="smartchip" data-act="scriptSmart" data-text="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+    <div class="scriptdiag"><div><span>SCENES</span><b>${diag.scenes}</b></div><div><span>CHARACTERS</span><b>${diag.characters}</b></div><div><span>LONG ACTION BLOCKS</span><b>${diag.longAction}</b></div><div><span>SLUGLINES TO CHECK</span><b>${diag.badSlug}</b></div></div>
+    <div class="scriptworkspace"><aside class="scriptnav"><h5>SCENE NAVIGATOR</h5>${idx.length?idx.map((s,i)=>`<button data-act="scriptJump" data-line="${s.line}"><b>${i+1}. ${esc(s.title)}</b><span>Line ${s.line}</span></button>`).join(""):`<button><span>Add INT. or EXT. headings to build the navigator.</span></button>`}</aside><main>
+    <p class="hint" style="margin:0 0 8px">Use Ctrl/Cmd+1–6 for screenplay elements. Smart suggestions reuse characters and locations already in the draft.</p>
+    <textarea id="scriptProEditor" class="ui scriptbox tall revision-${rev}${focus?" focusmode":""}" spellcheck="true" ${bindAttr("scene","script")}>${esc(sc.script||"")}</textarea></main></div>
     <div class="sect" style="margin-top:12px"><h4>Page view<span class="tagr">${esc(sc.slug)}</span></h4>
       <div class="sbody screenpage">${screenplayHTML(sc.script||"")}</div></div>`;
 }
@@ -8023,6 +8047,8 @@ function openSignalFlow(){
 }
 
 /* ------------------------- actions ------------------------- */
+let scriptSprintTimer=null,scriptSprintEnd=0;
+function updateScriptSprint(){const el=$("#scriptSprintClock");if(!el)return;const n=Math.max(0,scriptSprintEnd-Date.now()),m=Math.floor(n/60000),s=Math.floor(n%60000/1000);el.textContent=n?`${m}:${String(s).padStart(2,"0")}`:"Sprint complete";if(!n&&scriptSprintTimer){clearInterval(scriptSprintTimer);scriptSprintTimer=null;}}
 const ACTIONS = {
   asm3pt: build3Point,
   asmInterview: buildInterview,
@@ -8085,6 +8111,11 @@ const ACTIONS = {
   expGearCsv: exportGearCSV,
   print: printPlan,
   clearScript(){ if(!confirm("Clear the script text for this scene?")) return; pushHistory(); scene().script=""; renderPanel(); save(); },
+  scriptInsert(b){scriptInsertText(b.dataset.kind);},
+  scriptSmart(b){scriptInsertText("smart",b.dataset.text||"");},
+  scriptJump(b){const ed=$("#scriptProEditor");if(!ed)return;const line=Math.max(1,+b.dataset.line||1),parts=ed.value.split("\n"),pos=parts.slice(0,line-1).reduce((n,x)=>n+x.length+1,0);ed.focus();ed.setSelectionRange(pos,pos);ed.scrollTop=Math.max(0,(line-3)*20);},
+  scriptFocus(){ui().scriptFocus=!ui().scriptFocus;renderPanel();setTimeout(()=>$("#scriptProEditor")?.focus(),20);save();},
+  scriptSprint(){if(scriptSprintTimer){clearInterval(scriptSprintTimer);scriptSprintTimer=null;}scriptSprintEnd=Date.now()+25*60*1000;scriptSprintTimer=setInterval(updateScriptSprint,1000);updateScriptSprint();},
   openExport(){ openExportStudio(); },
   savePlan(){ savePlanFile(); },
   openPlan(){ $("#fileOpen").click(); },
@@ -8584,6 +8615,7 @@ function initUI(){
   });
 
   document.addEventListener("change", ev=>{
+    const sr=ev.target.closest("[data-script-revision]");if(sr){ui().scriptRevision=sr.value;const ed=$("#scriptProEditor");if(ed)ed.className=ed.className.replace(/revision-\w+/,"revision-"+sr.value);save();return;}
     const rc = ev.target.closest("[data-reccheck]");
     if(rc){ const p=rc.dataset.reccheck.split(":"); const r=rec(p[0],p[1]); if(r){ r[p[2]]=rc.checked; renderPanel(); save(); } return; }
     const st = ev.target.closest("[data-strip]");
