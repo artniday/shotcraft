@@ -1256,10 +1256,6 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
         <button id="hLabels" class="on" title="Toggle labels"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7"/></svg></button>
         <button id="hCones" class="on" title="Toggle camera and light cones"><svg viewBox="0 0 24 24"><path d="M12 4L4 20h16z"/></svg></button>
         <button id="h180" title="Toggle the 180 degree axis overlay"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M8.5 12h7"/></svg></button>
-        <button id="hMoveFree" class="axisbtn on" data-axis="free" title="Free move on X and Y axes">FREE</button>
-        <button id="hMoveX" class="axisbtn" data-axis="x" title="Constrain movement to the X axis">X</button>
-        <button id="hMoveY" class="axisbtn" data-axis="y" title="Constrain movement to the Y axis">Y</button>
-        <button id="hMoveZ" class="axisbtn" data-axis="z" title="Elevation mode — drag vertically to raise or lower">Z</button>
         
         
         
@@ -2079,6 +2075,7 @@ const IC = {
   text   :"M5 6.4h14M12 6.4v13M9 19.4h6",
   pen    :"M15.8 3.6l4.6 4.6L8.6 20H4v-4.6zM13.6 5.8l4.6 4.6",
   image  :"M3.6 5h16.8v14H3.6zM8 12.4l3 3 3.4-4.4L20.4 17M8.4 9.6a1.2 1.2 0 100-2.4 1.2 1.2 0 000 2.4",
+  environment:"M3 18h18M4 15l5-6 3.2 3.1L15.6 7 21 15M7 6.2a1.7 1.7 0 103.4 0 1.7 1.7 0 00-3.4 0",
   search :"M11 4a7 7 0 100 14 7 7 0 000-14zM20.4 20.4L16 16"
 };
 const TOOL_GROUPS = [
@@ -2103,6 +2100,9 @@ const TOOL_GROUPS = [
     {id:"staging", key:"E", name:"Staging and live events",  ic:IC.staging, c:"#8b53d6", palette:"staging", tool:"Staging"},
     {id:"grip",    key:"U", name:"Studio and grip",          ic:IC.grip,    c:"#e2762a", palette:"grip", tool:"Grip"},
     {id:"arch",    key:"F", name:"Architecture and fixtures",ic:IC.arch,    c:"#5b6478", palette:"arch", tool:"Architecture"}
+  ]},
+  {n:"Scene environment", c:"#159e91", tools:[
+    {id:"environment",key:"J",name:"Environment, floor and weather",ic:IC.environment,c:"#159e91",tool:"Environment"}
   ]},
   {n:"Geometry and moves", c:"#8b53d6", tools:[
     {id:"zone",  key:"S", name:"Shape / zone / area", ic:IC.shape, c:"#47D7AC", palette:"shape", tool:"Shape"},
@@ -2861,6 +2861,7 @@ function renderToolbar(){
   if(rt) rt.onclick=()=>{ railWide=!railWide; state.view.railWide=railWide; renderToolbar(); save(); setTimeout(renderPlan,60); };
   tb.querySelectorAll("[data-tool]").forEach(b=>b.onclick=ev=>{
     const t = toolDef(b.dataset.tool);
+    if(t && t.id==="environment"){setTool("select");state.tab="environment";openSects.add("envbackdrop");openSects.add("envfloor");renderTabs();renderPanel();save();return;}
     if(t && t.id==="actor"){ setTool("actor"); openActorChooser(b); return; }
     const already = t && t.palette && paletteOpen===t.palette;
     setTool(b.dataset.tool);
@@ -3176,7 +3177,7 @@ function initCanvas(){
         renderAll();return;
       }
       pushHistory();
-      drag={mode:"move",sy:py,axis:state.view.transformAxis||"free",items:selected().filter(e=>!e.locked).map(e=>{const hp=posAt(e);return {el:e,sx:hp.x,sy:hp.y,elevation:+e.elevation||0,dx:world.x-hp.x,dy:world.y-hp.y,d2:(e.x2!=null?{dx:world.x-e.x2,dy:world.y-e.y2}:null)};})};
+      drag={mode:"move",sy:py,axis:"free",items:selected().filter(e=>!e.locked).map(e=>{const hp=posAt(e);return {el:e,sx:hp.x,sy:hp.y,elevation:+e.elevation||0,dx:world.x-hp.x,dy:world.y-hp.y,d2:(e.x2!=null?{dx:world.x-e.x2,dy:world.y-e.y2}:null)};})};
       renderAll();return;
     }
     if(pendingTool!=="select"){
@@ -3251,7 +3252,7 @@ function initCanvas(){
       renderAll(); return;
     }
     pushHistory();
-    drag={mode:"move",sy:py,axis:state.view.transformAxis||"free",items:selected().filter(e=>!e.locked).map(e=>{
+    drag={mode:"move",sy:py,axis:"free",items:selected().filter(e=>!e.locked).map(e=>{
       const p=posAt(e);
       return {el:e,sx:p.x,sy:p.y,elevation:+e.elevation||0,dx:world.x-p.x,dy:world.y-p.y,
         d2:(e.x2!=null?{dx:world.x-e.x2,dy:world.y-e.y2}:null)};
@@ -4598,7 +4599,6 @@ function vfSVG(cam,W,H,opt){
   const fogAmt  = o.mini?0.55:0.8;
   const env=environmentState(scene());
   if(env.sky==="day"){skyTop="#62a8e5";skyBot="#d8ecfa";}else if(env.sky==="sunset"){skyTop="#563d85";skyBot="#f2a05f";}else if(env.sky==="night"){skyTop="#030817";skyBot="#17233e";}else if(env.sky==="overcast"){skyTop="#7f8b96";skyBot="#c9d0d4";}
-  const envArt=vfEnvironmentArt(W,top,fw,fh,cid,env);
   const floorPalette={studio:"#252b38",concrete:"#858b90",wood:"#765036",tile:"#c8cdd1",grass:"#4f8047",sand:"#b9945d",asphalt:"#3c4147",earth:"#604936"};
   floorCol=floorPalette[env.floor]||floorCol;
 
@@ -4959,6 +4959,7 @@ function vfSVG(cam,W,H,opt){
   /* ---- compose ---- */
   items.sort((x,y)=>y.d-x.d);
   const cid = "vf"+Math.random().toString(36).slice(2,8);
+  const envArt=vfEnvironmentArt(W,top,fw,fh,cid,env);
   const horizonY = top + fh/2 + Math.tan(pitch)*ky;
 
   let ov="";
@@ -6452,7 +6453,7 @@ function tabBadge(id){
   if(id==="locations" && recs("locations").length) return recs("locations").length;
   return "";
 }
-const MAIN_TABS = ["inspector","layers","environment","shots","story","script","gear"];
+const MAIN_TABS = ["inspector","layers","shots","story","script","gear"];
 const PROD_MENU = [
   {g:"Planning",        ids:["schedule","locations","moodboard"]},
   {g:"People and money",ids:["crew","tasks","budget"]},
@@ -6469,7 +6470,7 @@ function tabEnabled(id){ return visibleTabs().some(t=>t.id===id); }
 
 function renderTabs(){
   const vis = visibleTabs();
-  if(!vis.some(t=>t.id===state.tab)) state.tab="inspector";
+  if(state.tab!=="environment"&&!vis.some(t=>t.id===state.tab)) state.tab="inspector";
   const prodIds = PROD_MENU.flatMap(g=>g.ids).filter(tabEnabled);
   const inProd = prodIds.includes(state.tab);
   const pill = id => {
@@ -8726,7 +8727,6 @@ function syncHud(){
   $("#hLabels").classList.toggle("on",state.view.labels);
   $("#hCones").classList.toggle("on",state.view.cones);
   $("#h180").classList.toggle("on",state.view.axis);
-  ["free","x","y","z"].forEach(a=>$("#hMove"+(a==="free"?"Free":a.toUpperCase())).classList.toggle("on",(state.view.transformAxis||"free")===a));
 }
 
 /* ------------------------- help ------------------------- */
@@ -9053,7 +9053,6 @@ function initUI(){
   $("#hLabels").onclick = ()=>ACTIONS.tLabels();
   $("#hCones").onclick  = ()=>ACTIONS.tCones();
   $("#h180").onclick    = ()=>ACTIONS.toggleAxis();
-  ["free","x","y","z"].forEach(a=>$("#hMove"+(a==="free"?"Free":a.toUpperCase())).onclick=()=>{state.view.transformAxis=a;syncHud();renderPlan();save();});
 
   $("#beatAdd").onclick = ()=>{ pushHistory(); scene().beats++; state.beat=scene().beats-1; renderAll(); save(); };
   $("#beatDel").onclick = ()=>{
