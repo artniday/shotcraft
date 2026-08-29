@@ -1155,6 +1155,16 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
 @media(max-width:620px){.modal.launch>header{padding:18px!important}.launchidentity h3{font-size:22px!important}.launchidentity .launchsub{display:none}.launchnew{padding:16px}.lnpresets{grid-template-columns:1fr}}
 @media(max-width:1100px){.brand small,.saveflag,.topbar .tvsep{display:none}.topbar{gap:6px}.tbtn{padding:7px 8px}.topbar input.title{width:150px}.panel{--panelw:430px}.ptab span:not(.badge){max-width:76px;overflow:hidden;text-overflow:ellipsis}}
 @media(max-width:760px){.topbar{overflow-x:auto}.brand>div:last-child{display:none}.panel{position:absolute;right:0;left:auto;top:0;bottom:0;width:min(88vw,560px)!important;z-index:18}.panel.hidden{width:0!important}.tools{width:56px;flex-basis:56px}.tool{width:42px}.beatbar{overflow-x:auto}}
+
+.layerpanel{padding:14px}.layerhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.layerhead h3{margin:0;font-size:17px}.layerhead p{margin:3px 0 0;color:var(--muted);font-size:11px}
+.layerlist{display:flex;flex-direction:column-reverse;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+.layeritem{display:grid;grid-template-columns:34px 32px minmax(0,1fr) 30px 30px;align-items:center;gap:5px;min-height:46px;padding:5px 8px;border-top:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.layeritem:first-child{border-top:0}.layeritem.selected{background:color-mix(in srgb,var(--hct-blue) 10%,var(--panel));box-shadow:inset 3px 0 var(--hct-blue)}
+.layeritem.muted{opacity:.5}.layerbtn{height:30px;border:0;border-radius:8px;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;font-size:15px}
+.layerbtn:hover{background:var(--soft2);color:var(--hct-blue)}.layerthumb{width:30px;height:30px;border-radius:8px;background:var(--soft2);display:grid;place-items:center;font-weight:800;color:var(--hct-blue);font-size:10px}
+.layername{min-width:0;text-align:left;border:0;background:transparent;color:inherit;cursor:pointer;padding:2px}.layername b,.layername small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.layername b{font-size:12px}.layername small{font-size:9px;color:var(--muted);margin-top:2px}.layergroups{margin-top:12px}
+
 </style>
 </head>
 <body>
@@ -2280,6 +2290,7 @@ const LABEL_CATS = [["actors","Actors"],["cameras","Cameras"],["props","Props"],
 const LABEL_DEFCOL = {actors:"#0d1330",cameras:"#00249C",props:"#12a3b8",tracks:"#39445e",
   lights:"#e0a106",doors:"#8a6f52",measures:"#e0a106"};
 function elVisible(el){
+  if(el.hidden===true) return false;
   const L = state.view.layers||{};
   if(L[el.layer]===false) return false;
   return true;
@@ -2765,7 +2776,7 @@ function planSVGString(w,h,fixed){
   const tod = TODS[scene().tod]||TODS.dayint;
   const crossing = lineCrossings();
   const order = {image:0,road:1,zone:2,wall:3,arch:4,prop:5,staging:5,grip:5,track:6,door:7,window:7,cable:8,light:9,camera:10,actor:11,arrow:12,measure:13,pen:14,text:15};
-  const sorted = els().slice().sort((a,b)=>(order[a.type]||5)-(order[b.type]||5));
+  const sorted = els().slice().sort((a,b)=>Number.isFinite(a.stack)&&Number.isFinite(b.stack)?a.stack-b.stack:(order[a.type]||5)-(order[b.type]||5));
   let body=""; for(const el of sorted) body += drawElement(el,crossing);
   const inner = composePlan(body,crossing,tod);
   state.view = savedView; VIEW.w=savedVIEW.w; VIEW.h=savedVIEW.h; state.view.labels=savedLabels;
@@ -2779,7 +2790,7 @@ function renderPlan(){
   const tod = TODS[scene().tod]||TODS.dayint;
   const crossing = lineCrossings();
   const order = {image:0,road:1,zone:2,wall:3,arch:4,prop:5,staging:5,grip:5,track:6,door:7,window:7,cable:8,light:9,camera:10,actor:11,arrow:12,measure:13,pen:14,text:15};
-  const sorted = els().slice().sort((a,b)=>(order[a.type]||5)-(order[b.type]||5));
+  const sorted = els().slice().sort((a,b)=>Number.isFinite(a.stack)&&Number.isFinite(b.stack)?a.stack-b.stack:(order[a.type]||5)-(order[b.type]||5));
   let body = "";
   for(const el of sorted) body += drawElement(el,crossing);
   let marquee="";
@@ -3603,6 +3614,7 @@ function applyBind(path,value,isNum){
 /* ------------------------- tabs ------------------------- */
 const TABS = [
   {id:"inspector", n:"Inspector", always:true},
+  {id:"layers",    n:"Layers", always:true},
   {id:"shots",     n:"Shots"},
   {id:"story",     n:"Board"},
   {id:"script",    n:"Script"},
@@ -4401,12 +4413,27 @@ function checkReport(){
   return checkList().map(([k,t])=>`<div class="chip ${k}" style="display:block;margin-bottom:6px">${esc(t)}</div>`).join("");
 }
 
+
+function renderLayers(){
+  const items=els();
+  const icon=e=>({actor:"ACT",camera:"CAM",light:"LGT",wall:"WALL",door:"DOOR",window:"WIN",prop:"PROP",staging:"STG",grip:"GRIP",arch:"SET",track:"TRK",cable:"CBL",text:"TXT",image:"IMG"}[e.type]||String(e.type||"ITEM").slice(0,4).toUpperCase());
+  const rows=items.length?items.map((e,i)=>{const selected=state.sel.includes(e.id),hidden=e.hidden===true,group=e.layer||layerOf(e.type);return `<div class="layeritem${selected?" selected":""}${hidden?" muted":""}" data-layer-id="${e.id}">
+    <button class="layerbtn" data-act="layerEye" data-id="${e.id}" title="${hidden?"Show":"Hide"} layer">${hidden?"○":"●"}</button>
+    <span class="layerthumb">${esc(icon(e))}</span>
+    <button class="layername" data-act="layerSelect" data-id="${e.id}" title="Select layer; double-click Rename"><b>${esc(e.label||e.type||"Item")}</b><small>${esc(group)} · ${esc(e.type)}</small></button>
+    <button class="layerbtn" data-act="layerDown" data-id="${e.id}" title="Move backward">↓</button>
+    <button class="layerbtn" data-act="layerUp" data-id="${e.id}" title="Move forward">↑</button>
+  </div>`}).join(""):`<div class="emptystate"><b>No scene layers</b><span>Add an item to the plan and it will appear here.</span></div>`;
+  return `<div class="layerpanel"><div class="layerhead"><div><h3>Layers</h3><p>Top rows render in front, like Photoshop.</p></div><button class="btn" data-act="layersAll">Show all</button></div>
+    <div class="layerlist">${rows}</div><div class="layergroups">${sect("layergroups","Layer groups",LAYER_DEFS.map(([k,n])=>`<label class="chkrow"><input type="checkbox" ${state.view.layers[k]!==false?"checked":""} data-vcheck2="layers.${k}"><span><b>${esc(n)}</b><i>${items.filter(e=>(e.layer||layerOf(e.type))===k).length} items</i></span></label>`).join(""))}</div></div>`;
+}
+
 /* ------------------------- panel dispatch ------------------------- */
 function renderPanel(){
   renderTabs();
   const b=$("#pbody");
   const keepTab=b.dataset.tab, keepTop=b.scrollTop;
-  const map={inspector:renderInspector,shots:renderShots,story:renderStory,script:renderScript,
+  const map={inspector:renderInspector,layers:renderLayers,shots:renderShots,story:renderStory,script:renderScript,
              gear:renderGear,prod:renderProd,
              schedule:renderSchedule,crew:renderCrew,budget:renderBudget,locations:renderLocations,
              power:renderPower,rigging:renderRigging,dmx:renderDmx,continuity:renderContinuity,
@@ -4666,7 +4693,7 @@ function vfSVG(cam,W,H,opt){
         thv=rad(q.rot||0)-Math.atan2(q.y-CY,q.x-CX),
         sil=Math.abs(pr.w*Math.sin(thv))+Math.abs(pr.h*Math.cos(thv)),
         iw=clamp(ih*(sil/Math.max(.12,z)),4,ih*14),clip="vfAsset"+String(pr.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);
-        items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${exactAsset}" preserveAspectRatio="none"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(pr.label)}</text>`:""}`});
+        items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${exactAsset}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(pr.label)}</text>`:""}`});
       }
       return;
     }
@@ -4731,7 +4758,7 @@ function vfSVG(cam,W,H,opt){
   /* Local offset in the item's own axes: dx runs along its width, dy along its depth,
      which is the same convention the plan symbols use. Front of an item is +dy. */
   function atLocal(x,y,rotDeg,dx,dy){const a=rad(rotDeg||0);return [x+dx*Math.cos(a)-dy*Math.sin(a), y+dx*Math.sin(a)+dy*Math.cos(a)];}
-  function exactBillboard(q,ez,w,h,href,label,id){const feet=prj([q.x,q.y,ez]),top3=prj([q.x,q.y,ez+h]);if(feet.d<=NEAR||top3.d<=NEAR)return false;const F=scr(feet),T=scr(top3),ih=Math.max(6,Math.abs(F[1]-T[1])),iw=clamp(ih*w/Math.max(.12,h),4,ih*14),clip="vfExact"+String(id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${href}" preserveAspectRatio="none"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(label)}</text>`:""}`});return true;}
+  function exactBillboard(q,ez,w,h,href,label,id){const feet=prj([q.x,q.y,ez]),top3=prj([q.x,q.y,ez+h]);if(feet.d<=NEAR||top3.d<=NEAR)return false;const F=scr(feet),T=scr(top3),ih=Math.max(6,Math.abs(F[1]-T[1])),iw=clamp(ih*w/Math.max(.12,h),4,ih*14),clip="vfExact"+String(id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${href}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(label)}</text>`:""}`});return true;}
 
   /* ---- other cameras ---- */
   cameras().filter(c=>c.id!==cam.id).forEach(c=>{
@@ -8409,6 +8436,12 @@ const ACTIONS = {
     LABEL_CATS.forEach(([k])=>{ state.view.labelAuto[k]=true; state.view.labelCol[k]=""; });
     renderAll(); save();
   },
+
+  layerSelect(b){ const e=byId(b.dataset.id); if(!e)return; state.sel=[e.id]; renderPlan(); renderPanel(); },
+  layerEye(b){ const e=byId(b.dataset.id); if(!e)return; pushHistory(); e.hidden=!e.hidden; renderAll(); save(); },
+  layerUp(b){ const e=byId(b.dataset.id),a=els(); if(!e)return; pushHistory(); a.forEach((x,i)=>x.stack=Number.isFinite(x.stack)?x.stack:i); e.stack=Math.max(...a.map(x=>x.stack))+1; renderAll(); save(); },
+  layerDown(b){ const e=byId(b.dataset.id),a=els(); if(!e)return; pushHistory(); a.forEach((x,i)=>x.stack=Number.isFinite(x.stack)?x.stack:i); e.stack=Math.min(...a.map(x=>x.stack))-1; renderAll(); save(); },
+  layerRename(b){ const e=byId(b.dataset.id); if(!e)return; const n=prompt("Layer name",e.label||e.type); if(!n)return; pushHistory(); e.label=n.trim(); renderAll(); save(); },
   layersAll(){ Object.keys(state.view.layers).forEach(k=>state.view.layers[k]=true); renderAll(); save(); },
   layersOnlyPlan(){
     const used={}; els().forEach(e=>used[e.layer||layerOf(e.type)]=true);
@@ -8684,6 +8717,7 @@ function initUI(){
       } else if(veil){ if(veil.id==="veilAnimatic") stopAnimatic(); veil.classList.remove("show"); }
     }
   });
+  document.addEventListener("dblclick", ev=>{ const b=ev.target.closest(".layername[data-id]"); if(b){ ev.preventDefault(); ACTIONS.layerRename(b); } });
   document.addEventListener("mousedown", ev=>{
     const p=$("#palette");
     if(p.classList.contains("show") && !ev.target.closest("#palette") && !ev.target.closest("#toolbar")) closePalette();
