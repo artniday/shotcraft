@@ -1407,6 +1407,19 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
    HCT SHOT DESIGNER
    Single file planning tool for Applied Media film and video students.
    Higher Colleges of Technology. Runs fully offline in the browser.
+
+   Scale and proportion pass, 29 Aug 2026
+   - catalogue footprints and heights corrected against real furniture,
+     vehicle, grip and staging dimensions
+   - one shared SYMBOL_KIND map decides the plan symbol and the viewfinder
+     geometry, matched on the whole item id rather than on a substring
+   - item axes are consistent everywhere: width runs along local x, depth
+     along local y, and the front of an item faces +y
+   - viewfinder artwork is sized from the silhouette seen from the camera,
+     so an item reads its true width from the front and its depth from the end
+   - lights and cameras sit on their stands at fixture size instead of being
+     stretched from the floor to head height
+   - dolly track is drawn to its real 60 cm gauge and 50 cm sleeper spacing
    ===================================================================== */
 
 /* ------------------------- reference data ------------------------- */
@@ -1687,6 +1700,7 @@ function makeElement(type,x,y,extra){
     const a = (extra && extra.asset) ? assetById(tool,extra.asset) : null;
     const it = a || {id:first[0],n:first[1],w:first[2],h:first[3],z:first[4],flag:first[5]||""};
     return {asset:it.id,w:it.w,h:it.h,z:it.z,label:it.n,color:ASSET_COLOR[it.id]||CAT[tool].colour,
+      elevation:DEFAULT_ELEVATION[it.id]||0,
       safety:it.flag==="safety",exclusion:it.flag==="safety"?3:0};
   };
   const T = {
@@ -1758,7 +1772,7 @@ CAT.prop = {
   {n:"Living", items:[
     ["couch3","Couch / 3 seat sofa",2.10,0.90,0.85],
     ["sectional","L sectional couch",2.60,1.80,0.85],
-    ["armchair","Armchair / recliner",0.82,0.82,0.95],
+    ["armchair","Armchair / recliner",0.90,0.85,0.95],
     ["coffee","Coffee table",1.20,0.60,0.45],
     ["tvstand","Television and media stand",1.40,0.40,0.55],
     ["tv","Television screen",1.20,0.10,0.70],
@@ -1767,52 +1781,52 @@ CAT.prop = {
     ["rug","Rug",2.50,1.60,0.02],
     ["floorlamp","Floor lamp (dressing)",0.40,0.40,1.60]]},
   {n:"Dining and office", items:[
-    ["dining4","Dining table + 4 chairs",1.80,1.40,0.75],
+    ["dining4","Dining table + 4 chairs",2.20,1.60,0.75],
     ["recttable","Rectangular table",1.80,0.90,0.75],
-    ["roundtable","Round dining table + 4 chairs",1.40,1.40,0.75],
-    ["diningchair","Dining chair",0.48,0.48,0.95],
+    ["roundtable","Round dining table + 4 chairs",2.00,2.00,0.75],
+    ["diningchair","Dining chair",0.46,0.52,0.95],
     ["desk","Executive office desk",1.60,0.80,0.75],
     ["barcounter","Bar counter",2.40,0.60,1.10],
-    ["barstool","Bar stool",0.40,0.40,0.75],
+    ["barstool","Bar stool",0.40,0.40,1.05],
     ["filing","Filing cabinet",0.50,0.60,1.30]]},
   {n:"Bedroom", items:[
-    ["kingbed","King size bed",2.00,2.00,0.60],
-    ["queenbed","Double / queen bed",1.60,2.00,0.60],
+    ["kingbed","King size bed",1.90,2.00,0.60],
+    ["queenbed","Double / queen bed",1.55,2.00,0.60],
     ["nightstand","Nightstand",0.50,0.40,0.60],
     ["wardrobe","Wardrobe / closet",1.50,0.60,2.10]]},
   {n:"Vehicles", items:[
     ["sedan","Sedan passenger car (4 door)",4.50,1.80,1.45],
     ["suv","SUV / 4x4 vehicle",4.80,1.90,1.80],
-    ["griptruck","Production grip truck",7.00,2.40,3.20],
-    ["police","Police cruiser (4 door)",4.80,1.90,1.50],
+    ["griptruck","Production grip truck",7.60,2.45,3.40],
+    ["police","Police cruiser (4 door)",4.90,1.90,1.60],
     ["bicycle","Bicycle",1.70,0.60,1.05]]},
   {n:"Hand props", items:[
-    ["laptop","Laptop",0.35,0.25,0.25],
+    ["laptop","Laptop",0.33,0.24,0.24],
     ["phone","Mobile phone",0.16,0.08,0.02],
     ["book","Book / ledger",0.25,0.18,0.04],
-    ["mug","Mug / glass",0.10,0.10,0.12],
+    ["mug","Mug / glass",0.09,0.09,0.11],
     ["letter","Sealed letter / envelope",0.22,0.11,0.01],
     ["briefcase","Briefcase",0.45,0.15,0.35],
     ["suitcase","Suitcase",0.55,0.25,0.75],
     ["clapper","Clapperboard",0.30,0.05,0.25]]},
   {n:"Action and stunt (supervised)", items:[
-    ["propfirearm","Prop firearm (armourer required)",0.25,0.10,0.15,"safety"],
-    ["proprifle","Prop long arm (armourer required)",1.00,0.10,0.15,"safety"],
+    ["propfirearm","Prop firearm (armourer required)",0.22,0.06,0.15,"safety"],
+    ["proprifle","Prop long arm (armourer required)",1.05,0.08,0.20,"safety"],
     ["pyro","Pyrotechnic effect marker (licensed FX)",0.40,0.40,0.30,"safety"],
     ["stuntmat","Stunt crash mat",2.00,1.50,0.40],
     ["breakaway","Breakaway prop / sugar glass",0.60,0.30,0.60]]},
   {n:"Landscape and exterior", items:[
-    ["tree","Scenic tree / foliage",1.60,1.60,4.00],
+    ["tree","Scenic tree / foliage",3.00,3.00,4.50],
     ["bush","Bush / hedge run",1.60,0.60,1.10],
     ["rock","Rock / boulder",1.00,0.90,0.70],
-    ["bench","Park bench",1.60,0.60,0.85],
+    ["bench","Park bench",1.80,0.65,0.85],
     ["lamppost","Street lamp post",0.35,0.35,4.50],
     ["bin","Litter bin",0.50,0.50,0.95]]},
   {n:"Generic blocks", items:[
     ["box","Generic box / block",1.00,1.00,0.60],
-    ["pillar","Generic pillar / circle",0.50,0.50,2.60],
+    ["pillar","Generic pillar / circle",0.50,0.50,2.80],
     ["platform","Platform / rostrum",2.00,1.00,0.30],
-    ["crate","Crate / flight case",0.80,0.50,0.50]]}
+    ["crate","Crate / flight case",0.80,0.60,0.70]]}
 ]};
 
 CAT.staging = {
@@ -1824,14 +1838,14 @@ CAT.staging = {
     ["trusstower","Lighting truss tower",1.00,1.00,6.00],
     ["drumriser","Drum riser + full kit",2.40,2.40,1.60],
     ["keysrig","Keyboard rig / synth station",1.80,0.80,1.20],
-    ["ampstack","Guitar amp stack",0.80,0.60,1.60],
+    ["ampstack","Guitar amp stack",0.76,0.40,1.65],
     ["paspeaker","PA speaker stack",1.00,0.90,2.20],
     ["linearray","Line array speaker hang",1.20,0.80,4.00],
     ["subs","Subwoofer stack",1.20,0.90,1.20],
     ["wedge","Floor monitor wedge",0.60,0.45,0.35],
     ["foh","FOH mixing console position",2.40,1.60,1.10],
     ["monmix","Monitor mixing position",1.80,1.20,1.10],
-    ["micstand","Microphone stand",0.40,0.40,1.60],
+    ["micstand","Microphone stand",0.70,0.70,1.60],
     ["barrier","Crowd barrier / barricade",2.00,0.60,1.10],
     ["ledwall","LED video wall / screen",6.00,0.50,3.50]]},
   {n:"Broadcast and outside production", items:[
@@ -1846,14 +1860,14 @@ CAT.grip = {
   title:"Studio and grip", colour:"#e2762a", groups:[
   {n:"Studio and stage", items:[
     ["boomop","Sound boom operator",0.80,0.80,2.60],
-    ["cstandarm","C stand + 40 inch grip arm",1.00,1.00,2.60],
-    ["tripodstand","Heavy duty tripod stand",0.90,0.90,2.40],
+    ["cstandarm","C stand + 40 inch grip arm",1.10,1.10,2.90],
+    ["tripodstand","Heavy duty tripod stand",0.95,0.95,2.80],
     ["dirchair","Director's folding chair",0.55,0.55,1.10],
-    ["applebox","Apple box (full / half)",0.50,0.30,0.30],
+    ["applebox","Apple box (full / half)",0.50,0.30,0.20],
     ["magliner","Camera magliner cart",1.20,0.60,1.00],
     ["chroma","Chroma green / seamless backdrop",4.00,0.30,3.00],
     ["sandbag","Sandbag",0.40,0.25,0.12],
-    ["dollyplat","Dolly / doorway dolly",1.20,0.80,0.40],
+    ["dollyplat","Dolly / doorway dolly",1.20,0.75,0.35],
     ["jib","Jib arm base",1.40,1.40,1.80],
     ["dit","DIT cart / data station",1.20,0.70,1.20],
     ["makeup","Hair and make up station",1.60,0.80,1.80]]}
@@ -1922,6 +1936,10 @@ const ASSET_COLOR = {
   applebox:"#b98b4f", magliner:"#4a5058", dirchair:"#5b4a3a", boomop:"#5b6478", sandbag:"#4a4438",
   stuntmat:"#2f6f9a", propfirearm:"#3b4048", proprifle:"#3b4048", pyro:"#c4342a"
 };
+/* items whose catalogue height is the object itself, not its position on the floor.
+   The plan and the viewfinder both read el.elevation, so a wall screen or a radiator
+   now lands at the right height instead of standing on the ground. */
+const DEFAULT_ELEVATION = {tv:0.55, radiator:0.15};
 const MOD_FOR = {fresnel:"Fresnel spot", leko:"Barn doors", parcan:"Bare / open face", hmi:"Bare / open face",
   softbox:"Softbox", ledpanel:"Diffusion frame", kino:"Grid / egg crate", china:"Dome / lantern",
   spacelight:"Dome / lantern", practical:"Bare / open face", tube:"Bare / open face", bounce:"Bounce card",
@@ -2003,6 +2021,12 @@ Object.assign(ASSET_3D,{
   linearray:"live-event/line-array",subs:"live-event/subwoofers",wedge:"live-event/floor-wedge",foh:"live-event/foh-console",monmix:"live-event/monitor-console",
   micstand:"live-event/mic-stand",barrier:"live-event/barrier",obtruck:"live-event/ob-truck",engvan:"live-event/eng-van",uplink:"live-event/uplink-truck",comms:"live-event/comms-rack"
 });
+/* the camera rig decides which body is drawn in the viewfinder */
+const RIG_ART = {"Tripod":"production/cinema-camera","Static clamp":"production/cinema-camera",
+  "Handheld":"production/dslr-camera","Shoulder rig":"production/broadcast-camera",
+  "Slider":"production/cinema-camera","Dana dolly / rail":"production/doorway-dolly",
+  "Gimbal":"production/gimbal-camera","Jib / crane":"production/camera-crane",
+  "Drone":"production/gimbal-camera","Car mount":"production/dslr-camera"};
 const ASSET_RENDER_REV="20260829-library-v4";
 function asset3d(id){const p=ASSET_3D[id];return p?`assets/3d/${p}.png?v=${ASSET_RENDER_REV}`:""}
 
@@ -2262,34 +2286,58 @@ function elOpacity(el){
   return o[k]==null ? 1 : o[k];
 }
 
+/* Which drawn symbol each catalogue item uses. Matching by whole id rather than by
+   substring: "nightstand" is not a light stand, "lamppost" is not an amplifier and
+   "tvstand" is not a television. The plan symbols and the viewfinder read the same map. */
+const SYMBOL_KIND = {
+  rug:"rug",
+  couch3:"seating", sectional:"seating", armchair:"seating",
+  diningchair:"chair", dirchair:"chair", barstool:"chair",
+  dining4:"tableset", roundtable:"tableset",
+  recttable:"table", desk:"table", coffee:"table", island:"table",
+  counterrun:"table", barcounter:"table", makeup:"table", videovillage:"table",
+  plant:"foliage", tree:"foliage", bush:"foliage",
+  kingbed:"bed", queenbed:"bed",
+  sedan:"vehicle", suv:"vehicle", police:"vehicle", griptruck:"vehicle",
+  obtruck:"vehicle", engvan:"vehicle", uplink:"vehicle",
+  bicycle:"bicycle", stairs:"stairs",
+  tv:"screen", ledwall:"screen", chroma:"screen",
+  paspeaker:"speaker", ampstack:"speaker", subs:"speaker", linearray:"speaker", wedge:"speaker",
+  tripodstand:"stand", micstand:"stand", cstandarm:"stand", jib:"stand",
+  floorlamp:"stand", lamppost:"stand",
+  wc:"toilet", basin:"basin", bath:"basin", shower:"basin",
+  pillar:"column", pillarround:"column", hob:"table"
+};
+function symbolKind(id){ return SYMBOL_KIND[String(id||"").toLowerCase()] || "box"; }
 function planAssetSymbol(el,cx,cy,w,h,col){
-  const a=String(el.asset||"").toLowerCase(),x=cx-w/2,y=cy-h/2,sw=Math.max(1.2,Math.min(2.4,Math.min(w,h)*.08));
+  const a=String(el.asset||"").toLowerCase(), k=symbolKind(a),x=cx-w/2,y=cy-h/2,sw=Math.max(1.2,Math.min(2.4,Math.min(w,h)*.08));
   const light=rgb2hex(mixc(hex2rgb(col),[255,255,255],.48)),dark=rgb2hex(mixc(hex2rgb(col),[7,15,34],.34));
   const base=`fill="${light}" stroke="${col}" stroke-width="${sw}"`;
-  if(a==="rug") return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(12,h*.14)}" fill="${col}" fill-opacity=".16" stroke="${col}" stroke-width="${sw}"/><rect x="${x+5}" y="${y+5}" width="${Math.max(1,w-10)}" height="${Math.max(1,h-10)}" rx="${Math.min(8,h*.1)}" fill="none" stroke="${col}" stroke-opacity=".45" stroke-dasharray="5 4"/>`;
-  if(/couch|sofa|loveseat|sectional|armchair/.test(a)){
+  if(k==="rug") return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(12,h*.14)}" fill="${col}" fill-opacity=".16" stroke="${col}" stroke-width="${sw}"/><rect x="${x+5}" y="${y+5}" width="${Math.max(1,w-10)}" height="${Math.max(1,h-10)}" rx="${Math.min(8,h*.1)}" fill="none" stroke="${col}" stroke-opacity=".45" stroke-dasharray="5 4"/>`;
+  if(k==="seating"){
     const arm=Math.min(w*.13,h*.2);
     return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(10,h*.18)}" ${base}/><rect x="${x+arm}" y="${y+h*.2}" width="${w-arm*2}" height="${h*.62}" rx="${Math.min(8,h*.14)}" fill="${col}" fill-opacity=".23" stroke="${dark}" stroke-width="1.2"/><rect x="${x}" y="${y}" width="${arm}" height="${h}" rx="${arm*.45}" fill="${dark}"/><rect x="${x+w-arm}" y="${y}" width="${arm}" height="${h}" rx="${arm*.45}" fill="${dark}"/>${w>70?`<line x1="${cx}" y1="${y+h*.2}" x2="${cx}" y2="${y+h*.82}" stroke="${dark}" stroke-opacity=".5"/>`:""}`;
   }
-  if(/diningchair|dirchair|barstool|chair/.test(a)) return `<rect x="${x+w*.18}" y="${y+h*.24}" width="${w*.64}" height="${h*.58}" rx="${Math.min(7,w*.12)}" ${base}/><rect x="${x+w*.12}" y="${y+h*.05}" width="${w*.76}" height="${h*.18}" rx="${Math.min(5,w*.09)}" fill="${dark}"/><circle cx="${x+w*.24}" cy="${y+h*.88}" r="${Math.max(1.5,w*.045)}" fill="${dark}"/><circle cx="${x+w*.76}" cy="${y+h*.88}" r="${Math.max(1.5,w*.045)}" fill="${dark}"/>`;
-  if(/dining4|roundtable/.test(a)){
+  if(k==="chair") return `<rect x="${x+w*.18}" y="${y+h*.24}" width="${w*.64}" height="${h*.58}" rx="${Math.min(7,w*.12)}" ${base}/><rect x="${x+w*.12}" y="${y+h*.05}" width="${w*.76}" height="${h*.18}" rx="${Math.min(5,w*.09)}" fill="${dark}"/><circle cx="${x+w*.24}" cy="${y+h*.88}" r="${Math.max(1.5,w*.045)}" fill="${dark}"/><circle cx="${x+w*.76}" cy="${y+h*.88}" r="${Math.max(1.5,w*.045)}" fill="${dark}"/>`;
+  if(k==="tableset"){
     const rr=Math.min(w,h)*.29;
     return `<circle cx="${cx}" cy="${cy}" r="${rr}" ${base}/>${[[0,-1],[1,0],[0,1],[-1,0]].map(q=>`<rect x="${cx+q[0]*w*.38-w*.09}" y="${cy+q[1]*h*.38-h*.09}" width="${w*.18}" height="${h*.18}" rx="3" fill="${dark}"/>`).join("")}`;
   }
-  if(/table|desk|island|counter|barcounter|coffee/.test(a)) return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(8,h*.12)}" ${base}/><rect x="${x+5}" y="${y+5}" width="${Math.max(1,w-10)}" height="${Math.max(1,h-10)}" rx="${Math.min(5,h*.08)}" fill="none" stroke="${dark}" stroke-opacity=".42"/><circle cx="${x+7}" cy="${y+7}" r="2" fill="${dark}"/><circle cx="${x+w-7}" cy="${y+7}" r="2" fill="${dark}"/><circle cx="${x+7}" cy="${y+h-7}" r="2" fill="${dark}"/><circle cx="${x+w-7}" cy="${y+h-7}" r="2" fill="${dark}"/>`;
-  if(/plant|tree|bush/.test(a)){
+  if(k==="table") return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(8,h*.12)}" ${base}/><rect x="${x+5}" y="${y+5}" width="${Math.max(1,w-10)}" height="${Math.max(1,h-10)}" rx="${Math.min(5,h*.08)}" fill="none" stroke="${dark}" stroke-opacity=".42"/><circle cx="${x+7}" cy="${y+7}" r="2" fill="${dark}"/><circle cx="${x+w-7}" cy="${y+7}" r="2" fill="${dark}"/><circle cx="${x+7}" cy="${y+h-7}" r="2" fill="${dark}"/><circle cx="${x+w-7}" cy="${y+h-7}" r="2" fill="${dark}"/>`;
+  if(k==="foliage"){
     const rr=Math.min(w,h)*.23;
     return `<circle cx="${cx}" cy="${cy}" r="${Math.min(w,h)*.45}" fill="${col}" fill-opacity=".16" stroke="${col}" stroke-width="${sw}"/><rect x="${cx-rr*.22}" y="${cy-rr*.22}" width="${rr*.44}" height="${rr*.44}" rx="2" fill="#765033"/>${[[0,-.45],[.38,-.12],[.25,.34],[-.3,.3],[-.4,-.12]].map(q=>`<circle cx="${cx+q[0]*w*.48}" cy="${cy+q[1]*h*.48}" r="${rr}" fill="${q[1]<0?light:col}" stroke="${dark}" stroke-width="1"/>`).join("")}`;
   }
-  if(/bed/.test(a)) return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(9,w*.08)}" ${base}/><rect x="${x+w*.08}" y="${y+h*.07}" width="${w*.38}" height="${h*.22}" rx="${Math.min(7,w*.06)}" fill="#fff" fill-opacity=".82" stroke="${col}"/><rect x="${x+w*.54}" y="${y+h*.07}" width="${w*.38}" height="${h*.22}" rx="${Math.min(7,w*.06)}" fill="#fff" fill-opacity=".82" stroke="${col}"/><path d="M${x+w*.06} ${y+h*.38}Q${cx} ${y+h*.28} ${x+w*.94} ${y+h*.38}V${y+h*.92}H${x+w*.06}Z" fill="${col}" fill-opacity=".28"/>`;
-  if(/sedan|suv|truck|van|police/.test(a)) return `<rect x="${x}" y="${y+h*.12}" width="${w}" height="${h*.76}" rx="${Math.min(18,h*.28)}" ${base}/><rect x="${x+w*.2}" y="${y+h*.2}" width="${w*.48}" height="${h*.6}" rx="${Math.min(10,h*.2)}" fill="${dark}" fill-opacity=".72"/><rect x="${x+w*.7}" y="${y+h*.24}" width="${w*.2}" height="${h*.52}" rx="4" fill="#bfe5f4"/><rect x="${x+w*.15}" y="${y-3}" width="${w*.18}" height="6" rx="3" fill="${dark}"/><rect x="${x+w*.15}" y="${y+h-3}" width="${w*.18}" height="6" rx="3" fill="${dark}"/><rect x="${x+w*.7}" y="${y-3}" width="${w*.18}" height="6" rx="3" fill="${dark}"/><rect x="${x+w*.7}" y="${y+h-3}" width="${w*.18}" height="6" rx="3" fill="${dark}"/>`;
-  if(a==="bicycle") return `<circle cx="${x+w*.24}" cy="${cy}" r="${h*.34}" fill="none" stroke="${dark}" stroke-width="${sw}"/><circle cx="${x+w*.76}" cy="${cy}" r="${h*.34}" fill="none" stroke="${dark}" stroke-width="${sw}"/><path d="M${x+w*.24} ${cy}L${cx} ${y+h*.22}L${x+w*.62} ${cy}L${x+w*.4} ${cy}Z" fill="none" stroke="${col}" stroke-width="${sw}"/>`;
-  if(/stairs/.test(a)) return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${light}" stroke="${col}" stroke-width="${sw}"/>${Array.from({length:7},(_,i)=>`<line x1="${x}" y1="${y+h*(i+1)/8}" x2="${x+w}" y2="${y+h*(i+1)/8}" stroke="${dark}" stroke-width="1.3"/>`).join("")}<path d="M${cx} ${y+h*.88}V${y+h*.14}M${cx} ${y+h*.14}l-5 8m5-8l5 8" stroke="${col}" stroke-width="2" fill="none"/>`;
-  if(/tv|screen|ledwall|chroma/.test(a)) return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${dark}" stroke="${col}" stroke-width="${sw}"/><rect x="${x+4}" y="${y+4}" width="${Math.max(1,w-8)}" height="${Math.max(1,h-8)}" rx="2" fill="#82c8eb" fill-opacity=".65"/><line x1="${cx}" y1="${y+h}" x2="${cx}" y2="${y+h+Math.min(10,h*.3)}" stroke="${dark}" stroke-width="2"/>`;
-  if(/speaker|amp|subs|linearray/.test(a)) return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5" fill="${dark}" stroke="${col}" stroke-width="${sw}"/><circle cx="${cx}" cy="${y+h*.67}" r="${Math.min(w,h)*.22}" fill="#111827" stroke="${light}"/><circle cx="${cx}" cy="${y+h*.24}" r="${Math.min(w,h)*.1}" fill="#111827" stroke="${light}"/>`;
-  if(/stand|tripod|micstand|jib/.test(a)) return `<circle cx="${cx}" cy="${cy}" r="${Math.min(w,h)*.13}" fill="${col}"/><path d="M${cx} ${cy}L${x+w*.1} ${y+h*.88}M${cx} ${cy}L${x+w*.9} ${y+h*.88}M${cx} ${cy}L${cx} ${y+h*.04}" stroke="${dark}" stroke-width="${sw}" stroke-linecap="round"/><circle cx="${cx}" cy="${y+h*.05}" r="${Math.min(w,h)*.11}" ${base}/>`;
-  if(/toilet|wc/.test(a)) return `<ellipse cx="${cx}" cy="${y+h*.62}" rx="${w*.34}" ry="${h*.3}" fill="#fff" stroke="${col}" stroke-width="${sw}"/><rect x="${x+w*.18}" y="${y+h*.05}" width="${w*.64}" height="${h*.3}" rx="5" ${base}/><ellipse cx="${cx}" cy="${y+h*.62}" rx="${w*.16}" ry="${h*.14}" fill="#bfe5f4"/>`;
-  if(/basin|sink|bath|shower/.test(a)) return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(12,h*.2)}" fill="#f8fcff" stroke="${col}" stroke-width="${sw}"/><ellipse cx="${cx}" cy="${cy}" rx="${w*.32}" ry="${h*.3}" fill="#bfe5f4" stroke="${dark}" stroke-width="1.2"/><circle cx="${cx}" cy="${y+h*.15}" r="2.5" fill="${dark}"/>`;
+  if(k==="bed") return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(9,w*.08)}" ${base}/><rect x="${x+w*.08}" y="${y+h*.07}" width="${w*.38}" height="${h*.22}" rx="${Math.min(7,w*.06)}" fill="#fff" fill-opacity=".82" stroke="${col}"/><rect x="${x+w*.54}" y="${y+h*.07}" width="${w*.38}" height="${h*.22}" rx="${Math.min(7,w*.06)}" fill="#fff" fill-opacity=".82" stroke="${col}"/><path d="M${x+w*.06} ${y+h*.38}Q${cx} ${y+h*.28} ${x+w*.94} ${y+h*.38}V${y+h*.92}H${x+w*.06}Z" fill="${col}" fill-opacity=".28"/>`;
+  if(k==="vehicle") return `<rect x="${x}" y="${y+h*.12}" width="${w}" height="${h*.76}" rx="${Math.min(18,h*.28)}" ${base}/><rect x="${x+w*.2}" y="${y+h*.2}" width="${w*.48}" height="${h*.6}" rx="${Math.min(10,h*.2)}" fill="${dark}" fill-opacity=".72"/><rect x="${x+w*.7}" y="${y+h*.24}" width="${w*.2}" height="${h*.52}" rx="4" fill="#bfe5f4"/><rect x="${x+w*.15}" y="${y-3}" width="${w*.18}" height="6" rx="3" fill="${dark}"/><rect x="${x+w*.15}" y="${y+h-3}" width="${w*.18}" height="6" rx="3" fill="${dark}"/><rect x="${x+w*.7}" y="${y-3}" width="${w*.18}" height="6" rx="3" fill="${dark}"/><rect x="${x+w*.7}" y="${y+h-3}" width="${w*.18}" height="6" rx="3" fill="${dark}"/>`;
+  if(k==="bicycle") return `<circle cx="${x+w*.24}" cy="${cy}" r="${h*.34}" fill="none" stroke="${dark}" stroke-width="${sw}"/><circle cx="${x+w*.76}" cy="${cy}" r="${h*.34}" fill="none" stroke="${dark}" stroke-width="${sw}"/><path d="M${x+w*.24} ${cy}L${cx} ${y+h*.22}L${x+w*.62} ${cy}L${x+w*.4} ${cy}Z" fill="none" stroke="${col}" stroke-width="${sw}"/>`;
+  if(k==="stairs") return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${light}" stroke="${col}" stroke-width="${sw}"/>${Array.from({length:7},(_,i)=>`<line x1="${x}" y1="${y+h*(i+1)/8}" x2="${x+w}" y2="${y+h*(i+1)/8}" stroke="${dark}" stroke-width="1.3"/>`).join("")}<path d="M${cx} ${y+h*.88}V${y+h*.14}M${cx} ${y+h*.14}l-5 8m5-8l5 8" stroke="${col}" stroke-width="2" fill="none"/>`;
+  if(k==="screen") return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${dark}" stroke="${col}" stroke-width="${sw}"/><rect x="${x+4}" y="${y+4}" width="${Math.max(1,w-8)}" height="${Math.max(1,h-8)}" rx="2" fill="#82c8eb" fill-opacity=".65"/><line x1="${cx}" y1="${y+h}" x2="${cx}" y2="${y+h+Math.min(10,h*.3)}" stroke="${dark}" stroke-width="2"/>`;
+  if(k==="speaker") return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5" fill="${dark}" stroke="${col}" stroke-width="${sw}"/><circle cx="${cx}" cy="${y+h*.67}" r="${Math.min(w,h)*.22}" fill="#111827" stroke="${light}"/><circle cx="${cx}" cy="${y+h*.24}" r="${Math.min(w,h)*.1}" fill="#111827" stroke="${light}"/>`;
+  if(k==="stand") return `<circle cx="${cx}" cy="${cy}" r="${Math.min(w,h)*.13}" fill="${col}"/><path d="M${cx} ${cy}L${x+w*.1} ${y+h*.88}M${cx} ${cy}L${x+w*.9} ${y+h*.88}M${cx} ${cy}L${cx} ${y+h*.04}" stroke="${dark}" stroke-width="${sw}" stroke-linecap="round"/><circle cx="${cx}" cy="${y+h*.05}" r="${Math.min(w,h)*.11}" ${base}/>`;
+  if(k==="column") return `<circle cx="${cx}" cy="${cy}" r="${Math.min(w,h)/2}" ${base}/><circle cx="${cx}" cy="${cy}" r="${Math.max(1,Math.min(w,h)/2-sw*1.6)}" fill="none" stroke="${dark}" stroke-opacity=".5"/><path d="M${cx-Math.min(w,h)*.22} ${cy}h${Math.min(w,h)*.44}M${cx} ${cy-Math.min(w,h)*.22}v${Math.min(w,h)*.44}" stroke="${dark}" stroke-width="1.1"/>`;
+  if(k==="toilet") return `<ellipse cx="${cx}" cy="${y+h*.62}" rx="${w*.34}" ry="${h*.3}" fill="#fff" stroke="${col}" stroke-width="${sw}"/><rect x="${x+w*.18}" y="${y+h*.05}" width="${w*.64}" height="${h*.3}" rx="5" ${base}/><ellipse cx="${cx}" cy="${y+h*.62}" rx="${w*.16}" ry="${h*.14}" fill="#bfe5f4"/>`;
+  if(k==="basin") return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(12,h*.2)}" fill="#f8fcff" stroke="${col}" stroke-width="${sw}"/><ellipse cx="${cx}" cy="${cy}" rx="${w*.32}" ry="${h*.3}" fill="#bfe5f4" stroke="${dark}" stroke-width="1.2"/><circle cx="${cx}" cy="${y+h*.15}" r="2.5" fill="${dark}"/>`;
   const bevel=Math.max(3,Math.min(10,Math.min(w,h)*.14));
   return `<path d="M${x} ${y}H${x+w}V${y+h-bevel}L${x+w-bevel} ${y+h}H${x}Z" ${base}/><path d="M${x+w} ${y}V${y+h-bevel}L${x+w-bevel} ${y+h}V${y+bevel}Z" fill="${dark}" fill-opacity=".72"/><path d="M${x} ${y}H${x+w}L${x+w-bevel} ${y+bevel}H${x+bevel}Z" fill="#fff" fill-opacity=".42"/><rect x="${x+bevel}" y="${y+bevel}" width="${Math.max(1,w-bevel*2)}" height="${Math.max(1,h-bevel*2)}" rx="3" fill="none" stroke="#fff" stroke-opacity=".32"/>`;
 }
@@ -2385,15 +2433,17 @@ function drawElement(el,crossing){
 
   case "track":{
     const x2=X(el.x2), y2=Y(el.y2), ang=Math.atan2(y2-cy,x2-cx), L=Math.hypot(x2-cx,y2-cy);
+    /* real track: 60 cm gauge, sleepers every 50 cm, so the drawing keeps its scale on zoom */
+    const gauge=Math.max(4,S(0.3)), tieStep=Math.max(9,S(0.5));
     let ties="";
-    for(let d=0;d<=L;d+=14){
+    for(let d=0;d<=L;d+=tieStep){
       const ax=cx+Math.cos(ang)*d, ay=cy+Math.sin(ang)*d;
-      ties+=`<line x1="${ax+Math.cos(ang+Math.PI/2)*7}" y1="${ay+Math.sin(ang+Math.PI/2)*7}"
-                   x2="${ax-Math.cos(ang+Math.PI/2)*7}" y2="${ay-Math.sin(ang+Math.PI/2)*7}" stroke="#7b8aa8" stroke-width="2"/>`;
+      ties+=`<line x1="${ax+Math.cos(ang+Math.PI/2)*gauge}" y1="${ay+Math.sin(ang+Math.PI/2)*gauge}"
+                   x2="${ax-Math.cos(ang+Math.PI/2)*gauge}" y2="${ay-Math.sin(ang+Math.PI/2)*gauge}" stroke="#7b8aa8" stroke-width="2"/>`;
     }
     const off=a=>`${cx+Math.cos(ang+Math.PI/2)*a} ${cy+Math.sin(ang+Math.PI/2)*a} L ${x2+Math.cos(ang+Math.PI/2)*a} ${y2+Math.sin(ang+Math.PI/2)*a}`;
-    g = `${ties}<path d="M ${off(7)}" stroke="#39445e" stroke-width="2.5" fill="none"/>
-         <path d="M ${off(-7)}" stroke="#39445e" stroke-width="2.5" fill="none"/>`
+    g = `${ties}<path d="M ${off(gauge)}" stroke="#39445e" stroke-width="2.5" fill="none"/>
+         <path d="M ${off(-gauge)}" stroke="#39445e" stroke-width="2.5" fill="none"/>`
        + label((cx+x2)/2,(cy+y2)/2-18,(el.label||"Dolly track")+" "+fmtLen(dist(p.x,p.y,el.x2,el.y2)),{fs:10,bg:"#39445e",cat:"tracks"});
     if(isSel) g+=`<circle cx="${cx}" cy="${cy}" r="5" fill="#fff" stroke="#00249C" stroke-width="2"/><circle cx="${x2}" cy="${y2}" r="5" fill="#fff" stroke="#00249C" stroke-width="2"/>`;
     break; }
@@ -2853,7 +2903,8 @@ function paletteData(key){
     groups:[{n:"Shapes",items:SHAPES.map(s=>({id:s[0],n:s[1],meta:""}))}]};
   const c = CAT[key];
   return {title:c.title, colour:c.colour, tool:key,
-    groups:c.groups.map(g=>({n:g.n, items:g.items.map(i=>({id:i[0],n:i[1],meta:i[2]+" x "+i[3]+" m",warn:i[5]==="safety"}))}))};
+    groups:c.groups.map(g=>({n:g.n, items:g.items.map(i=>({id:i[0],n:i[1],
+      meta:i[2].toFixed(2)+" x "+i[3].toFixed(2)+" m  ·  "+i[4].toFixed(2)+" m high",warn:i[5]==="safety"}))}))};
 }
 function openPalette(key,anchor){
   const d = paletteData(key);
@@ -4599,55 +4650,71 @@ function vfSVG(cam,W,H,opt){
   els().filter(e=>["prop","staging","grip","arch"].includes(e.type)).forEach(pr=>{
     const q=posAt(pr), z=pr.z!=null?pr.z:0.8, ez=+pr.elevation||0;
     shadow(q.x,q.y,pr.w*0.6,pr.h*0.6);
-    const aid=String(pr.asset||"").toLowerCase(),col=pr.color||"#8a93ab";
-    const exactAsset=asset3d(pr.asset);
+    const aid=String(pr.asset||"").toLowerCase(),kind=symbolKind(aid),col=pr.color||"#8a93ab";
+    /* Anything flatter than 12 cm (rugs, envelopes, phones) is drawn as real geometry.
+       A billboard would stand it up on edge at the minimum image height. */
+    const exactAsset=z>=0.12?asset3d(pr.asset):"";
     if(exactAsset){
       const feet=prj([q.x,q.y,ez]),top3=prj([q.x,q.y,ez+z]);
-      if(feet.d>NEAR&&top3.d>NEAR){const F=scr(feet),T=scr(top3),ih=Math.max(16,Math.abs(F[1]-T[1])),iw=clamp(ih*(Math.max(pr.w,pr.h)/Math.max(.15,z)),18,ih*3.2),clip="vfAsset"+String(pr.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);
+      if(feet.d>NEAR&&top3.d>NEAR){const F=scr(feet),T=scr(top3),ih=Math.max(6,Math.abs(F[1]-T[1])),
+        /* silhouette across the screen for the angle we are looking from: a sofa reads
+           2.10 m across the front and 0.90 m from the end, not always its longest side */
+        thv=rad(q.rot||0)-Math.atan2(q.y-CY,q.x-CX),
+        sil=Math.abs(pr.w*Math.sin(thv))+Math.abs(pr.h*Math.cos(thv)),
+        iw=clamp(ih*(sil/Math.max(.12,z)),4,ih*14),clip="vfAsset"+String(pr.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);
         items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${exactAsset}" preserveAspectRatio="none"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(pr.label)}</text>`:""}`});
       }
       return;
     }
-    if(aid.includes("plant")||aid==="tree"||aid==="bush"){
-      box3(q.x,q.y,ez,Math.max(.28,pr.w*.48),Math.max(.28,pr.h*.48),Math.min(.48,z*.34),q.rot,"#8a5a35");
-      box3(q.x,q.y,ez+Math.min(.36,z*.25),.10,.10,Math.max(.35,z*.42),q.rot,"#654126");
-      round3(q.x,q.y,ez+z*.72,Math.max(.25,pr.w*.48),"#3f9b58");
-      round3(q.x-pr.w*.22,q.y,z*.62,Math.max(.18,pr.w*.34),"#58ad63");
-      round3(q.x+pr.w*.20,q.y,z*.60,Math.max(.18,pr.w*.31),"#2f7f47");
-    }else if(aid.includes("couch")||aid.includes("sofa")||aid.includes("armchair")||aid.includes("loveseat")){
+    if(kind==="foliage"){
+      box3(q.x,q.y,ez,Math.max(.28,pr.w*.28),Math.max(.28,pr.h*.28),Math.min(.48,z*.20),q.rot,"#8a5a35");
+      box3(q.x,q.y,ez+Math.min(.36,z*.16),.12,.12,Math.max(.35,z*.42),q.rot,"#654126");
+      round3(q.x,q.y,ez+z*.72,Math.max(.25,pr.w*.42),"#3f9b58");
+      round3(q.x-pr.w*.22,q.y,ez+z*.62,Math.max(.18,pr.w*.30),"#58ad63");
+      round3(q.x+pr.w*.20,q.y,ez+z*.60,Math.max(.18,pr.w*.27),"#2f7f47");
+    }else if(kind==="seating"){
       box3(q.x,q.y,ez,pr.w,pr.h*.82,z*.48,q.rot,col);
-      box3(q.x-pr.w*.42*Math.sin(rad(q.rot)),q.y+pr.w*.42*Math.cos(rad(q.rot)),ez+z*.34,pr.w,pr.h*.18,z*.52,q.rot,col);
+      const back=atLocal(q.x,q.y,q.rot,0,-pr.h*.40);
+      box3(back[0],back[1],ez+z*.34,pr.w,pr.h*.18,z*.52,q.rot,col);
       box3(q.x,q.y,ez+z*.42,pr.w*.86,pr.h*.7,z*.10,q.rot,rgb2hex(mixc(hex2rgb(col),[255,255,255],.13)));
-    }else if(aid.includes("table")||aid==="dining4"||aid==="desk"||aid==="coffee"){
+    }else if(kind==="table"||kind==="tableset"){
       box3(q.x,q.y,ez,pr.w*.08,pr.h*.08,z*.92,q.rot,"#4b3528");
-      box3(q.x,q.y,ez+z*.86,pr.w,pr.h,z*.14,q.rot,col,o.mini?"":pr.label);
-      if(aid==="dining4"||aid.includes("roundtable")){
-        [[0,-.62],[0,.62],[-.62,0],[.62,0]].forEach(v=>{const cp=atAsset(q.x,q.y,q.rot,v[1]*pr.h,v[0]*pr.w);box3(cp[0],cp[1],0,pr.w*.18,pr.h*.18,z*.56,q.rot,col);});
+      const topW = kind==="tableset"?pr.w*.62:pr.w, topH = kind==="tableset"?pr.h*.62:pr.h;
+      box3(q.x,q.y,ez+z*.86,topW,topH,z*.14,q.rot,col,o.mini?"":pr.label);
+      if(kind==="tableset"){
+        [[0,-.42],[0,.42],[-.42,0],[.42,0]].forEach(v=>{
+          const cp=atLocal(q.x,q.y,q.rot,v[0]*pr.w,v[1]*pr.h);
+          box3(cp[0],cp[1],ez,pr.w*.18,pr.h*.18,z*.56,q.rot,col);});
       }
-    }else if(aid.includes("chair")||aid.includes("stool")){
-      box3(q.x,q.y,ez,pr.w*.72,pr.h*.72,z*.48,q.rot,col);
-      const back=atAsset(q.x,q.y,q.rot,-pr.h*.34,0);
-      box3(back[0],back[1],ez+z*.42,pr.w*.76,pr.h*.12,z*.58,q.rot,col,o.mini?"":pr.label);
-    }else if(aid.includes("bed")){
-      box3(q.x,q.y,0,pr.w,pr.h,z*.58,q.rot,col);
-      const head=atAsset(q.x,q.y,q.rot,-pr.h*.38,0);
-      box3(head[0],head[1],z*.5,pr.w,pr.h*.12,z*.62,q.rot,col);
-      const pillow=atAsset(q.x,q.y,q.rot,-pr.h*.25,0);
-      box3(pillow[0],pillow[1],z*.58,pr.w*.72,pr.h*.24,z*.12,q.rot,"#f2eee7");
-    }else if(/sedan|suv|truck|van|police/.test(aid)){
+    }else if(kind==="chair"){
+      const seatF = aid==="barstool" ? .70 : .48;
+      box3(q.x,q.y,ez,pr.w*.72,pr.h*.72,z*seatF,q.rot,col);
+      const back=atLocal(q.x,q.y,q.rot,0,-pr.h*.34);
+      box3(back[0],back[1],ez+z*(seatF-.06),pr.w*.76,pr.h*.12,z*(1-seatF+.06),q.rot,col,o.mini?"":pr.label);
+    }else if(kind==="bed"){
+      box3(q.x,q.y,ez,pr.w,pr.h,z*.58,q.rot,col);
+      const head=atLocal(q.x,q.y,q.rot,0,-pr.h*.44);
+      box3(head[0],head[1],ez+z*.5,pr.w,pr.h*.12,z*.62,q.rot,col);
+      const pillow=atLocal(q.x,q.y,q.rot,0,-pr.h*.31);
+      box3(pillow[0],pillow[1],ez+z*.58,pr.w*.72,pr.h*.24,z*.12,q.rot,"#f2eee7");
+    }else if(kind==="vehicle"){
       box3(q.x,q.y,.18,pr.w,pr.h*.92,z*.42,q.rot,col);
       box3(q.x,q.y,z*.55,pr.w*.52,pr.h*.82,z*.36,q.rot,"#76a8c7",o.mini?"":pr.label);
       const a=rad(q.rot),fw=pr.w*.32,side=pr.h*.5;
       [-1,1].forEach(f=>[-1,1].forEach(s=>{const wx=q.x+Math.cos(a)*fw*f-Math.sin(a)*side*s,wy=q.y+Math.sin(a)*fw*f+Math.cos(a)*side*s;round3(wx,wy,.22,Math.min(.24,pr.h*.13),"#151a22");}));
-    }else if(aid.includes("stairs")){
+    }else if(kind==="stairs"){
       const steps=7;
-      for(let i=0;i<steps;i++){const d=-pr.h/2+(i+.5)*pr.h/steps,p=atAsset(q.x,q.y,q.rot,d,0);box3(p[0],p[1],0,pr.w,pr.h/steps,(i+1)*z/steps,q.rot,col);}
-    }else if(/speaker|amp|subs|linearray/.test(aid)){
-      box3(q.x,q.y,0,pr.w,pr.h,z,q.rot,"#202635",o.mini?"":pr.label);
-      const front=atAsset(q.x,q.y,q.rot,pr.h*.51,0);round3(front[0],front[1],z*.38,Math.min(pr.w*.3,z*.28),"#070a10");round3(front[0],front[1],z*.75,Math.min(pr.w*.15,z*.14),"#111827");
-    }else if(/stand|tripod|micstand|jib/.test(aid)){
-      box3(q.x,q.y,0,.07,.07,z,q.rot,"#273147",o.mini?"":pr.label);
-      const a=rad(q.rot);[-1,1].forEach(s=>{const foot=atAsset(q.x,q.y,q.rot,pr.h*.28,s*pr.w*.34);box3(foot[0],foot[1],0,.04,.04,.06,q.rot,"#273147");line3([q.x,q.y,z*.45],[foot[0],foot[1],.04],"#273147",2,1);});
+      for(let i=0;i<steps;i++){const d=-pr.h/2+(i+.5)*pr.h/steps,p=atLocal(q.x,q.y,q.rot,0,d);box3(p[0],p[1],ez,pr.w,pr.h/steps,(i+1)*z/steps,q.rot,col);}
+    }else if(kind==="speaker"){
+      box3(q.x,q.y,ez,pr.w,pr.h,z,q.rot,"#202635",o.mini?"":pr.label);
+      const front=atLocal(q.x,q.y,q.rot,0,pr.h*.51);
+      round3(front[0],front[1],ez+z*.38,Math.min(pr.w*.3,z*.28),"#070a10");
+      round3(front[0],front[1],ez+z*.75,Math.min(pr.w*.15,z*.14),"#111827");
+    }else if(kind==="stand"){
+      box3(q.x,q.y,ez,.07,.07,z,q.rot,"#273147",o.mini?"":pr.label);
+      [-1,1].forEach(sgn=>{const foot=atLocal(q.x,q.y,q.rot,sgn*pr.w*.34,pr.h*.28);
+        box3(foot[0],foot[1],ez,.04,.04,.06,q.rot,"#273147");
+        line3([q.x,q.y,ez+z*.45],[foot[0],foot[1],ez+.04],"#273147",2,1);});
     }else box3(q.x,q.y,ez,pr.w,pr.h,z,q.rot,col,o.mini?"":pr.label);
     if(pr.safety && pr.exclusion>0){
       const seg=22, pts=[];
@@ -4657,14 +4724,20 @@ function vfSVG(cam,W,H,opt){
     }
   });
   function atAsset(x,y,rotDeg,fwd,side){const a=rad(rotDeg||0);return [x+Math.cos(a)*fwd-Math.sin(a)*side,y+Math.sin(a)*fwd+Math.cos(a)*side];}
-  function exactBillboard(q,ez,w,h,href,label,id){const feet=prj([q.x,q.y,ez]),top3=prj([q.x,q.y,ez+h]);if(feet.d<=NEAR||top3.d<=NEAR)return false;const F=scr(feet),T=scr(top3),ih=Math.max(18,Math.abs(F[1]-T[1])),iw=clamp(ih*w/Math.max(.15,h),20,ih*2.8),clip="vfExact"+String(id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${href}" preserveAspectRatio="none"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(label)}</text>`:""}`});return true;}
+  /* Local offset in the item's own axes: dx runs along its width, dy along its depth,
+     which is the same convention the plan symbols use. Front of an item is +dy. */
+  function atLocal(x,y,rotDeg,dx,dy){const a=rad(rotDeg||0);return [x+dx*Math.cos(a)-dy*Math.sin(a), y+dx*Math.sin(a)+dy*Math.cos(a)];}
+  function exactBillboard(q,ez,w,h,href,label,id){const feet=prj([q.x,q.y,ez]),top3=prj([q.x,q.y,ez+h]);if(feet.d<=NEAR||top3.d<=NEAR)return false;const F=scr(feet),T=scr(top3),ih=Math.max(6,Math.abs(F[1]-T[1])),iw=clamp(ih*w/Math.max(.12,h),4,ih*14),clip="vfExact"+String(id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${href}" preserveAspectRatio="none"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(label)}</text>`:""}`});return true;}
 
   /* ---- other cameras ---- */
   cameras().filter(c=>c.id!==cam.id).forEach(c=>{
     const q=posAt(c), h=c.height||1.6,ez=+c.elevation||0;
     shadow(q.x,q.y,0.34,0.34);
-    if(exactBillboard(q,ez,.8,h,`assets/3d/production/cinema-camera.png?v=${ASSET_RENDER_REV}`,c.label,c.id))return;
-    box3(q.x,q.y,ez,0.09,0.09,h-0.12,0,"#39445e");
+    /* legs to lens height, then the body at its own size on top, instead of one
+       camera image stretched from the floor to the lens */
+    const bodyH=0.34, art=RIG_ART[c.rig]||"production/cinema-camera";
+    box3(q.x,q.y,ez,0.09,0.09,Math.max(.1,h-bodyH),0,"#39445e");
+    if(exactBillboard(q,ez+Math.max(.1,h-bodyH),0.55,bodyH,`assets/3d/${art}.png?v=${ASSET_RENDER_REV}`,c.label,c.id))return;
     box3(q.x,q.y,ez+h-0.12,0.30,0.20,0.20,q.rot,"#00249C", o.mini?"":c.label);
   });
 
@@ -4673,9 +4746,15 @@ function vfSVG(cam,W,H,opt){
     const q=posAt(l), h=l.height||2,ez=+l.elevation||0;
     const LT = LIGHT_TYPES[l.role]||LIGHT_TYPES.key;
     shadow(q.x,q.y,0.3,0.3);
-    const exactLight=asset3d(l.asset);if(exactLight&&exactBillboard(q,ez,l.flag?(l.width||1.2):.75,h,exactLight,l.label,l.id))return;
+    const exactLight=asset3d(l.asset);
+    const fw = l.flag ? (l.width||1.2) : 0.62, fh = l.flag ? (l.width||1.2) : 0.55;
+    const poleH = Math.max(0.1, h - fh*0.5);
+    if(exactLight){
+      box3(q.x,q.y,ez,0.07,0.07,poleH,0,"#2b3350");
+      if(exactBillboard(q,ez+poleH,fw,fh,exactLight,l.label,l.id))return;
+    }
     box3(q.x,q.y,ez,0.07,0.07,h-0.18,0,"#2b3350");
-    if(l.flag) box3(q.x,q.y,ez+h-0.18,l.width||1.2,0.05,0.9,q.rot,"#1c2233", o.mini?"":l.label);
+    if(l.flag) box3(q.x,q.y,ez+h-0.18,l.width||1.2,0.05,l.width||1.2,q.rot,"#1c2233", o.mini?"":l.label);
     else {
       box3(q.x,q.y,ez+h-0.18,0.26,0.26,0.26,q.rot,"#2b3350", o.mini?"":l.label);
       const c=prj([q.x,q.y,ez+h-0.05]);
@@ -8074,7 +8153,9 @@ const ACTIONS = {
   resetAssetSize(b){
     const el=byId(b.dataset.id); if(!el) return;
     const a=assetById(el.type,el.asset); if(!a) return;
-    pushHistory(); el.w=a.w; el.h=a.h; el.z=a.z; renderAll(); save();
+    pushHistory(); el.w=a.w; el.h=a.h; el.z=a.z;
+    if(DEFAULT_ELEVATION[a.id]!=null) el.elevation=DEFAULT_ELEVATION[a.id];
+    renderAll(); save();
   },
   groundItem(b){const el=byId(b.dataset.id);if(!el)return;pushHistory();el.elevation=0;renderAll();save();},
   setLens(b){ const el=byId(b.dataset.id); if(!el) return; pushHistory(); el.lens=parseFloat(b.dataset.l); renderAll(); save(); },
