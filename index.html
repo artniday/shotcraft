@@ -1167,6 +1167,8 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
 .layername{min-width:0;text-align:left;border:0;background:transparent;color:inherit;cursor:pointer;padding:2px}.layername b,.layername small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.layername b{font-size:12px}.layername small{font-size:9px;color:var(--muted);margin-top:2px}.layergroups{margin-top:12px}
 .envpanel{padding:14px}.envhero{padding:16px;border-radius:16px;color:#fff;background:linear-gradient(135deg,#062d57,#159e91);box-shadow:0 12px 28px #0b536733;margin-bottom:14px}.envhero h3{margin:0 0 4px;font-size:18px}.envhero p{margin:0;font-size:11px;opacity:.82}.envgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.envcard{position:relative;min-height:92px;padding:0;border:2px solid transparent;border-radius:13px;overflow:hidden;background:var(--soft);cursor:pointer;box-shadow:0 5px 14px #14234816}.envcard img{width:100%;height:68px;display:block;object-fit:cover}.envcard span{display:block;padding:7px 9px;text-align:left;font-size:10px;font-weight:800;color:var(--ink)}.envcard.on{border-color:#159e91;box-shadow:0 0 0 3px #159e9122}.envcard.none{display:grid;place-items:center;min-height:105px;background:linear-gradient(145deg,#20304f,#6f93c4)}.envcard.none span{color:#fff}.weathergrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.weatherbtn{padding:10px 5px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font-size:10px;font-weight:750;cursor:pointer}.weatherbtn.on{background:#159e91;color:#fff;border-color:#159e91}.envpreview{aspect-ratio:16/7;border-radius:13px;overflow:hidden;background:#172541 center/cover no-repeat;position:relative;margin-bottom:12px}.envpreview:after{content:attr(data-weather);position:absolute;right:8px;bottom:8px;padding:4px 7px;border-radius:999px;background:#07152bbb;color:#fff;font-size:9px;font-weight:800}
 .floorgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.floorbtn{display:flex;align-items:center;gap:9px;padding:8px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--ink);font-size:10px;font-weight:800;cursor:pointer;text-align:left}.floorbtn.on{border-color:#159e91;box-shadow:0 0 0 2px #159e9122}.floorswatch{width:38px;height:30px;flex:0 0 auto;border-radius:7px;background:var(--floor);box-shadow:inset 0 0 0 1px #0002}.axisbtn{font:800 10px/1 ui-monospace,monospace!important;min-width:32px}.axisbtn[data-axis="x"].on{background:#d84b42!important;color:#fff!important}.axisbtn[data-axis="y"].on{background:#2d9b68!important;color:#fff!important}.axisbtn[data-axis="z"].on{background:#3478db!important;color:#fff!important}
+.envhero{position:relative;padding-right:104px!important}.envclearall{position:absolute;right:12px;top:12px;padding:8px 11px;border:1px solid #ffffff66;border-radius:9px;background:#ffffff18;color:#fff;font-size:10px;font-weight:850;cursor:pointer}.envclearall:hover{background:#fff;color:#0b5367}.envclearrow{display:flex;justify-content:flex-end;margin:0 0 8px}.envclear{padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--muted);font-size:9px;font-weight:800;cursor:pointer}.envclear:hover{border-color:#c4342a;color:#c4342a;background:#c4342a0d}
+.actorsection{padding:10px}.actorsubhead{margin:3px 2px 8px;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.actorsubhead:not(:first-child){margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.actorgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;align-items:stretch}.actorchoice img.actorphoto.animal{object-fit:contain!important;padding:4px;background:#edf2ff}
 
 
 .storyscene{margin:0 0 18px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);box-shadow:0 8px 22px rgba(19,34,75,.07)}
@@ -1700,7 +1702,12 @@ const ACTOR_PROFILES={
   baby:{n:"Baby",gender:"neutral",h:.72,file:embedded3dPath("characters/baby"),face:embedded3dPath("characters/faces/baby")},
   "senior-woman":{n:"Senior woman",gender:"female",h:1.58,file:embedded3dPath("characters/senior-woman"),face:embedded3dPath("characters/faces/senior-woman")},
   "senior-man":{n:"Senior man",gender:"male",h:1.70,file:embedded3dPath("characters/senior-man"),face:embedded3dPath("characters/faces/senior-man")},
-  child:{n:"Child",gender:"neutral",h:1.28,file:embedded3dPath("characters/child"),face:embedded3dPath("characters/faces/child")}
+  child:{n:"Child",gender:"neutral",h:1.28,file:embedded3dPath("characters/child"),face:embedded3dPath("characters/faces/child")},
+  dog:{n:"Dog",gender:"animal",kind:"animal",h:.62,file:"assets/3d/characters/animals/dog.png",face:"assets/3d/characters/animals/dog.png"},
+  cat:{n:"Cat",gender:"animal",kind:"animal",h:.28,file:"assets/3d/characters/animals/cat.png",face:"assets/3d/characters/animals/cat.png"},
+  horse:{n:"Horse",gender:"animal",kind:"animal",h:1.65,file:"assets/3d/characters/animals/horse.png",face:"assets/3d/characters/animals/horse.png"},
+  rabbit:{n:"Rabbit",gender:"animal",kind:"animal",h:.32,file:"assets/3d/characters/animals/rabbit.png",face:"assets/3d/characters/animals/rabbit.png"},
+  chicken:{n:"Chicken",gender:"animal",kind:"animal",h:.42,file:"assets/3d/characters/animals/chicken.png",face:"assets/3d/characters/animals/chicken.png"}
 };
 function actorProfile(el){return ACTOR_PROFILES[el.profile||((el.gender||"female")==="male"?"adult-man":"adult-woman")]}
 function nextActorName(gender){
@@ -1724,7 +1731,7 @@ function makeElement(type,x,y,extra){
       safety:it.flag==="safety",exclusion:it.flag==="safety"?3:0};
   };
   const T = {
-    actor:()=>{const profile=pendingActorProfile||"adult-woman",gender=(ACTOR_PROFILES[profile]||ACTOR_PROFILES["adult-woman"]).gender,name=nextActorName(gender),letter=nextLetter();return {letter,color:ACTOR_COLORS[actors().length%ACTOR_COLORS.length],
+    actor:()=>{const profile=pendingActorProfile||"adult-woman",ap=(ACTOR_PROFILES[profile]||ACTOR_PROFILES["adult-woman"]),gender=ap.gender,name=ap.kind==="animal"?`${ap.n}${actors().some(a=>a.profile===profile)?" "+(actors().filter(a=>a.profile===profile).length+1):""}`:nextActorName(gender),letter=nextLetter();return {letter,color:ACTOR_COLORS[actors().length%ACTOR_COLORS.length],
       label:name,character:name,autoActorName:true,seated:false,pose:"Standing neutral",action:"",lines:"",wardrobe:"",
       profile,gender,w:.48,h:.65,heightM:0, castNo:actors().length+1};},
     camera:()=>{
@@ -2075,7 +2082,6 @@ const IC = {
   text   :"M5 6.4h14M12 6.4v13M9 19.4h6",
   pen    :"M15.8 3.6l4.6 4.6L8.6 20H4v-4.6zM13.6 5.8l4.6 4.6",
   image  :"M3.6 5h16.8v14H3.6zM8 12.4l3 3 3.4-4.4L20.4 17M8.4 9.6a1.2 1.2 0 100-2.4 1.2 1.2 0 000 2.4",
-  environment:"M3 18h18M4 15l5-6 3.2 3.1L15.6 7 21 15M7 6.2a1.7 1.7 0 103.4 0 1.7 1.7 0 00-3.4 0",
   search :"M11 4a7 7 0 100 14 7 7 0 000-14zM20.4 20.4L16 16"
 };
 const TOOL_GROUPS = [
@@ -2100,9 +2106,6 @@ const TOOL_GROUPS = [
     {id:"staging", key:"E", name:"Staging and live events",  ic:IC.staging, c:"#8b53d6", palette:"staging", tool:"Staging"},
     {id:"grip",    key:"U", name:"Studio and grip",          ic:IC.grip,    c:"#e2762a", palette:"grip", tool:"Grip"},
     {id:"arch",    key:"F", name:"Architecture and fixtures",ic:IC.arch,    c:"#5b6478", palette:"arch", tool:"Architecture"}
-  ]},
-  {n:"Scene environment", c:"#159e91", tools:[
-    {id:"environment",key:"J",name:"Environment, floor and weather",ic:IC.environment,c:"#159e91",tool:"Environment"}
   ]},
   {n:"Geometry and moves", c:"#8b53d6", tools:[
     {id:"zone",  key:"S", name:"Shape / zone / area", ic:IC.shape, c:"#47D7AC", palette:"shape", tool:"Shape"},
@@ -2861,7 +2864,6 @@ function renderToolbar(){
   if(rt) rt.onclick=()=>{ railWide=!railWide; state.view.railWide=railWide; renderToolbar(); save(); setTimeout(renderPlan,60); };
   tb.querySelectorAll("[data-tool]").forEach(b=>b.onclick=ev=>{
     const t = toolDef(b.dataset.tool);
-    if(t && t.id==="environment"){setTool("select");state.tab="environment";openSects.add("envbackdrop");openSects.add("envfloor");renderTabs();renderPanel();save();return;}
     if(t && t.id==="actor"){ setTool("actor"); openActorChooser(b); return; }
     const already = t && t.palette && paletteOpen===t.palette;
     setTool(b.dataset.tool);
@@ -2873,10 +2875,11 @@ function renderToolbar(){
 function openActorChooser(anchor){
   const p=$("#palette");
   paletteOpen="actor";
-  p.innerHTML=`<div class="phead"><b>Choose character</b><span class="pcount">6 realistic figures</span><button class="x" id="palClose">&times;</button></div>
-    <div style="padding:10px;display:grid;grid-template-columns:repeat(2,1fr);gap:9px;align-items:stretch">
-      ${Object.entries(ACTOR_PROFILES).map(([id,a])=>`<button class="actorchoice${pendingActorProfile===id?" on":""}" data-profile="${id}" aria-label="Add ${a.n}"><img class="actorphoto" src="${a.face}" alt=""><b>${a.n}</b><small>Realistic 3D character</small></button>`).join("")}
-    </div><p class="hint" style="padding:1px 12px 12px;margin:0;text-align:center;font-size:10px">Choose a character, then click the floor plan to place it.</p>`;
+  const actorChoice=(id,a)=>`<button class="actorchoice${pendingActorProfile===id?" on":""}" data-profile="${id}" aria-label="Add ${a.n}"><img class="actorphoto${a.kind==="animal"?" animal":""}" src="${a.face}" alt=""><b>${a.n}</b><small>${a.kind==="animal"?"Realistic animal":"Realistic 3D character"}</small></button>`;
+  const humans=Object.entries(ACTOR_PROFILES).filter(([,a])=>a.kind!=="animal"),animals=Object.entries(ACTOR_PROFILES).filter(([,a])=>a.kind==="animal");
+  p.innerHTML=`<div class="phead"><b>Choose actor</b><span class="pcount">${humans.length} people · ${animals.length} animals</span><button class="x" id="palClose">&times;</button></div>
+    <div class="actorsection"><div class="actorsubhead">People</div><div class="actorgrid">${humans.map(([id,a])=>actorChoice(id,a)).join("")}</div><div class="actorsubhead">Animals</div><div class="actorgrid">${animals.map(([id,a])=>actorChoice(id,a)).join("")}</div></div>
+    <p class="hint" style="padding:1px 12px 12px;margin:0;text-align:center;font-size:10px">Choose a person or animal, then click the floor plan to place it.</p>`;
   p.style.top=Math.max(66,Math.min(innerHeight-300,anchor.getBoundingClientRect().top-40))+"px";
   p.classList.add("show");
   p.querySelectorAll("[data-profile]").forEach(b=>b.onclick=()=>{
@@ -4453,17 +4456,21 @@ function renderLayers(){
 
 
 const ENVIRONMENTS=[{id:"none",name:"Procedural sky",file:""},{id:"city",name:"City · golden hour",file:"assets/environments/city-golden-hour.jpg"},{id:"desert",name:"Desert · clear day",file:"assets/environments/desert-clear-day.jpg"},{id:"forest",name:"Forest · overcast",file:"assets/environments/forest-overcast.jpg"},{id:"soundstage",name:"Dark soundstage",file:"assets/environments/soundstage-dark.jpg"}];
+const ENV_INTERIORS=[{id:"interior-house",name:"House · living room",file:"assets/environments/interiors/house-living-room.jpg"},{id:"interior-office",name:"Office",file:"assets/environments/interiors/office.jpg"},{id:"interior-school",name:"School · classroom",file:"assets/environments/interiors/classroom.jpg"},{id:"interior-store",name:"Retail store",file:"assets/environments/interiors/retail-store.jpg"},{id:"interior-kitchen",name:"Kitchen",file:"assets/environments/interiors/kitchen.jpg"},{id:"interior-bedroom",name:"Bedroom",file:"assets/environments/interiors/bedroom.jpg"},{id:"interior-reception",name:"Reception area",file:"assets/environments/interiors/reception.jpg"},{id:"interior-bathroom",name:"Bathroom",file:"assets/environments/interiors/bathroom.jpg"}];
+const ALL_ENVIRONMENTS=[...ENVIRONMENTS,...ENV_INTERIORS];
 const ENV_SKIES=[{v:"auto",n:"Automatic from time of day"},{v:"day",n:"Clear daylight"},{v:"sunset",n:"Golden sunset"},{v:"night",n:"Night sky"},{v:"overcast",n:"Overcast"}];
 const ENV_WEATHER=[{id:"clear",n:"Clear",i:"☀"},{id:"rain",n:"Rain",i:"☂"},{id:"snow",n:"Snow",i:"❄"},{id:"fog",n:"Fog",i:"≋"},{id:"dust",n:"Dust",i:"◌"},{id:"storm",n:"Storm",i:"ϟ"}];
 const ENV_FLOORS=[{id:"studio",n:"Studio floor",c:"linear-gradient(135deg,#303746,#151923)"},{id:"concrete",n:"Concrete",c:"repeating-linear-gradient(45deg,#9ca1a4 0 8px,#8b9094 8px 9px)"},{id:"wood",n:"Wood planks",c:"repeating-linear-gradient(90deg,#8b5d39 0 15px,#603c25 15px 17px)"},{id:"tile",n:"Ceramic tile",c:"linear-gradient(90deg,#d9dde0 48%,#9ba4ad 49% 52%,#d9dde0 53%),linear-gradient(#d9dde0 48%,#9ba4ad 49% 52%,#d9dde0 53%)"},{id:"grass",n:"Grass",c:"linear-gradient(135deg,#397b3e,#78a64c)"},{id:"sand",n:"Sand / desert",c:"linear-gradient(135deg,#d7b77b,#aa7e45)"},{id:"asphalt",n:"Asphalt",c:"linear-gradient(135deg,#4b5056,#25282d)"},{id:"earth",n:"Earth / ground",c:"linear-gradient(135deg,#76573d,#4e392c)"}];
 function environmentState(sc){sc.environment=Object.assign({backdrop:"none",sky:"auto",weather:"clear",strength:55,backdropOpacity:82,floor:"studio",floorScale:100},sc.environment||{});return sc.environment;}
 function renderEnvironment(){
-  const sc=scene(),e=environmentState(sc),current=ENVIRONMENTS.find(x=>x.id===e.backdrop)||ENVIRONMENTS[0];
-  return `<div class="envpanel"><div class="envhero"><h3>Scene Environment</h3><p>Set the world behind this scene. It appears in the viewfinder, storyboard and animatic.</p></div><div class="envpreview" data-weather="${esc(ENV_WEATHER.find(x=>x.id===e.weather)?.n||"Clear")}" style="${current.file?`background-image:url('${current.file}')`:""}"></div>
-  ${sect("envbackdrop","Background plate",`<div class="envgrid">${ENVIRONMENTS.map(x=>x.id==="none"?`<button class="envcard none${e.backdrop===x.id?" on":""}" data-act="envBackdrop" data-v="${x.id}"><span>${x.name}</span></button>`:`<button class="envcard${e.backdrop===x.id?" on":""}" data-act="envBackdrop" data-v="${x.id}"><img src="${x.file}" alt=""><span>${x.name}</span></button>`).join("")}</div><label class="f"><span>Background opacity <b style="float:right">${e.backdropOpacity}%</b></span><input type="range" min="0" max="100" step="1" value="${e.backdropOpacity}" data-envrange="backdropOpacity"></label>`)}
-  ${sect("envsky","Sky and time",fSelect("Sky treatment","scene","environment.sky",null,e.sky,ENV_SKIES))}
-  ${sect("envfloor","Floor and ground",`<div class="floorgrid">${ENV_FLOORS.map(x=>`<button class="floorbtn${e.floor===x.id?" on":""}" data-act="envFloor" data-v="${x.id}"><i class="floorswatch" style="--floor:${x.c}"></i><span>${x.n}</span></button>`).join("")}</div><label class="f"><span>Material scale <b style="float:right">${e.floorScale}%</b></span><input type="range" min="50" max="200" step="5" value="${e.floorScale}" data-envrange="floorScale"></label><p class="hint">The chosen surface is used by the viewfinder, storyboard and perspective preview.</p>`)}
-  ${sect("envweather","Weather and atmosphere",`<div class="weathergrid">${ENV_WEATHER.map(x=>`<button class="weatherbtn${e.weather===x.id?" on":""}" data-act="envWeather" data-v="${x.id}">${x.i} ${x.n}</button>`).join("")}</div><label class="f"><span>Effect strength <b style="float:right">${e.strength}%</b></span><input type="range" min="0" max="100" step="1" value="${e.strength}" data-envrange="strength"></label><p class="hint">Weather is a visual planning overlay; it does not alter geometry.</p>`)}</div>`;
+  const sc=scene(),e=environmentState(sc),current=ALL_ENVIRONMENTS.find(x=>x.id===e.backdrop)||ENVIRONMENTS[0];
+  const clear=x=>`<div class="envclearrow"><button class="envclear" data-act="envClear" data-v="${x}">Clear this section</button></div>`;
+  return `<div class="envpanel"><div class="envhero"><h3>Scene Environment</h3><p>Set the world behind this scene. It appears in the viewfinder, storyboard and animatic.</p><button class="envclearall" data-act="envClearAll">Clear All</button></div><div class="envpreview" data-weather="${esc(ENV_WEATHER.find(x=>x.id===e.weather)?.n||"Clear")}" style="${current.file?`background-image:url('${current.file}')`:""}"></div>
+  ${sect("envbackdrop","Exterior and studio backgrounds",`${clear("background")}<div class="envgrid">${ENVIRONMENTS.map(x=>x.id==="none"?`<button class="envcard none${e.backdrop===x.id?" on":""}" data-act="envBackdrop" data-v="${x.id}"><span>${x.name}</span></button>`:`<button class="envcard${e.backdrop===x.id?" on":""}" data-act="envBackdrop" data-v="${x.id}"><img src="${x.file}" alt=""><span>${x.name}</span></button>`).join("")}</div><label class="f"><span>Background opacity <b style="float:right">${e.backdropOpacity}%</b></span><input type="range" min="0" max="100" step="1" value="${e.backdropOpacity}" data-envrange="backdropOpacity"></label>`)}
+  ${sect("envinteriors","Interior locations",`<div class="envgrid">${ENV_INTERIORS.map(x=>`<button class="envcard${e.backdrop===x.id?" on":""}" data-act="envBackdrop" data-v="${x.id}"><img src="${x.file}" alt="${x.name}"><span>${x.name}</span></button>`).join("")}</div><p class="hint">Interior backplates are empty, eye-level spaces designed for actor and prop staging.</p>`)}
+  ${sect("envsky","Sky and time",clear("sky")+fSelect("Sky treatment","scene","environment.sky",null,e.sky,ENV_SKIES))}
+  ${sect("envfloor","Floor and ground",`${clear("floor")}<div class="floorgrid">${ENV_FLOORS.map(x=>`<button class="floorbtn${e.floor===x.id?" on":""}" data-act="envFloor" data-v="${x.id}"><i class="floorswatch" style="--floor:${x.c}"></i><span>${x.n}</span></button>`).join("")}</div><label class="f"><span>Material scale <b style="float:right">${e.floorScale}%</b></span><input type="range" min="50" max="200" step="5" value="${e.floorScale}" data-envrange="floorScale"></label><p class="hint">The chosen surface is used by the viewfinder, storyboard and perspective preview.</p>`)}
+  ${sect("envweather","Weather and atmosphere",`${clear("weather")}<div class="weathergrid">${ENV_WEATHER.map(x=>`<button class="weatherbtn${e.weather===x.id?" on":""}" data-act="envWeather" data-v="${x.id}">${x.i} ${x.n}</button>`).join("")}</div><label class="f"><span>Effect strength <b style="float:right">${e.strength}%</b></span><input type="range" min="0" max="100" step="1" value="${e.strength}" data-envrange="strength"></label><p class="hint">Weather is a visual planning overlay; it does not alter geometry.</p>`)}</div>`;
 }
 
 /* ------------------------- panel dispatch ------------------------- */
@@ -4549,14 +4556,17 @@ function clipNear(cs,N){
 
 
 function vfEnvironmentArt(W,top,fw,fh,cid,e){
-  const entry=ENVIRONMENTS.find(x=>x.id===e.backdrop),op=clamp((+e.backdropOpacity||0)/100,0,1),strength=clamp((+e.strength||0)/100,0,1);
+  const entry=ALL_ENVIRONMENTS.find(x=>x.id===e.backdrop),op=clamp((+e.backdropOpacity||0)/100,0,1),strength=clamp((+e.strength||0)/100,0,1);
   const back=entry&&entry.file?`<image href="${entry.file}" x="0" y="${top}" width="${fw}" height="${fh}" preserveAspectRatio="xMidYMid slice" opacity="${op}"/>`:`<rect x="0" y="${top}" width="${fw}" height="${fh}" fill="url(#sky${cid})"/>`;
-  let over="";const n=Math.max(10,Math.round(45*strength));
-  if(e.weather==="rain")over=Array.from({length:n},(_,i)=>{const x=(i*83%Math.max(1,fw)),y=top+(i*47%Math.max(1,fh));return `<path d="M${x} ${y}l-8 18" stroke="#b9dcff" stroke-width="1.4" opacity="${.2+.55*strength}"/>`;}).join("");
-  else if(e.weather==="snow")over=Array.from({length:n},(_,i)=>{const x=(i*97%Math.max(1,fw)),y=top+(i*59%Math.max(1,fh)),r=1+(i%3);return `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity="${.25+.6*strength}"/>`;}).join("");
-  else if(e.weather==="fog")over=`<rect x="0" y="${top}" width="${fw}" height="${fh}" fill="#dce5e8" opacity="${.15+.55*strength}"/>`;
-  else if(e.weather==="dust")over=`<rect x="0" y="${top}" width="${fw}" height="${fh}" fill="#c99b62" opacity="${.12+.45*strength}"/>`;
-  else if(e.weather==="storm")over=`<rect x="0" y="${top}" width="${fw}" height="${fh}" fill="#101827" opacity="${.18+.45*strength}"/><path d="M${fw*.7} ${top+10}l-34 ${fh*.42}h24l-34 ${fh*.42}" fill="none" stroke="#f5f1c7" stroke-width="3" opacity="${.35+.6*strength}"/>`;
+  let over="";const n=Math.max(18,Math.round(75*strength)),uid=`wx${cid}`;
+  const defs=`<defs><filter id="${uid}blur"><feGaussianBlur stdDeviation="7"/></filter><linearGradient id="${uid}fog" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#dfe8eb" stop-opacity=".18"/><stop offset=".5" stop-color="#f6fafb" stop-opacity=".72"/><stop offset="1" stop-color="#cbd8dc" stop-opacity=".18"/></linearGradient><radialGradient id="${uid}storm"><stop offset="0" stop-color="#53627a" stop-opacity=".12"/><stop offset="1" stop-color="#07111f" stop-opacity=".82"/></radialGradient></defs>`;
+  const rain=(count,far=false)=>Array.from({length:count},(_,i)=>{const x=(i*(far?137:83)+31)%Math.max(1,fw),y=top+((i*(far?71:47)+19)%Math.max(1,fh)),len=far?10+(i%5):18+(i%12),sw=far?.65:1.15+(i%3)*.22;return `<path d="M${x} ${y}l-${len*.34} ${len}" stroke="${far?"#dcecff":"#b9dcff"}" stroke-width="${sw}" stroke-linecap="round" opacity="${(far?.12:.25)+(far?.22:.55)*strength}"/>`;}).join("");
+  const particles=(count,color)=>Array.from({length:count},(_,i)=>{const x=(i*97+23)%Math.max(1,fw),y=top+((i*59+17)%Math.max(1,fh)),r=.7+(i%4)*.6;return `<circle cx="${x}" cy="${y}" r="${r}" fill="${color}" opacity="${.14+.52*strength}"/>`;}).join("");
+  if(e.weather==="rain")over=defs+`<rect x="0" y="${top}" width="${fw}" height="${fh}" fill="#12233a" opacity="${.05+.18*strength}"/>`+rain(Math.round(n*.7),true)+rain(n,false);
+  else if(e.weather==="snow")over=defs+particles(n,"#fff")+Array.from({length:Math.round(n*.35)},(_,i)=>`<circle cx="${(i*149+41)%fw}" cy="${top+((i*91+11)%fh)}" r="${2.2+i%4}" fill="#fff" opacity="${.3+.55*strength}" filter="url(#${uid}blur)"/>`).join("");
+  else if(e.weather==="fog")over=defs+`<rect x="0" y="${top}" width="${fw}" height="${fh}" fill="#dbe4e7" opacity="${.08+.25*strength}"/><g filter="url(#${uid}blur)" opacity="${.2+.62*strength}"><ellipse cx="${fw*.22}" cy="${top+fh*.42}" rx="${fw*.38}" ry="${fh*.13}" fill="url(#${uid}fog)"/><ellipse cx="${fw*.72}" cy="${top+fh*.62}" rx="${fw*.5}" ry="${fh*.16}" fill="url(#${uid}fog)"/></g>`;
+  else if(e.weather==="dust")over=defs+`<rect x="0" y="${top}" width="${fw}" height="${fh}" fill="#b37d43" opacity="${.07+.3*strength}"/><g filter="url(#${uid}blur)" opacity="${.18+.35*strength}"><ellipse cx="${fw*.28}" cy="${top+fh*.65}" rx="${fw*.42}" ry="${fh*.15}" fill="#c99b62"/><ellipse cx="${fw*.78}" cy="${top+fh*.38}" rx="${fw*.35}" ry="${fh*.12}" fill="#d5ad78"/></g>`+particles(Math.round(n*.7),"#e7c898");
+  else if(e.weather==="storm")over=defs+`<rect x="0" y="${top}" width="${fw}" height="${fh}" fill="url(#${uid}storm)" opacity="${.3+.5*strength}"/>`+rain(Math.round(n*.7),true)+rain(Math.round(n*1.15),false)+`<path d="M${fw*.72} ${top+8}l-30 ${fh*.34}h18l-27 ${fh*.42}" fill="none" stroke="#fff9c4" stroke-width="3.2" stroke-linejoin="round" opacity="${.28+.58*strength}" filter="url(#${uid}blur)"/><path d="M${fw*.72} ${top+8}l-30 ${fh*.34}h18l-27 ${fh*.42}" fill="none" stroke="#fff" stroke-width="1.2" opacity="${.4+.6*strength}"/>`;
   return {back,over};
 }
 
@@ -6453,7 +6463,7 @@ function tabBadge(id){
   if(id==="locations" && recs("locations").length) return recs("locations").length;
   return "";
 }
-const MAIN_TABS = ["inspector","layers","shots","story","script","gear"];
+const MAIN_TABS = ["inspector","layers","environment","shots","story","script","gear"];
 const PROD_MENU = [
   {g:"Planning",        ids:["schedule","locations","moodboard"]},
   {g:"People and money",ids:["crew","tasks","budget"]},
@@ -6470,7 +6480,7 @@ function tabEnabled(id){ return visibleTabs().some(t=>t.id===id); }
 
 function renderTabs(){
   const vis = visibleTabs();
-  if(state.tab!=="environment"&&!vis.some(t=>t.id===state.tab)) state.tab="inspector";
+  if(!vis.some(t=>t.id===state.tab)) state.tab="inspector";
   const prodIds = PROD_MENU.flatMap(g=>g.ids).filter(tabEnabled);
   const inProd = prodIds.includes(state.tab);
   const pill = id => {
@@ -8582,6 +8592,8 @@ const ACTIONS = {
   envBackdrop(b){pushHistory();environmentState(scene()).backdrop=b.dataset.v;renderAll();save();},
   envWeather(b){pushHistory();environmentState(scene()).weather=b.dataset.v;renderAll();save();},
   envFloor(b){pushHistory();environmentState(scene()).floor=b.dataset.v;renderAll();save();},
+  envClear(b){pushHistory();const e=environmentState(scene()),v=b.dataset.v;if(v==="background"){e.backdrop="none";e.backdropOpacity=82;}else if(v==="sky")e.sky="auto";else if(v==="floor"){e.floor="studio";e.floorScale=100;}else if(v==="weather"){e.weather="clear";e.strength=55;}renderAll();save();},
+  envClearAll(){pushHistory();scene().environment={backdrop:"none",sky:"auto",weather:"clear",strength:55,backdropOpacity:82,floor:"studio",floorScale:100};renderAll();save();},
   layersAll(){ Object.keys(state.view.layers).forEach(k=>state.view.layers[k]=true); renderAll(); save(); },
   layersOnlyPlan(){
     const used={}; els().forEach(e=>used[e.layer||layerOf(e.type)]=true);
