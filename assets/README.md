@@ -6,7 +6,7 @@ registered in `index.html` (see below).
 
 ## Layout
 
-`3d/` holds 185 PNGs with transparent backgrounds, grouped by category:
+`3d/` holds 188 PNGs with transparent backgrounds, grouped by category:
 
 | Folder | Contents |
 | --- | --- |
@@ -52,16 +52,6 @@ Target for every crop in `characters/faces/` and `characters/emirati/faces/`:
 
 `characters/faces/` predates this rule and still varies between roughly 37% and 46%
 face height; `characters/emirati/faces/` is normalised to it.
-
-## Fixtures that carry their own stand
-
-The viewfinder draws a pole under a light so the head sits at its rigged height.
-Artwork that already includes a tripod or C stand must not get that pole as well,
-or the support is drawn twice. Those fixtures are listed in `FIXTURE_ON_STAND` in
-`index.html` and are drawn from the floor to full height instead. `FIXTURE_NO_POLE`
-covers the sun marker, which gets neither.
-
-If you add fixture art, check whether it has legs and add it to the right set.
 
 ## Framing rule for animals
 
