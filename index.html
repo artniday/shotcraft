@@ -828,6 +828,26 @@ body.dark .helpcontrols,body.dark .helpchips button,body.dark #helpBody kbd{back
 .sp-dial{padding-left:100px;padding-right:70px;margin-bottom:8px}
 .sp-trans{text-align:right;font-weight:700;text-transform:uppercase;margin:10px 0}
 .sp-blank{height:8px}
+/* Paginated screenplay page. Widths are in ch units so the layout tracks the
+   same 60 column Courier measure the paginator uses: 1.5in binding margin,
+   1in right margin, 55 lines to the page. */
+.fdpage{position:relative;font-family:"Courier New",Courier,monospace;font-size:12px;line-height:1.0;
+  width:64ch;min-height:55em;margin:0 auto 18px;padding:2.4em 2ch 3em;background:#fff;color:#14171f;
+  box-shadow:0 2px 10px rgba(18,29,62,.14);border:1px solid #e3e0d8}
+.fdpage:last-child{margin-bottom:0}
+.fdpageno{position:absolute;top:1em;right:2ch;font-size:12px;color:#4a5058}
+.fdpage>div{white-space:pre-wrap}
+.fd-blank{height:1em}
+.fd-scene{text-transform:uppercase;font-weight:700}
+.fd-action{margin:0}
+.fd-character{margin-left:22ch;text-transform:uppercase}
+.fd-parenthetical{margin-left:16ch}
+.fd-dialogue{margin-left:10ch}
+.fd-more{margin-left:22ch;color:#5b6478}
+.fd-transition{margin-left:45ch;text-transform:uppercase}
+.fd-shot{text-transform:uppercase}
+body.dark .fdpage{background:#f6f4ee}
+@media print{.fdpage{box-shadow:none;border:0;page-break-after:always;margin:0}}
 .avtable textarea{width:100%;min-height:52px;border:1px solid var(--line);border-radius:6px;padding:5px 7px;
   font-size:11px;resize:vertical}
 .titlepage{background:#fff;font-family:"Courier New",monospace;text-align:center;padding:34px 20px;min-height:300px;
@@ -1105,7 +1125,7 @@ body.dark .launchnew{background:rgba(20,27,51,.94);border-color:#303a60}.dark .l
 .actoravatar i::before,.actoravatar i::after{content:"";position:absolute;top:27px;width:8px;height:38px;border-radius:6px;background:linear-gradient(#3159c9,#172d73);z-index:-1}.actoravatar i::before{left:3px;transform:rotate(7deg)}.actoravatar i::after{right:3px;transform:rotate(-7deg)}
 .actoravatar.female::after{left:12px;width:26px;border-radius:12px 12px 18px 18px;background:linear-gradient(110deg,#bd5bd4,#6d2b9b)}.actoravatar.female::before{box-shadow:-5px 2px 0 #3c2431,5px 2px 0 #3c2431,inset -3px -2px 4px rgba(70,30,20,.22)}
 .actoravatar.male::after{left:8px;width:34px;border-radius:8px 8px 11px 11px}
-.actorphoto{display:block;width:72px;height:72px;border-radius:50%;overflow:hidden;background-image:url("assets/3d/characters/legacy-pair.png?v=20260830a");background-repeat:no-repeat;background-size:400% auto;background-color:#edf2ff;border:3px solid #fff;box-shadow:0 7px 17px rgba(18,29,62,.18),0 0 0 2px rgba(49,89,219,.15)}
+.actorphoto{display:block;width:72px;height:72px;border-radius:50%;overflow:hidden;background-image:url("assets/3d/characters/legacy-pair.png?v=20260830g");background-repeat:no-repeat;background-size:400% auto;background-color:#edf2ff;border:3px solid #fff;box-shadow:0 7px 17px rgba(18,29,62,.18),0 0 0 2px rgba(49,89,219,.15)}
 .actorchoice img.actorphoto{object-fit:cover;object-position:50% 50%;background-image:none}
 .actorphoto.male{background-position:22% 7%}.actorphoto.female{background-position:80% 7%}
 .dirham-symbol{position:relative;display:inline-block;width:.82em;height:1em;margin-right:.2em;vertical-align:-.1em;font-family:Georgia,"Times New Roman",serif;font-size:1.16em;font-weight:900;line-height:.92;color:currentColor}
@@ -1237,7 +1257,7 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
     <input type="file" id="fileMood" accept="image/*" style="display:none">
     <input type="file" id="fileBoard" accept="image/*" style="display:none">
     <input type="file" id="fileLogo" accept="image/*" style="display:none">
-    <input type="file" id="fileScript" accept=".txt,.fountain,.md,text/plain" style="display:none">
+    <input type="file" id="fileScript" accept=".fdx,.txt,.fountain,.md,text/plain,text/xml" style="display:none">
   </div>
 
   <!-- ================= MAIN ================= -->
@@ -1709,31 +1729,35 @@ const ACTOR_NAMES={
   neutral:["Jordan","Taylor","Morgan","Casey","Riley","Avery","Jamie","Robin"]
 };
 function poseHeightFactor(el){return el.seated?.72:1}
+/* one revision string for every asset path, so replacing artwork actually
+   invalidates the browser cache. Must be declared before embedded3dPath,
+   which ACTOR_PROFILES calls at module init. */
+const ASSET_RENDER_REV="20260830-library-v5";
 function embedded3dPath(path){
   const clean=String(path||"").replace(/^assets\/3d\//,"").replace(/\.png(?:\?.*)?$/,"");
-  return clean ? "assets/3d/"+clean+".png" : "";
+  return clean ? "assets/3d/"+clean+".png?v="+ASSET_RENDER_REV : "";
 }
 const ACTOR_PROFILES={
-  "adult-woman":{n:"Adult woman",gender:"female",h:1.66,file:embedded3dPath("characters/adult-woman"),face:embedded3dPath("characters/faces/adult-woman")},
-  "adult-man":{n:"Adult man",gender:"male",h:1.78,file:embedded3dPath("characters/adult-man"),face:embedded3dPath("characters/faces/adult-man")},
-  baby:{n:"Baby",gender:"neutral",h:.72,file:embedded3dPath("characters/baby"),face:embedded3dPath("characters/faces/baby")},
-  "senior-woman":{n:"Senior woman",gender:"female",h:1.58,file:embedded3dPath("characters/senior-woman"),face:embedded3dPath("characters/faces/senior-woman")},
-  "senior-man":{n:"Senior man",gender:"male",h:1.70,file:embedded3dPath("characters/senior-man"),face:embedded3dPath("characters/faces/senior-man")},
-  child:{n:"Child",gender:"neutral",h:1.28,file:embedded3dPath("characters/child"),face:embedded3dPath("characters/faces/child")},
-  "emirati-man":{n:"Emirati adult man",gender:"male",kind:"emirati",h:1.77,file:"assets/3d/characters/emirati/adult-man.png?v=20260830a",face:"assets/3d/characters/emirati/faces/adult-man.png?v=20260830d"},
-  "emirati-woman":{n:"Emirati adult woman",gender:"female",kind:"emirati",h:1.64,file:"assets/3d/characters/emirati/adult-woman.png?v=20260830a",face:"assets/3d/characters/emirati/faces/adult-woman.png?v=20260830d"},
-  "emirati-teenager":{n:"Emirati teenage boy",gender:"male",kind:"emirati",h:1.69,file:"assets/3d/characters/emirati/teenager.png?v=20260830a",face:"assets/3d/characters/emirati/faces/teenager.png?v=20260830d"},
-  "emirati-teenage-girl":{n:"Emirati teenage girl",gender:"female",kind:"emirati",h:1.62,file:"assets/3d/characters/emirati/teenage-girl.png?v=20260830a",face:"assets/3d/characters/emirati/faces/teenage-girl.png?v=20260830d"},
-  "emirati-old-man":{n:"Emirati senior man",gender:"male",kind:"emirati",h:1.70,file:"assets/3d/characters/emirati/senior-man.png?v=20260830a",face:"assets/3d/characters/emirati/faces/senior-man.png?v=20260830d"},
-  "emirati-old-woman":{n:"Emirati senior woman",gender:"female",kind:"emirati",h:1.57,file:"assets/3d/characters/emirati/senior-woman.png?v=20260830a",face:"assets/3d/characters/emirati/faces/senior-woman.png?v=20260830d"},
-  "emirati-girl":{n:"Emirati girl",gender:"female",kind:"emirati",h:1.38,file:"assets/3d/characters/emirati/girl.png?v=20260830a",face:"assets/3d/characters/emirati/faces/girl.png?v=20260830d"},
-  "emirati-boy":{n:"Emirati boy",gender:"male",kind:"emirati",h:1.36,file:"assets/3d/characters/emirati/boy.png?v=20260830a",face:"assets/3d/characters/emirati/faces/boy.png?v=20260830d"},
-  dog:{n:"Dog",gender:"animal",kind:"animal",h:.62,r:1.55,file:"assets/3d/characters/animals/dog.png?v=20260830b",face:"assets/3d/characters/animals/dog.png?v=20260830b"},
-  cat:{n:"Cat",gender:"animal",kind:"animal",h:.28,r:1.65,file:"assets/3d/characters/animals/cat.png?v=20260830b",face:"assets/3d/characters/animals/cat.png?v=20260830b"},
-  horse:{n:"Horse",gender:"animal",kind:"animal",h:1.62,r:1.28,file:"assets/3d/characters/animals/horse.png?v=20260830b",face:"assets/3d/characters/animals/horse.png?v=20260830b"},
-  rabbit:{n:"Rabbit",gender:"animal",kind:"animal",h:.32,r:.72,file:"assets/3d/characters/animals/rabbit.png?v=20260830b",face:"assets/3d/characters/animals/rabbit.png?v=20260830b"},
-  chicken:{n:"Chicken",gender:"animal",kind:"animal",h:.42,r:.72,file:"assets/3d/characters/animals/chicken.png?v=20260830b",face:"assets/3d/characters/animals/chicken.png?v=20260830b"},
-  falcon:{n:"Falcon",gender:"animal",kind:"animal",h:.48,r:.78,file:"assets/3d/characters/animals/falcon.png?v=20260830b",face:"assets/3d/characters/animals/falcon.png?v=20260830b"}
+  "adult-woman":{n:"Adult woman",gender:"female",h:1.66,r:0.35,file:embedded3dPath("characters/adult-woman"),face:embedded3dPath("characters/faces/adult-woman")},
+  "adult-man":{n:"Adult man",gender:"male",h:1.78,r:0.29,file:embedded3dPath("characters/adult-man"),face:embedded3dPath("characters/faces/adult-man")},
+  baby:{n:"Baby",gender:"neutral",h:.72,r:0.45,file:embedded3dPath("characters/baby"),face:embedded3dPath("characters/faces/baby")},
+  "senior-woman":{n:"Senior woman",gender:"female",h:1.58,r:.32,file:embedded3dPath("characters/senior-woman"),face:embedded3dPath("characters/faces/senior-woman")},
+  "senior-man":{n:"Senior man",gender:"male",h:1.70,r:.33,file:embedded3dPath("characters/senior-man"),face:embedded3dPath("characters/faces/senior-man")},
+  child:{n:"Child",gender:"neutral",h:1.28,r:0.31,file:embedded3dPath("characters/child"),face:embedded3dPath("characters/faces/child")},
+  "emirati-man":{n:"Emirati adult man",gender:"male",kind:"emirati",h:1.77,r:0.3,file:"assets/3d/characters/emirati/adult-man.png?v=20260830g",face:"assets/3d/characters/emirati/faces/adult-man.png?v=20260830d"},
+  "emirati-woman":{n:"Emirati adult woman",gender:"female",kind:"emirati",h:1.64,r:0.29,file:"assets/3d/characters/emirati/adult-woman.png?v=20260830g",face:"assets/3d/characters/emirati/faces/adult-woman.png?v=20260830d"},
+  "emirati-teenager":{n:"Emirati teenage boy",gender:"male",kind:"emirati",h:1.69,r:0.3,file:"assets/3d/characters/emirati/teenager.png?v=20260830g",face:"assets/3d/characters/emirati/faces/teenager.png?v=20260830d"},
+  "emirati-teenage-girl":{n:"Emirati teenage girl",gender:"female",kind:"emirati",h:1.62,r:0.31,file:"assets/3d/characters/emirati/teenage-girl.png?v=20260830g",face:"assets/3d/characters/emirati/faces/teenage-girl.png?v=20260830d"},
+  "emirati-old-man":{n:"Emirati senior man",gender:"male",kind:"emirati",h:1.70,r:0.34,file:"assets/3d/characters/emirati/senior-man.png?v=20260830g",face:"assets/3d/characters/emirati/faces/senior-man.png?v=20260830d"},
+  "emirati-old-woman":{n:"Emirati senior woman",gender:"female",kind:"emirati",h:1.57,r:0.29,file:"assets/3d/characters/emirati/senior-woman.png?v=20260830g",face:"assets/3d/characters/emirati/faces/senior-woman.png?v=20260830d"},
+  "emirati-girl":{n:"Emirati girl",gender:"female",kind:"emirati",h:1.38,r:0.28,file:"assets/3d/characters/emirati/girl.png?v=20260830g",face:"assets/3d/characters/emirati/faces/girl.png?v=20260830d"},
+  "emirati-boy":{n:"Emirati boy",gender:"male",kind:"emirati",h:1.36,r:0.29,file:"assets/3d/characters/emirati/boy.png?v=20260830g",face:"assets/3d/characters/emirati/faces/boy.png?v=20260830d"},
+  dog:{n:"Dog",gender:"animal",kind:"animal",h:0.7,r:.87,file:"assets/3d/characters/animals/dog.png?v=20260830g",face:"assets/3d/characters/animals/faces/dog.png?v=20260830f"},
+  cat:{n:"Cat",gender:"animal",kind:"animal",h:0.55,r:0.87,file:"assets/3d/characters/animals/cat.png?v=20260830g",face:"assets/3d/characters/animals/faces/cat.png?v=20260830f"},
+  horse:{n:"Horse",gender:"animal",kind:"animal",h:2.1,r:.69,file:"assets/3d/characters/animals/horse.png?v=20260830g",face:"assets/3d/characters/animals/faces/horse.png?v=20260830f"},
+  rabbit:{n:"Rabbit",gender:"animal",kind:"animal",h:0.45,r:0.68,file:"assets/3d/characters/animals/rabbit.png?v=20260830g",face:"assets/3d/characters/animals/faces/rabbit.png?v=20260830f"},
+  chicken:{n:"Chicken",gender:"animal",kind:"animal",h:0.45,r:0.6,file:"assets/3d/characters/animals/chicken.png?v=20260830g",face:"assets/3d/characters/animals/faces/chicken.png?v=20260830f"},
+  falcon:{n:"Falcon",gender:"animal",kind:"animal",h:0.5,r:0.79,file:"assets/3d/characters/animals/falcon.png?v=20260830g",face:"assets/3d/characters/animals/faces/falcon.png?v=20260830f"}
 };
 function actorProfile(el){return ACTOR_PROFILES[el.profile||((el.gender||"female")==="male"?"adult-man":"adult-woman")]}
 function nextActorName(gender){
@@ -1832,7 +1856,9 @@ CAT.prop = {
     ["bookshelf","Bookshelf / storage",1.00,0.35,1.80],
     ["plant","Potted plant / tree",0.60,0.60,1.40],
     ["rug","Rug",2.50,1.60,0.02],
-    ["floorlamp","Floor lamp (dressing)",0.40,0.40,1.60]]},
+    ["floorlamp","Floor lamp (dressing)",0.40,0.40,1.60],
+    ["sidetable","Side / end table",0.50,0.50,0.55],
+    ["curtain","Curtain / drape run",1.80,0.15,2.40]]},
   {n:"Dining and office", items:[
     ["dining4","Dining table + 4 chairs",2.20,1.60,0.75],
     ["recttable","Rectangular table",1.80,0.90,0.75],
@@ -1841,18 +1867,27 @@ CAT.prop = {
     ["desk","Executive office desk",1.60,0.80,0.75],
     ["barcounter","Bar counter",2.40,0.60,1.10],
     ["barstool","Bar stool",0.40,0.40,1.05],
-    ["filing","Filing cabinet",0.50,0.60,1.30]]},
+    ["filing","Filing cabinet",0.50,0.60,1.30],
+    ["officechair","Swivel office chair",0.65,0.65,1.15],
+    ["whiteboard","Whiteboard / flip chart",1.80,0.50,1.90],
+    ["receptiondesk","Reception desk",2.20,0.80,1.10]]},
   {n:"Bedroom", items:[
     ["kingbed","King size bed",1.90,2.00,0.60],
     ["queenbed","Double / queen bed",1.55,2.00,0.60],
     ["nightstand","Nightstand",0.50,0.40,0.60],
-    ["wardrobe","Wardrobe / closet",1.50,0.60,2.10]]},
+    ["wardrobe","Wardrobe / closet",1.50,0.60,2.10],
+    ["singlebed","Single bed",0.90,1.90,0.60],
+    ["cot","Cot / crib",0.70,1.30,0.95],
+    ["dresser","Chest of drawers",1.10,0.50,0.85]]},
   {n:"Vehicles", items:[
     ["sedan","Sedan passenger car (4 door)",4.50,1.80,1.45],
     ["suv","SUV / 4x4 vehicle",4.80,1.90,1.80],
     ["griptruck","Production grip truck",7.60,2.45,3.40],
     ["police","Police cruiser (4 door)",4.90,1.90,1.60],
-    ["bicycle","Bicycle",1.70,0.60,1.05]]},
+    ["bicycle","Bicycle",1.70,0.60,1.05],
+    ["van","Panel van",5.40,2.00,2.20],
+    ["motorcycle","Motorcycle",2.10,0.80,1.20],
+    ["minibus","Minibus / crew shuttle",7.00,2.20,2.70]]},
   {n:"Hand props", items:[
     ["laptop","Laptop",0.33,0.24,0.24],
     ["phone","Mobile phone",0.16,0.08,0.02],
@@ -1861,7 +1896,11 @@ CAT.prop = {
     ["letter","Sealed letter / envelope",0.22,0.11,0.01],
     ["briefcase","Briefcase",0.45,0.15,0.35],
     ["suitcase","Suitcase",0.55,0.25,0.75],
-    ["clapper","Clapperboard",0.30,0.05,0.25]]},
+    ["clapper","Clapperboard",0.30,0.05,0.25],
+    ["tablet","Tablet",0.25,0.18,0.01],
+    ["bottle","Bottle",0.07,0.07,0.25],
+    ["tray","Serving tray",0.45,0.32,0.03],
+    ["stillscamera","Stills camera",0.15,0.12,0.11]]},
   {n:"Action and stunt (supervised)", items:[
     ["propfirearm","Prop firearm (armourer required)",0.22,0.06,0.15,"safety"],
     ["proprifle","Prop long arm (armourer required)",1.05,0.08,0.20,"safety"],
@@ -1900,7 +1939,9 @@ CAT.staging = {
     ["monmix","Monitor mixing position",1.80,1.20,1.10],
     ["micstand","Microphone stand",0.70,0.70,1.60],
     ["barrier","Crowd barrier / barricade",2.00,0.60,1.10],
-    ["ledwall","LED video wall / screen",6.00,0.50,3.50]]},
+    ["ledwall","LED video wall / screen",6.00,0.50,3.50],
+    ["lectern","Lectern / podium",0.60,0.45,1.20],
+    ["followspot","Follow spot position",1.00,0.80,1.60]]},
   {n:"Broadcast and outside production", items:[
     ["obtruck","Broadcast production truck",12.0,2.60,3.80],
     ["engvan","ENG / news van",5.40,2.10,2.60],
@@ -1923,13 +1964,18 @@ CAT.grip = {
     ["dollyplat","Dolly / doorway dolly",1.20,0.75,0.35],
     ["jib","Jib arm base",1.40,1.40,1.80],
     ["dit","DIT cart / data station",1.20,0.70,1.20],
-    ["makeup","Hair and make up station",1.60,0.80,1.80]]}
+    ["makeup","Hair and make up station",1.60,0.80,1.80],
+    ["combostand","Combo stand (heavy roller)",1.20,1.20,3.60],
+    ["overhead12","12x12 overhead frame",3.66,3.66,3.20],
+    ["ladder","Step ladder",0.60,1.10,2.40],
+    ["generator","Generator / genny",1.80,0.90,1.30],
+    ["crafttable","Craft services table",1.80,0.75,0.75]]}
 ]};
 
 CAT.arch = {
   title:"Architecture and fixtures", colour:"#5b6478", groups:[
   {n:"Architecture", items:[
-    ["stairs","Staircase flight",1.20,3.00,2.60],
+    ["stairs","Staircase flight",1.20,4.30,2.60],
     ["wc","Toilet / WC",0.40,0.70,0.80],
     ["basin","Wash basin / sink",0.60,0.45,0.90],
     ["bath","Bathtub",1.70,0.75,0.60],
@@ -1942,7 +1988,9 @@ CAT.arch = {
     ["railing","Railing / balustrade",2.00,0.10,1.10],
     ["radiator","Radiator",1.20,0.12,0.60],
     ["fireplace","Fireplace / hearth",1.30,0.40,1.20],
-    ["pillarround","Round column",0.50,0.50,2.80]]}
+    ["pillarround","Round column",0.50,0.50,2.80],
+    ["kitchensink","Kitchen sink run",1.20,0.65,0.92],
+    ["wallunit","Wall / kitchen unit",1.20,0.35,0.70]]}
 ]};
 
 /* lighting and grip fixtures: kind light = throws a beam, kind flag = cuts light */
@@ -2080,7 +2128,6 @@ const RIG_ART = {"Tripod":"production/cinema-camera","Static clamp":"production/
   "Slider":"production/cinema-camera","Dana dolly / rail":"production/doorway-dolly",
   "Gimbal":"production/gimbal-camera","Jib / crane":"production/camera-crane",
   "Drone":"production/gimbal-camera","Car mount":"production/dslr-camera"};
-const ASSET_RENDER_REV="20260829-library-v4";
 function asset3d(id){const p=ASSET_3D[id];return p?embedded3dPath(p):""}
 
 /* =====================================================================
@@ -2642,11 +2689,11 @@ function drawElement(el,crossing){
        keeps that copy from borrowing the editor actor's clipping rectangle. */
     const clipId="actorClip"+String(el.id).replace(/[^a-zA-Z0-9_-]/g,"")+"_"+Math.random().toString(36).slice(2,8);
     const female=(el.gender||"female")==="female",profile=el.profile&&actorProfile(el);
-    const imageX=profile?cx-aw/2:(female?cx-aw*1.5:cx-aw/2),imageW=profile?aw:aw*2,imageHref=profile?profile.file:"assets/3d/characters/legacy-pair.png?v=20260830a";
+    const imageX=profile?cx-aw/2:(female?cx-aw*1.5:cx-aw/2),imageW=profile?aw:aw*2,imageHref=profile?profile.file:"assets/3d/characters/legacy-pair.png?v=20260830g";
     g = `<ellipse cx="${cx}" cy="${cy+ah*.42}" rx="${aw*.46}" ry="7" fill="#091126" opacity=".25"/>
       <defs><clipPath id="${clipId}"><rect x="${cx-aw/2}" y="${cy-ah/2}" width="${aw}" height="${ah}" rx="11"/></clipPath></defs>
       <g clip-path="url(#${clipId})">
-        <image x="${imageX}" y="${cy-ah/2}" width="${imageW}" height="${ah}" href="${imageHref}" preserveAspectRatio="${profile?"xMidYMax meet":"xMidYMax meet"}"/>
+        <image x="${imageX}" y="${cy-ah/2}" width="${imageW}" height="${ah}" href="${imageHref}" preserveAspectRatio="xMidYMax meet"/>
         <path d="M${cx-aw/2+3} ${cy-ah/2+5} Q${cx} ${cy-ah/2-3} ${cx+aw/2-4} ${cy-ah/2+8}" fill="none" stroke="#fff" stroke-width="3" opacity=".55"/>
       </g>
       <g pointer-events="none"><circle cx="${cx-aw*.38}" cy="${cy-ah*.32}" r="10" fill="${el.color}" stroke="#fff" stroke-width="2"/>
@@ -4908,10 +4955,10 @@ function vfSVG(cam,W,H,opt){
     const figureH=standingH*poseHeightFactor(ac),ez=+ac.elevation||0,feet=prj([q.x,q.y,ez]),head=prj([q.x,q.y,ez+figureH]);
     if(feet.d>NEAR&&head.d>NEAR){
       shadow(q.x,q.y,ac.seated?.42:.28,ac.seated?.38:.24);
-      const F=scr(feet),Hh=scr(head),ih=Math.max(28,Math.abs(F[1]-Hh[1])),bodyRatio=profile.kind==="animal"?(profile.r||1):ac.profile==="baby"?.52:ac.profile==="child"?.40:.43,widthScale=((+ac.w||.48)/.48)/actorScale,iw=ih*bodyRatio*widthScale;
+      const F=scr(feet),Hh=scr(head),ih=Math.max(28,Math.abs(F[1]-Hh[1])),bodyRatio=profile.r||(profile.kind==="animal"?1:ac.profile==="baby"?.52:ac.profile==="child"?.40:.43),widthScale=((+ac.w||.48)/.48)/actorScale,iw=ih*bodyRatio*widthScale;
       const clip="vfActor"+String(ac.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,5);
-      const female=(ac.gender||"female")==="female",hasProfile=!!ac.profile,isAnimal=profile.kind==="animal",assetBoxW=isAnimal?iw:(hasProfile?ih:iw*2),ix=hasProfile?F[0]-assetBoxW*.5:(female?F[0]-iw*1.5:F[0]-iw*.5),imgW=assetBoxW,imgHref=hasProfile?profile.file:"assets/3d/characters/legacy-pair.png?v=20260830a";
-      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${imgW.toFixed(1)}" height="${ih.toFixed(1)}" href="${imgHref}" preserveAspectRatio="${hasProfile?"xMidYMid meet":"none"}"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)}</text>`:""}`});
+      const female=(ac.gender||"female")==="female",hasProfile=!!ac.profile,isAnimal=profile.kind==="animal",assetBoxW=isAnimal?iw:(hasProfile?ih:iw*2),ix=hasProfile?F[0]-assetBoxW*.5:(female?F[0]-iw*1.5:F[0]-iw*.5),imgW=assetBoxW,imgHref=hasProfile?profile.file:"assets/3d/characters/legacy-pair.png?v=20260830g";
+      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${imgW.toFixed(1)}" height="${ih.toFixed(1)}" href="${imgHref}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)}</text>`:""}`});
       return;
     }
     const skin = (ac.gender||"neutral")==="female" ? "#d9a07f" : (ac.gender||"neutral")==="male" ? "#b97857" : "#c98d6d";
@@ -6242,7 +6289,7 @@ function sheetScript(){
   const sc=scene();
   return sheetHead("Lined script")
     + `<h2>${esc(sc.slug)}</h2>`
-    + (sc.script?`<pre style="font-size:10px;white-space:pre-wrap;font-family:Consolas,monospace;line-height:1.5">${esc(sc.script)}</pre>`
+    + (sc.script?`<div class="screenpage printpages">${screenplayPagesHTML(sc.script)}</div>`
                 :`<p>No script text entered for this scene.</p>`)
     + `<h2>Coverage against the page</h2>`
     + tbl(["Shot","Camera","Size","Covers"], shotList().map(s=>[s.no,esc(s.cam.label),esc(s.cam.size+" "+sizeName(s.cam.size)),esc(s.cam.coverage||"")]));
@@ -7745,8 +7792,8 @@ function frontElevationSVG(){
     if(e.type==="wall")w=Math.max(.12,Math.abs((e.x2||p.x)-p.x));if(e.type==="door"||e.type==="window")w=e.width||.9;
     const x=Xf(p.x)-w*sc/2,y=Zf(elev+z),ww=Math.max(7,w*sc),hh=Math.max(5,z*sc);
     if(e.type==="actor"){
-      const clip="frontActor"+String(e.id).replace(/[^a-zA-Z0-9_-]/g,"")+"_"+Math.random().toString(36).slice(2,8),female=(e.gender||"female")==="female",profile=e.profile&&actorProfile(e),imageX=profile?Xf(p.x)-ww*.5:(female?Xf(p.x)-ww*1.5:Xf(p.x)-ww*.5),imageW=profile?ww:ww*2,imageHref=profile?profile.file:"assets/3d/characters/legacy-pair.png?v=20260830a";
-      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${imageX}" y="${y}" width="${imageW}" height="${hh}" href="${imageHref}" preserveAspectRatio="${profile?"none":"xMidYMax meet"}"/></g>`;
+      const clip="frontActor"+String(e.id).replace(/[^a-zA-Z0-9_-]/g,"")+"_"+Math.random().toString(36).slice(2,8),female=(e.gender||"female")==="female",profile=e.profile&&actorProfile(e),imageX=profile?Xf(p.x)-ww*.5:(female?Xf(p.x)-ww*1.5:Xf(p.x)-ww*.5),imageW=profile?ww:ww*2,imageHref=profile?profile.file:"assets/3d/characters/legacy-pair.png?v=20260830g";
+      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${imageX}" y="${y}" width="${imageW}" height="${hh}" href="${imageHref}" preserveAspectRatio="xMidYMax meet"/></g>`;
     }
     else g+=`<rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="${col}" stroke="#fff" stroke-opacity=".65"/><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="url(#frontObj)"/>`;
     g+=`<text x="${Xf(p.x)}" y="${Math.max(18,y-8)}" text-anchor="middle" font-size="12" font-weight="800" fill="#f7f9ff" stroke="#101a30" stroke-width="3" paint-order="stroke">${esc(e.label||e.type)} · ${elev.toFixed(2)} m</text>`;});
@@ -7909,7 +7956,8 @@ function scriptStats(text){
   const t=String(text||"");
   const words=(t.match(/[A-Za-z0-9'\u2019-]+/g)||[]).length;
   const lines=t.split("\n").length;
-  const pages=Math.max(1,Math.round((lines/55)*10)/10);
+  /* real pagination: each element wrapped at its own industry column width */
+  const pages=t.trim()?scriptPageCount(t):0;
   const chars=new Set();
   t.split("\n").forEach(l=>{ const x=l.trim();
     if(/^[A-Z][A-Z0-9 .'()-]{1,30}$/.test(x) && x.length<32 && !/^(INT|EXT|CUT TO|FADE|DISSOLVE)/i.test(x)) chars.add(x.replace(/\(.*\)/,"").trim()); });
@@ -7951,9 +7999,10 @@ function scriptEditor(){
   return `<div class="modhead"><div><b>SCREENPLAY EDITOR</b>
       <div class="hint">Professional screenplay formatting, navigation, autocomplete and revision tools.</div></div>
       <div style="display:flex;gap:6px">
-        <button class="btn" data-act="importScript" title="Load a .txt or .fountain file">Import</button>
+        <button class="btn" data-act="importScript" title="Load a Final Draft .fdx, .txt or .fountain file">Import</button>
         <button class="btn" data-act="pasteScript">Paste</button>
         <button class="btn" data-act="exportScriptTxt" title="Download the scene text">Save .txt</button>
+        <button class="btn" data-act="exportScriptFdx" title="Final Draft interchange format">Save .fdx</button>
         <button class="btn" data-act="printScript">Print PDF</button>
         <button class="btn danger" data-act="clearScript">Clear</button></div></div>
     ${scriptStatStrip(sc.script)}
@@ -7969,7 +8018,7 @@ function scriptEditor(){
     <p class="hint" style="margin:0 0 8px">Use Ctrl/Cmd+1–6 for screenplay elements. Smart suggestions reuse characters and locations already in the draft.</p>
     <textarea id="scriptProEditor" class="ui scriptbox tall revision-${rev}${focus?" focusmode":""}" spellcheck="true" ${bindAttr("scene","script")}>${esc(sc.script||"")}</textarea></main></div>
     <div class="sect" style="margin-top:12px"><h4>Page view<span class="tagr">${esc(sc.slug)}</span></h4>
-      <div class="sbody screenpage">${screenplayHTML(sc.script||"")}</div></div>`;
+      <div class="sbody screenpage">${screenplayPagesHTML(sc.script||"")}</div></div>`;
 }
 function screenplayHTML(text){
   if(!text.trim()) return `<p class="hint">Nothing typed yet.</p>`;
@@ -7991,6 +8040,144 @@ function screenplayHTML(text){
   });
   return out.join("");
 }
+/* =====================================================================
+   SCREENPLAY PAGINATION AND FINAL DRAFT INTERCHANGE
+   12 pt Courier is 10 characters to the inch and 6 lines to the inch.
+   On US Letter with a 1.5 in binding margin and a 1 in right margin the
+   text block is 6 in, so 60 characters wide and 55 lines to the page.
+   Indents below are measured in characters from the left margin.
+   ===================================================================== */
+const FD_METRICS = {
+  linesPerPage: 55, cols: 60,
+  scene:      {indent:0,  width:60, before:1, upper:true},
+  action:     {indent:0,  width:60, before:1, upper:false},
+  character:  {indent:22, width:35, before:1, upper:true},
+  parenthetical:{indent:16,width:24, before:0, upper:false},
+  dialogue:   {indent:10, width:35, before:0, upper:false},
+  transition: {indent:45, width:15, before:1, upper:true, flushRight:true},
+  shot:       {indent:0,  width:60, before:1, upper:true}
+};
+const FD_TRANSITION = /^(CUT TO|FADE IN|FADE OUT|FADE TO|DISSOLVE TO|SMASH CUT|MATCH CUT|JUMP CUT|WIPE TO|IRIS OUT|TIME CUT)\b/i;
+const FD_SCENE = /^(INT|EXT|INT\/EXT|I\/E)[\.\s]/i;
+const FD_CUE = /^[A-Z][A-Z0-9 .'\u2019()#-]{0,34}$/;
+
+/* One classifier for the whole app. The page view, the statistics, the
+   scene navigator and the FDX writer previously each guessed differently,
+   so a line could be dialogue in one place and action in another. */
+function scriptParse(text){
+  const lines = String(text||"").replace(/\r\n/g,"\n").split("\n");
+  const out=[]; let prev=null;
+  lines.forEach(raw=>{
+    const t=raw.trim();
+    if(!t){ prev=null; return; }
+    let type;
+    if(FD_SCENE.test(t)) type="scene";
+    else if(FD_TRANSITION.test(t) || /^[A-Z ]+ TO:$/.test(t)) type="transition";
+    else if(/^\(.*\)$/.test(t)) type=(prev==="character"||prev==="dialogue")?"parenthetical":"action";
+    else if(FD_CUE.test(t) && t===t.toUpperCase() && /[A-Z]/.test(t) && t.length<36
+            && !(prev==="character"||prev==="parenthetical")) type="character";
+    else type=(prev==="character"||prev==="parenthetical"||prev==="dialogue")?"dialogue":"action";
+    out.push({type, text:t}); prev=type;
+  });
+  return out;
+}
+function fdWrap(text, width){
+  const words=String(text).split(/\s+/).filter(Boolean);
+  if(!words.length) return [""];
+  const rows=[]; let line="";
+  for(const w of words){
+    if(!line) line=w;
+    else if((line+" "+w).length<=width) line+=" "+w;
+    else { rows.push(line); line=w; }
+    while(line.length>width){ rows.push(line.slice(0,width)); line=line.slice(width); }
+  }
+  if(line) rows.push(line);
+  return rows;
+}
+/* Splits the script into real pages, carrying dialogue across a break with
+   (MORE) at the foot and CONT'D on the cue at the top, as the industry
+   format requires. Cues are never left stranded at the bottom of a page. */
+function scriptPaginate(text){
+  const els=scriptParse(text);
+  const pages=[]; let page=[]; let used=0; let cue=null;
+  const push=(type,line)=>{ page.push({type,text:line}); used++; };
+  const newPage=()=>{ pages.push(page); page=[]; used=0; };
+  for(let i=0;i<els.length;i++){
+    const el=els[i], m=FD_METRICS[el.type]||FD_METRICS.action;
+    const body=m.upper?el.text.toUpperCase():el.text;
+    const rows=fdWrap(body, m.width);
+    if(el.type==="character") cue=body.replace(/\s*\(CONT'D\)$/i,"");
+    const gap = m.before && used ? 1 : 0;
+    if(el.type==="dialogue"){
+      let idx=0;
+      while(idx<rows.length){
+        const room=FD_METRICS.linesPerPage-used-2;      // keep room for (MORE)
+        if(room<=0){ if(cue){ push("more","(MORE)"); } newPage();
+          if(cue) push("character", cue+" (CONT'D)"); continue; }
+        const take=Math.min(room, rows.length-idx);
+        for(let k=0;k<take;k++) push("dialogue", rows[idx+k]);
+        idx+=take;
+        if(idx<rows.length){ push("more","(MORE)"); newPage(); if(cue) push("character", cue+" (CONT'D)"); }
+      }
+      continue;
+    }
+    /* a scene heading or a cue must not be the last thing on a page */
+    const widow = (el.type==="scene"||el.type==="character") ? 2 : 0;
+    if(used+gap+rows.length+widow > FD_METRICS.linesPerPage) newPage();
+    else if(gap) push("blank","");
+    rows.forEach(r=>push(el.type,r));
+  }
+  if(page.length) pages.push(page);
+  return pages.length?pages:[[]];
+}
+function scriptPageCount(text){ const t=String(text||"").trim(); return t?scriptPaginate(t).length:0; }
+
+/* ---- Final Draft .fdx interchange ---- */
+const FDX_TYPE={scene:"Scene Heading",action:"Action",character:"Character",
+  parenthetical:"Parenthetical",dialogue:"Dialogue",transition:"Transition",shot:"Shot"};
+const FDX_BACK={"Scene Heading":"scene","Action":"action","Character":"character",
+  "Parenthetical":"parenthetical","Dialogue":"dialogue","Transition":"transition","Shot":"shot",
+  "General":"action"};
+function scriptToFdx(text, title, author){
+  const els=scriptParse(text);
+  const body=els.map(e=>`    <Paragraph Type="${FDX_TYPE[e.type]||"Action"}">\n`+
+    `      <Text>${esc(e.text)}</Text>\n    </Paragraph>`).join("\n");
+  return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n`+
+`<FinalDraft DocumentType="Script" Template="No" Version="5">\n`+
+`  <Content>\n${body}\n  </Content>\n`+
+`  <TitlePage>\n    <Content>\n`+
+`      <Paragraph Alignment="Center"><Text>${esc(title||"Untitled")}</Text></Paragraph>\n`+
+`      <Paragraph Alignment="Center"><Text>written by</Text></Paragraph>\n`+
+`      <Paragraph Alignment="Center"><Text>${esc(author||"")}</Text></Paragraph>\n`+
+`    </Content>\n  </TitlePage>\n</FinalDraft>\n`;
+}
+function fdxToScript(xml){
+  let doc;
+  try{ doc=new DOMParser().parseFromString(xml,"application/xml"); }catch(e){ return null; }
+  if(!doc || doc.getElementsByTagName("parsererror").length) return null;
+  const content=doc.querySelector("FinalDraft > Content");
+  if(!content) return null;
+  const out=[];
+  content.querySelectorAll("Paragraph").forEach(p=>{
+    const kind=FDX_BACK[p.getAttribute("Type")]||"action";
+    const txt=Array.from(p.querySelectorAll("Text")).map(t=>t.textContent).join("").trim();
+    if(!txt) return;
+    if(out.length && (kind==="scene"||kind==="action"||kind==="character"||kind==="transition")) out.push("");
+    out.push(kind==="parenthetical" && !/^\(/.test(txt) ? "("+txt+")" : txt);
+  });
+  return out.join("\n").replace(/\n{3,}/g,"\n\n").trim();
+}
+/* Renders the paginated script the way it prints: page numbers flush right
+   with a full stop, and no number on page one. */
+function screenplayPagesHTML(text){
+  if(!String(text||"").trim()) return `<p class="hint">Nothing typed yet.</p>`;
+  return scriptPaginate(text).map((rows,pi)=>{
+    const body=rows.map(r=>r.type==="blank"?`<div class="fd-blank"></div>`
+      :`<div class="fd-${r.type}">${esc(r.text)||"&nbsp;"}</div>`).join("");
+    return `<div class="fdpage"><div class="fdpageno">${pi?(pi+1)+".":"&nbsp;"}</div>${body}</div>`;
+  }).join("");
+}
+
 function scriptAV(){
   const rows=shotRows();
   const inAv=rows.filter(r=>r.cam.inAv);
@@ -8537,6 +8724,12 @@ const ACTIONS = {
   exportScriptTxt(){
     const sc=scene();
     download((sc.slug||sc.name||"scene").replace(/[^\w -]/g,"").trim().replace(/\s+/g,"-")+".txt", sc.script||"");
+  },
+  exportScriptFdx(){
+    const sc=scene(), P=state.project, T=P.titlePage||{};
+    if(!(sc.script||"").trim()){ alert("There is no script text in this scene yet."); return; }
+    download((sc.slug||sc.name||"scene").replace(/[^\w -]/g,"").trim().replace(/\s+/g,"-")+".fdx",
+      scriptToFdx(sc.script, P.title, T.author||P.student.name||""));
   },
   boardFromScript(){
     const sc=scene();
@@ -9086,8 +9279,14 @@ function initUI(){
   $("#fileScript").addEventListener("change", e=>{
     const f=e.target.files[0]; if(!f) return;
     const rd=new FileReader();
-    rd.onload=()=>{ pushHistory();
-      const t=String(rd.result||"").replace(/\r\n/g,"\n");
+    rd.onload=()=>{
+      let t=String(rd.result||"").replace(/\r\n/g,"\n");
+      if(/\.fdx$/i.test(f.name) || /<FinalDraft[\s>]/.test(t.slice(0,400))){
+        const conv=fdxToScript(t);
+        if(conv==null){ alert("That .fdx file could not be read. Save it again from Final Draft as .fdx and retry."); return; }
+        t=conv;
+      }
+      pushHistory();
       scene().script = (scene().script||"").trim() ? (scene().script+"\n\n"+t) : t;
       renderPanel(); save(); };
     rd.readAsText(f); e.target.value="";
