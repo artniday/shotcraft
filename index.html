@@ -5059,10 +5059,53 @@ function vfSVG(cam,W,H,opt){
     push([[q.x,q.y,0],[w.x2,w.y2,0],[w.x2,w.y2,h],[q.x,q.y,h]], wc, lum([n[0]*flip,n[1]*flip,0]), glass?' opacity="0.48"':'');
     line3([q.x,q.y,h],[w.x2,w.y2,h], night?"#4d5a80":"#aab3c6", 1.2, 0.5);
   });
+  /* Map artwork onto an opening cut in a wall. a1/b1 are the jamb positions in
+     plan, z0/z1 the sill and head. The image sits in the plane of the wall, so
+     it foreshortens with the wall rather than turning to face the lens.
+
+     An SVG matrix is affine, and the perspective image of a rectangle is not a
+     parallelogram, so a single matrix skews badly once the wall turns away: the
+     far corner lands about a third of the opening's width out at 45 degrees.
+     Slicing the opening into narrow vertical strips and mapping each one
+     separately keeps the error negligible, because within a strip the
+     divergence is tiny. */
+  function openingImage(a1,b1,z0,z1,href,id){
+    if(!assetAR(href)) return false;
+    /* Only an oblique wall needs slicing. Head on, one strip is already exact,
+       so scale the count with how much the two jambs differ in depth. */
+    const dA=prj([a1[0],a1[1],z1]).d, dB=prj([b1[0],b1[1],z1]).d;
+    if(dA<=NEAR||dB<=NEAR) return false;
+    const skew=Math.max(dA,dB)/Math.max(NEAR,Math.min(dA,dB));
+    const N=Math.max(1,Math.min(12,Math.round((skew-1)*24)+1));
+    const parts=[]; let depth=0, ok=true;
+    const lerp=(u)=>[a1[0]+(b1[0]-a1[0])*u, a1[1]+(b1[1]-a1[1])*u];
+    const corners=[];
+    for(let i=0;i<=N;i++){
+      const q=lerp(i/N);
+      const t=prj([q[0],q[1],z1]), b=prj([q[0],q[1],z0]);
+      if(t.d<=NEAR||b.d<=NEAR){ ok=false; break; }
+      corners.push({t:scr(t), b:scr(b), d:(t.d+b.d)/2});
+    }
+    if(!ok||corners.length<2) return false;
+    const cid="vfOp"+String(id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,5);
+    for(let i=0;i<N;i++){
+      const L=corners[i], R=corners[i+1];
+      const ex=[R.t[0]-L.t[0], R.t[1]-L.t[1]];      /* across this strip */
+      const ey=[L.b[0]-L.t[0], L.b[1]-L.t[1]];      /* down the opening   */
+      if(!isFinite(ex[0])||!isFinite(ey[0])) return false;
+      depth+=L.d;
+      parts.push(`<g clip-path="url(#${cid})" transform="matrix(${ex[0].toFixed(4)} ${ex[1].toFixed(4)} ${ey[0].toFixed(4)} ${ey[1].toFixed(4)} ${L.t[0].toFixed(2)} ${L.t[1].toFixed(2)})">`
+        + `<image x="${-i}" y="0" width="${N}" height="1" href="${href}" preserveAspectRatio="none"/></g>`);
+    }
+    items.push({d:depth/N-0.03,
+      s:`<defs><clipPath id="${cid}" clipPathUnits="userSpaceOnUse"><rect x="0" y="0" width="1" height="1"/></clipPath></defs>`+parts.join("")});
+    return true;
+  }
   els().filter(e=>e.type==="window").forEach(wn=>{
     const q=posAt(wn), a=rad(q.rot), hw=wn.width/2;
     const a1=[q.x-Math.cos(a)*hw, q.y-Math.sin(a)*hw], b1=[q.x+Math.cos(a)*hw, q.y+Math.sin(a)*hw];
     const s=wn.sill==null?0.9:wn.sill, hd=wn.head==null?2.2:wn.head;
+    if(openingImage(a1,b1,s,hd,asset3d("window"),wn.id)) return;
     push([[a1[0],a1[1],s],[b1[0],b1[1],s],[b1[0],b1[1],hd],[a1[0],a1[1],hd]],
       night?"#101a33":ext?"#cfe2f5":"#9ec4ea", night?0.8:1.5, ' opacity="0.95"');
     line3([a1[0],a1[1],(s+hd)/2],[b1[0],b1[1],(s+hd)/2], "#dfeaf7", 1.4, 0.6);
@@ -5070,7 +5113,9 @@ function vfSVG(cam,W,H,opt){
   els().filter(e=>e.type==="door").forEach(d=>{
     const q=posAt(d), a=rad(q.rot), hw=d.width/2;
     const a1=[q.x-Math.cos(a)*hw, q.y-Math.sin(a)*hw], b1=[q.x+Math.cos(a)*hw, q.y+Math.sin(a)*hw];
-    push([[a1[0],a1[1],0],[b1[0],b1[1],0],[b1[0],b1[1],2.05],[a1[0],a1[1],2.05]], "#6b5136", 1.05);
+    const dh=d.height||2.05;
+    if(openingImage(a1,b1,0,dh,asset3d("door"),d.id)) return;
+    push([[a1[0],a1[1],0],[b1[0],b1[1],0],[b1[0],b1[1],dh],[a1[0],a1[1],dh]], "#6b5136", 1.05);
   });
 
   /* ---- roads and zones on the floor ---- */
