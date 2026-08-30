@@ -1127,6 +1127,8 @@ body.dark .launchnew{background:rgba(20,27,51,.94);border-color:#303a60}.dark .l
 .actoravatar.male::after{left:8px;width:34px;border-radius:8px 8px 11px 11px}
 .actorphoto{display:block;width:72px;height:72px;border-radius:50%;overflow:hidden;background-image:url("assets/3d/characters/legacy-pair.png?v=20260830g");background-repeat:no-repeat;background-size:400% auto;background-color:#edf2ff;border:3px solid #fff;box-shadow:0 7px 17px rgba(18,29,62,.18),0 0 0 2px rgba(49,89,219,.15)}
 .actorchoice img.actorphoto{object-fit:cover;object-position:50% 50%;background-image:none}
+.chipbtn{border:0;background:#00249C;color:#fff;font:inherit;font-weight:700;padding:2px 9px;border-radius:6px;cursor:pointer;margin:0 2px}
+.chipbtn:hover{background:#1c3fc4}
 .actorphoto.male{background-position:22% 7%}.actorphoto.female{background-position:80% 7%}
 .dirham-symbol{position:relative;display:inline-block;width:.82em;height:1em;margin-right:.2em;vertical-align:-.1em;font-family:Georgia,"Times New Roman",serif;font-size:1.16em;font-weight:900;line-height:.92;color:currentColor}
 .dirham-symbol::before,.dirham-symbol::after{content:"";position:absolute;left:-.08em;right:-.05em;height:.075em;border-radius:1em;background:currentColor;z-index:2}
@@ -1732,7 +1734,7 @@ function poseHeightFactor(el){return el.seated?.72:1}
 /* one revision string for every asset path, so replacing artwork actually
    invalidates the browser cache. Must be declared before embedded3dPath,
    which ACTOR_PROFILES calls at module init. */
-const ASSET_RENDER_REV="20260830-library-v5";
+const ASSET_RENDER_REV="20260830-library-v8";
 function embedded3dPath(path){
   const clean=String(path||"").replace(/^assets\/3d\//,"").replace(/\.png(?:\?.*)?$/,"");
   return clean ? "assets/3d/"+clean+".png?v="+ASSET_RENDER_REV : "";
@@ -1806,7 +1808,9 @@ function makeElement(type,x,y,extra){
         flag:isFlag, width:isFlag?1.2:0, dmxUniverse:1, dmxAddress:0, dmxChannels:isFlag?0:4,
         circuit:"", stand:"C stand", weight:isFlag?8:12};
     },
-    wall:()=>({x2:round2(x+4),y2:round2(y),thick:0.15,label:"",height:2.6}),
+    wall:()=>({x2:round2(x+4),y2:round2(y),thick:0.125,label:"",height:2.7,
+      wallPreset:"interior",material:"gypsum",finish:"matte-paint",color:"#d7d3ca",
+      acousticRating:45,fireRating:60,loadBearing:false,wallNotes:""}),
     door:()=>({width:0.9,swing:1,label:"Door"}),
     window:()=>({width:1.4,label:"Window",sill:0.9,head:2.2}),
     prop:boxAsset("prop"),
@@ -2106,8 +2110,8 @@ const ASSET_3D={
   fresnel:"lighting/fresnel",ledpanel:"lighting/led-panel",softbox:"lighting/softbox",tube:"lighting/tube-light",leko:"lighting/leko",
   hmi:"lighting/hmi",parcan:"lighting/par-can",china:"lighting/china-ball",bounce:"lighting/bounce-board",flagsolid:"lighting/solid-flag",
   flagsilk:"lighting/silk-frame",cucoloris:"lighting/cucoloris",stageplatform:"lighting/stage-platform",trusstower:"lighting/truss-tower",
-  paspeaker:"lighting/pa-speaker",ledwall:"lighting/led-video-wall",stairs:"architecture/staircase",door:"architecture/door",
-  window:"architecture/window",column:"architecture/column",railing:"architecture/railing",fireplace:"architecture/fireplace",
+  paspeaker:"lighting/pa-speaker",ledwall:"lighting/led-video-wall",stairs:"architecture/staircase",door:"architecture/open-door-3d",
+  window:"architecture/window-3d",column:"architecture/column",railing:"architecture/railing",fireplace:"architecture/fireplace",
   fridge:"architecture/refrigerator",counterrun:"architecture/kitchen-counter",island:"architecture/kitchen-island",wc:"architecture/toilet",
   basin:"architecture/wash-basin",bath:"architecture/bathtub",shower:"architecture/shower",tree:"architecture/tree",bush:"architecture/hedge",rock:"architecture/boulder"
 };
@@ -2126,6 +2130,7 @@ Object.assign(ASSET_3D,{
    fell back to a coloured square. */
 Object.assign(ASSET_3D,{
   sidetable:"catalog-missing/sidetable",curtain:"catalog-missing/curtain",
+  singlebed:"catalog-missing/singlebed",cot:"catalog-missing/cot",dresser:"catalog-missing/dresser",
   officechair:"catalog-missing/officechair",whiteboard:"catalog-missing/whiteboard",receptiondesk:"catalog-missing/receptiondesk",
   van:"catalog-missing/van",motorcycle:"catalog-missing/motorcycle",minibus:"catalog-missing/minibus",
   tablet:"catalog-missing/tablet",bottle:"catalog-missing/bottle",tray:"catalog-missing/tray",stillscamera:"catalog-missing/stillscamera",
@@ -2149,58 +2154,55 @@ const RIG_ART = {"Tripod":"production/cinema-camera","Static clamp":"production/
    equals the item's real height. Sizing the box from the plan silhouette
    instead made tall thin items collapse when they were rotated. */
 const ASSET_AR={
-  "architecture/bathtub":1.152,"architecture/boulder":1.117,"architecture/column":0.354,"architecture/door":0.447,
-  "architecture/fireplace":0.855,"architecture/hedge":1.303,"architecture/kitchen-counter":1.251,"architecture/kitchen-island":1.273,
+  "architecture/bathtub":1.152,"architecture/boulder":1.117,"architecture/column":0.354,"architecture/fireplace":0.855,
+  "architecture/hedge":1.303,"architecture/kitchen-counter":1.251,"architecture/kitchen-island":1.273,"architecture/open-door-3d":0.499,
   "architecture/railing":0.835,"architecture/refrigerator":0.597,"architecture/shower":0.561,"architecture/staircase":0.792,
-  "architecture/toilet":0.678,"architecture/tree":0.961,"architecture/wash-basin":1.118,"architecture/window":0.626,
+  "architecture/toilet":0.678,"architecture/tree":0.961,"architecture/wash-basin":1.118,"architecture/window-3d":1.284,
   "catalog-missing/applebox":1.173,"catalog-missing/barndoor":0.909,"catalog-missing/bottle":0.453,"catalog-missing/branch":0.837,
-  "catalog-missing/chroma":1.046,"catalog-missing/combostand":0.642,"catalog-missing/crafttable":1.243,"catalog-missing/curtain":1.067,
-  "catalog-missing/flagcutter":0.605,"catalog-missing/flagnet":0.753,"catalog-missing/followspot":0.802,"catalog-missing/generator":1.167,
-  "catalog-missing/hob":1.566,"catalog-missing/kino":0.655,"catalog-missing/kitchensink":1.176,"catalog-missing/ladder":0.669,
-  "catalog-missing/lectern":0.606,"catalog-missing/magliner":1.024,"catalog-missing/makeup":0.822,"catalog-missing/minibus":1.531,
-  "catalog-missing/motorcycle":1.082,"catalog-missing/officechair":0.613,"catalog-missing/overhead":0.959,"catalog-missing/overhead12":0.957,
-  "catalog-missing/receptiondesk":1.766,"catalog-missing/sidetable":0.809,"catalog-missing/spacelight":0.779,"catalog-missing/stillscamera":1.109,
-  "catalog-missing/sun":0.989,"catalog-missing/tablet":1.284,"catalog-missing/tray":1.749,"catalog-missing/van":1.439,
-  "catalog-missing/wallunit":1.358,"catalog-missing/whiteboard":0.621,"characters/adult-man":0.288,"characters/adult-woman":0.349,
-  "characters/animals/cat":0.865,"characters/animals/chicken":0.6,"characters/animals/dog":0.862,"characters/animals/falcon":0.785,
-  "characters/animals/horse":0.682,"characters/animals/rabbit":0.676,"characters/baby":0.446,"characters/child":0.306,
-  "characters/emirati/adult-man":0.297,"characters/emirati/adult-woman":0.286,"characters/emirati/boy":0.286,"characters/emirati/girl":0.279,
-  "characters/emirati/senior-man":0.335,"characters/emirati/senior-woman":0.287,"characters/emirati/teenage-girl":0.309,"characters/emirati/teenager":0.295,
-  "characters/legacy-pair":0.758,"characters/senior-man":0.322,"characters/senior-woman":0.312,"furniture/armchair":1.005,
-  "furniture/bicycle":1.181,"furniture/bookshelf":0.554,"furniture/clapperboard":0.791,"furniture/coffee-table":1.494,
-  "furniture/dining-chair":0.667,"furniture/dining-table":1.808,"furniture/executive-desk":1.837,"furniture/floor-lamp":0.327,
-  "furniture/king-bed":1.484,"furniture/park-bench":1.29,"furniture/potted-plant":0.84,"furniture/sedan":1.976,
-  "furniture/sofa-3":1.896,"furniture/suitcase":0.567,"furniture/wardrobe":0.721,"hand-stunt/book":1.026,
-  "hand-stunt/box":1.0,"hand-stunt/breakaway-glass":0.675,"hand-stunt/briefcase":1.058,"hand-stunt/envelope":1.197,
-  "hand-stunt/lamp-post":0.226,"hand-stunt/litter-bin":0.542,"hand-stunt/mug":1.08,"hand-stunt/pillar":0.328,
-  "hand-stunt/platform":1.191,"hand-stunt/prop-handgun":1.269,"hand-stunt/prop-rifle":1.687,"hand-stunt/pyro-marker":1.015,
-  "hand-stunt/stunt-mat":2.012,"lighting/bounce-board":0.753,"lighting/china-ball":0.469,"lighting/cucoloris":0.522,
-  "lighting/fresnel":0.735,"lighting/hmi":0.841,"lighting/led-panel":1.046,"lighting/led-video-wall":0.976,
-  "lighting/leko":1.1,"lighting/pa-speaker":0.373,"lighting/par-can":0.859,"lighting/silk-frame":0.706,
-  "lighting/softbox":0.751,"lighting/solid-flag":0.57,"lighting/stage-platform":1.566,"lighting/truss-tower":0.567,
-  "lighting/tube-light":0.484,"live-event/amp-stack":0.716,"live-event/barrier":1.332,"live-event/comms-rack":0.616,
-  "live-event/drum-riser":1.875,"live-event/eng-van":1.094,"live-event/floor-wedge":1.441,"live-event/foh-console":1.593,
-  "live-event/keyboard-rig":0.988,"live-event/line-array":0.58,"live-event/mic-stand":0.646,"live-event/monitor-console":1.092,
-  "live-event/ob-truck":1.483,"live-event/runway":1.212,"live-event/stage-riser":1.592,"live-event/subwoofers":1.173,
-  "live-event/uplink-truck":1.063,"production/boom-microphone":1.023,"production/broadcast-camera":1.389,"production/c-stand":0.574,
-  "production/camera-crane":0.994,"production/cinema-camera":1.209,"production/director-chair":0.658,"production/dit-cart":0.954,
-  "production/dolly-track":1.208,"production/doorway-dolly":1.113,"production/dslr-camera":1.178,"production/field-monitor":1.05,
-  "production/gimbal-camera":0.675,"production/light-stand":0.471,"production/road-case":1.131,"production/sandbag":1.423,
-  "production/video-village":0.947,"props-extra/bar-counter":1.503,"props-extra/bar-stool":0.576,"props-extra/dining-set":1.498,
-  "props-extra/filing-cabinet":0.708,"props-extra/grip-truck":1.471,"props-extra/laptop":1.048,"props-extra/nightstand":0.952,
-  "props-extra/phone":0.628,"props-extra/police-cruiser":1.82,"props-extra/queen-bed":1.384,"props-extra/round-dining-set":1.299,
-  "props-extra/rug":1.303,"props-extra/sectional":2.26,"props-extra/suv":1.675,"props-extra/television":1.051,
-  "props-extra/tv-stand":2.052
+  "catalog-missing/chroma":1.046,"catalog-missing/combostand":0.642,"catalog-missing/cot":1.201,"catalog-missing/crafttable":1.243,
+  "catalog-missing/curtain":1.067,"catalog-missing/dresser":1.177,"catalog-missing/flagcutter":0.605,"catalog-missing/flagnet":0.753,
+  "catalog-missing/followspot":0.802,"catalog-missing/generator":1.167,"catalog-missing/hob":1.566,"catalog-missing/kino":0.655,
+  "catalog-missing/kitchensink":1.176,"catalog-missing/ladder":0.669,"catalog-missing/lectern":0.606,"catalog-missing/magliner":1.024,
+  "catalog-missing/makeup":0.822,"catalog-missing/minibus":1.531,"catalog-missing/motorcycle":1.082,"catalog-missing/officechair":0.613,
+  "catalog-missing/overhead":0.959,"catalog-missing/overhead12":0.957,"catalog-missing/receptiondesk":1.766,"catalog-missing/sidetable":0.809,
+  "catalog-missing/singlebed":1.401,"catalog-missing/spacelight":0.779,"catalog-missing/stillscamera":1.109,"catalog-missing/sun":0.989,
+  "catalog-missing/tablet":1.284,"catalog-missing/tray":1.749,"catalog-missing/van":1.439,"catalog-missing/wallunit":1.358,
+  "catalog-missing/whiteboard":0.621,"characters/adult-man":0.288,"characters/adult-woman":0.349,"characters/animals/cat":0.865,
+  "characters/animals/chicken":0.6,"characters/animals/dog":0.862,"characters/animals/falcon":0.785,"characters/animals/horse":0.682,
+  "characters/animals/rabbit":0.676,"characters/baby":0.446,"characters/child":0.306,"characters/emirati/adult-man":0.297,
+  "characters/emirati/adult-woman":0.286,"characters/emirati/boy":0.286,"characters/emirati/girl":0.279,"characters/emirati/senior-man":0.335,
+  "characters/emirati/senior-woman":0.287,"characters/emirati/teenage-girl":0.309,"characters/emirati/teenager":0.295,"characters/legacy-pair":0.758,
+  "characters/senior-man":0.322,"characters/senior-woman":0.312,"furniture/armchair":1.005,"furniture/bicycle":1.181,
+  "furniture/bookshelf":0.554,"furniture/clapperboard":0.791,"furniture/coffee-table":1.494,"furniture/dining-chair":0.667,
+  "furniture/dining-table":1.808,"furniture/executive-desk":1.837,"furniture/floor-lamp":0.327,"furniture/king-bed":1.484,
+  "furniture/park-bench":1.29,"furniture/potted-plant":0.84,"furniture/sedan":1.976,"furniture/sofa-3":1.896,
+  "furniture/suitcase":0.567,"furniture/wardrobe":0.721,"hand-stunt/book":1.026,"hand-stunt/box":1.0,
+  "hand-stunt/breakaway-glass":0.675,"hand-stunt/briefcase":1.058,"hand-stunt/envelope":1.197,"hand-stunt/lamp-post":0.226,
+  "hand-stunt/litter-bin":0.542,"hand-stunt/mug":1.08,"hand-stunt/pillar":0.328,"hand-stunt/platform":1.191,
+  "hand-stunt/prop-handgun":1.269,"hand-stunt/prop-rifle":1.687,"hand-stunt/pyro-marker":1.015,"hand-stunt/stunt-mat":2.012,
+  "lighting/bounce-board":0.753,"lighting/china-ball":0.469,"lighting/cucoloris":0.522,"lighting/fresnel":0.735,
+  "lighting/hmi":0.841,"lighting/led-panel":1.046,"lighting/led-video-wall":0.976,"lighting/leko":1.1,
+  "lighting/pa-speaker":0.373,"lighting/par-can":0.859,"lighting/silk-frame":0.706,"lighting/softbox":0.751,
+  "lighting/solid-flag":0.57,"lighting/stage-platform":1.566,"lighting/truss-tower":0.567,"lighting/tube-light":0.484,
+  "live-event/amp-stack":0.716,"live-event/barrier":1.332,"live-event/comms-rack":0.616,"live-event/drum-riser":1.875,
+  "live-event/eng-van":1.094,"live-event/floor-wedge":1.441,"live-event/foh-console":1.593,"live-event/keyboard-rig":0.988,
+  "live-event/line-array":0.58,"live-event/mic-stand":0.646,"live-event/monitor-console":1.092,"live-event/ob-truck":1.483,
+  "live-event/runway":1.212,"live-event/stage-riser":1.592,"live-event/subwoofers":1.173,"live-event/uplink-truck":1.063,
+  "production/boom-microphone":1.023,"production/broadcast-camera":1.389,"production/c-stand":0.574,"production/camera-crane":0.994,
+  "production/cinema-camera":1.209,"production/director-chair":0.658,"production/dit-cart":0.954,"production/dolly-track":1.208,
+  "production/doorway-dolly":1.113,"production/dslr-camera":1.178,"production/field-monitor":1.05,"production/gimbal-camera":0.675,
+  "production/light-stand":0.471,"production/road-case":1.131,"production/sandbag":1.423,"production/video-village":0.947,
+  "props-extra/bar-counter":1.503,"props-extra/bar-stool":0.576,"props-extra/dining-set":1.498,"props-extra/filing-cabinet":0.708,
+  "props-extra/grip-truck":1.471,"props-extra/laptop":1.048,"props-extra/nightstand":0.952,"props-extra/phone":0.628,
+  "props-extra/police-cruiser":1.82,"props-extra/queen-bed":1.384,"props-extra/round-dining-set":1.299,"props-extra/rug":1.303,
+  "props-extra/sectional":2.26,"props-extra/suv":1.675,"props-extra/television":1.051,"props-extra/tv-stand":2.052
 };
 function assetAR(href){const m=String(href||"").match(/assets\/3d\/([a-z0-9\-\/]+)\.png/);
   return m?(ASSET_AR[m[1]]||0):0;}
 /* Fixture artwork that already includes its own tripod or C stand. Anything
    not listed here is a bare head on a yoke and still needs a pole drawn. */
 const FIXTURE_ON_STAND = new Set(["fresnel","softbox","tube","china","bounce",
-  "flagsolid","flagsilk","cucoloris","kino","flagnet","flagcutter","branch","overhead","spacelight"]);
-/* The sun marker is not a fixture on the floor: draw it at its rigged height
-   with no stand and no pole underneath. */
-const FIXTURE_NO_POLE = new Set(["sun"]);
+  "flagsolid","flagsilk","cucoloris","kino","flagnet","flagcutter","branch","overhead"]);
 function asset3d(id){const p=ASSET_3D[id];return p?embedded3dPath(p):""}
 
 /* =====================================================================
@@ -2319,6 +2321,132 @@ function setRot(el,r){
   } else el.rot=r;
 }
 function snapVal(v){ return state.view.snap ? Math.round(v*4)/4 : round2(v); }
+
+/* =====================================================================
+   PLACEMENT ASSISTANCE
+   The behaviours people expect from home design software: things line up
+   with each other, furniture sits flush against walls, walls draw at clean
+   angles and close onto existing corners, and the measurement is on screen
+   while you drag.
+   ===================================================================== */
+let snapGuides = [];                      /* drawn by renderPlan each frame */
+let snapHint   = null;                    /* live readout near the pointer */
+const SNAP = {
+  align:  0.12,   /* metres: centre / edge alignment with another object */
+  wall:   0.45,   /* metres: distance at which furniture grabs a wall     */
+  corner: 0.40,   /* metres: wall endpoint welds onto an existing corner  */
+  angle:  4       /* degrees: wall direction rounds to a clean bearing    */
+};
+function snapOn(){ return !!state.view.snap; }   /* the same switch as the "Snap 0.25 m" toggle */
+
+/* half extents of an element in plan, honouring its rotation */
+function planHalf(el){
+  const a = rad(el.rot||0), w=(+el.w||0)/2, h=(+el.h||0)/2;
+  return { x: Math.abs(w*Math.cos(a)) + Math.abs(h*Math.sin(a)),
+           y: Math.abs(w*Math.sin(a)) + Math.abs(h*Math.cos(a)) };
+}
+/* Slide an element flush against the nearest wall and turn its back to it,
+   the way a sofa drops into place along a wall. */
+function snapAgainstWall(el, nx, ny){
+  const walls = els().filter(e=>e.type==="wall");
+  let best=null;
+  for(const w of walls){
+    const a=posAt(w), bx=w.x2, by=w.y2;
+    const vx=bx-a.x, vy=by-a.y, len2=vx*vx+vy*vy;
+    if(!len2) continue;
+    let t=((nx-a.x)*vx+(ny-a.y)*vy)/len2;
+    if(t<0||t>1) continue;                       /* only alongside the wall */
+    const px=a.x+vx*t, py=a.y+vy*t, d=dist(nx,ny,px,py);
+    if(d<SNAP.wall && (!best||d<best.d)) best={w,px,py,d,ang:deg(Math.atan2(vy,vx))};
+  }
+  if(!best) return null;
+  const back = deg(Math.atan2(ny-best.py, nx-best.px));      /* which side we are on */
+  const face = ((back - best.ang + 540)%360) - 180 > 0 ? best.ang+90 : best.ang-90;
+  el.rot = round2(((face%360)+360)%360);
+  const half = planHalf(el);
+  const off = Math.abs(Math.cos(rad(best.ang)))>Math.abs(Math.sin(rad(best.ang))) ? half.y : half.x;
+  const nrm = rad(best.ang+90), sgn = (((back-best.ang+540)%360)-180)>0 ? 1 : -1;
+  return { x: round2(best.px + Math.cos(nrm)*off*sgn),
+           y: round2(best.py + Math.sin(nrm)*off*sgn),
+           guide: {type:"wall", x1:posAt(best.w).x, y1:posAt(best.w).y, x2:best.w.x2, y2:best.w.y2},
+           label: "flush to wall" };
+}
+/* Line an element up with the centres and edges of everything else. */
+function snapAlign(el, nx, ny){
+  const half=planHalf(el), out={x:nx,y:ny,guides:[]};
+  const others=els().filter(e=>e!==el && ["prop","staging","grip","arch","actor","camera","light"].includes(e.type));
+  const cand=(v,ref)=>Math.abs(v-ref)<SNAP.align;
+  let bx=null,by=null;
+  for(const o of others){
+    const p=posAt(o), oh=planHalf(o);
+    for(const [v,ref] of [[nx,p.x],[nx,p.x-oh.x-half.x],[nx,p.x+oh.x+half.x],[nx,p.x-oh.x+half.x],[nx,p.x+oh.x-half.x]])
+      if(cand(v,ref) && (bx===null||Math.abs(ref-nx)<Math.abs(bx.v-nx))) bx={v:ref,at:p.y};
+    for(const [v,ref] of [[ny,p.y],[ny,p.y-oh.y-half.y],[ny,p.y+oh.y+half.y],[ny,p.y-oh.y+half.y],[ny,p.y+oh.y-half.y]])
+      if(cand(v,ref) && (by===null||Math.abs(ref-ny)<Math.abs(by.v-ny))) by={v:ref,at:p.x};
+  }
+  if(bx){ out.x=round2(bx.v); out.guides.push({type:"v", x:bx.v}); }
+  if(by){ out.y=round2(by.v); out.guides.push({type:"h", y:by.v}); }
+  return out;
+}
+/* One entry point used by the move handler. */
+function snapPlace(el, nx, ny){
+  snapGuides=[]; snapHint=null;
+  if(!snapOn()) return {x:snapVal(nx), y:snapVal(ny)};
+  if(["prop","staging","grip","arch"].includes(el.type)){
+    const w=snapAgainstWall(el,nx,ny);
+    if(w){ snapGuides=[w.guide]; snapHint=w.label; return {x:w.x,y:w.y}; }
+  }
+  const a=snapAlign(el,nx,ny);
+  if(a.guides.length){ snapGuides=a.guides; snapHint="aligned"; return {x:a.x,y:a.y}; }
+  return {x:snapVal(nx), y:snapVal(ny)};
+}
+/* Wall drawing: clean bearings, and corners that weld onto existing ends. */
+function snapWallEnd(ax, ay, bx, by, ignoreId){
+  snapGuides=[]; snapHint=null;
+  if(!snapOn()) return {x:snapVal(bx), y:snapVal(by)};
+  for(const w of els().filter(e=>e.type==="wall" && e.id!==ignoreId)){
+    const a=posAt(w);
+    for(const [ex,ey] of [[a.x,a.y],[w.x2,w.y2]]){
+      if(dist(bx,by,ex,ey)<SNAP.corner){
+        snapHint="corner"; snapGuides=[{type:"dot", x:ex, y:ey}];
+        return {x:round2(ex), y:round2(ey)};
+      }
+    }
+  }
+  const d=dist(ax,ay,bx,by), ang=deg(Math.atan2(by-ay,bx-ax));
+  const step=15, near=Math.round(ang/step)*step;
+  if(Math.abs(((ang-near+540)%360)-180)<SNAP.angle){
+    snapHint=`${Math.abs(near%180)}\u00b0`;
+    return {x:round2(ax+Math.cos(rad(near))*d), y:round2(ay+Math.sin(rad(near))*d)};
+  }
+  return {x:snapVal(bx), y:snapVal(by)};
+}
+function snapGuideSVG(){
+  if(!snapGuides.length) return "";
+  const C="#d63bd6";
+  return snapGuides.map(g=>{
+    if(g.type==="v") return `<line x1="${X(g.x)}" y1="0" x2="${X(g.x)}" y2="${VIEW.h}" stroke="${C}" stroke-width="1" stroke-dasharray="4 4" opacity="0.9"/>`;
+    if(g.type==="h") return `<line x1="0" y1="${Y(g.y)}" x2="${VIEW.w}" y2="${Y(g.y)}" stroke="${C}" stroke-width="1" stroke-dasharray="4 4" opacity="0.9"/>`;
+    if(g.type==="dot") return `<circle cx="${X(g.x)}" cy="${Y(g.y)}" r="7" fill="none" stroke="${C}" stroke-width="2"/>`;
+    if(g.type==="wall") return `<line x1="${X(g.x1)}" y1="${Y(g.y1)}" x2="${X(g.x2)}" y2="${Y(g.y2)}" stroke="${C}" stroke-width="3" opacity="0.55"/>`;
+    return "";
+  }).join("");
+}
+/* Four walls in one action, so a room exists before anything else is placed. */
+function addRoom(wm, dm){
+  pushHistory();
+  const x0=round2(2), y0=round2(2), x1=round2(2+wm), y1=round2(2+dm);
+  const corners=[[x0,y0,x1,y0],[x1,y0,x1,y1],[x1,y1,x0,y1],[x0,y1,x0,y0]];
+  const made=[];
+  for(const [ax,ay,bx,by] of corners){
+    const w=makeElement("wall",ax,ay,{});
+    w.x2=bx; w.y2=by; w.thick=.125; w.height=2.7;
+    w.wallPreset="interior"; w.material="gypsum"; w.finish="matte-paint";
+    w.color="#d7d3ca"; w.acousticRating=45; w.fireRating=60; w.loadBearing=false;
+    els().push(w); made.push(w.id);
+  }
+  state.sel=made; renderAll(); save();
+}
 
 /* ------------------------- shot numbering ------------------------- */
 function shotList(){
@@ -2565,8 +2693,9 @@ function drawElement(el,crossing){
 
   case "wall":{
     const x2=X(el.x2), y2=Y(el.y2);
-    g = `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="${isDark()?"#7d88a8":"#39445e"}" stroke-width="${Math.max(4,S(el.thick))}" stroke-linecap="round"/>
-         <line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#8d97ae" stroke-width="${Math.max(1,S(el.thick)*0.35)}" stroke-linecap="round"/>
+    const wallStroke=el.color||(isDark()?"#7d88a8":"#39445e");
+    g = `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="${wallStroke}" stroke-width="${Math.max(4,S(el.thick||.125))}" stroke-linecap="round"/>
+         <line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#ffffff" stroke-opacity="0.34" stroke-width="${Math.max(1,S(el.thick||.125)*0.35)}" stroke-linecap="round"/>
          <g class="walljoin" data-wall-end="a" aria-label="Extend wall from this endpoint"><circle cx="${cx}" cy="${cy}" r="11"/><path d="M${cx-4} ${cy}h8M${cx} ${cy-4}v8"/></g>
          <g class="walljoin" data-wall-end="b" aria-label="Extend wall from this endpoint"><circle cx="${x2}" cy="${y2}" r="11"/><path d="M${x2-4} ${y2}h8M${x2} ${y2-4}v8"/></g>`;
     if(isSel) g+=`<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#00249C" stroke-width="${Math.max(7,S(el.thick)+5)}" opacity="0.28" stroke-linecap="round"/>
@@ -2963,16 +3092,36 @@ function renderPlan(){
     ghost = `<line x1="${X(drag.ax)}" y1="${Y(drag.ay)}" x2="${X(drag.bx)}" y2="${Y(drag.by)}"
       stroke="#00249C" stroke-width="2" stroke-dasharray="6 4"/>`;
   }
-  svg.innerHTML = composePlan(body,crossing,tod) + marquee + ghost;
+  svg.innerHTML = composePlan(body,crossing,tod) + marquee + ghost + snapGuideSVG() + dragReadoutSVG();
   $("#zoomVal").textContent = Math.round(state.view.ppm/46*100)+"%";
   renderStageNotes(crossing);
   refreshFloatingVF();
 }
 
+/* Length and bearing while a wall is drawn, and the snap that is being applied
+   while something is moved. Home design tools keep this on screen so you are
+   not guessing at the size of what you are drawing. */
+function dragReadoutSVG(){
+  if(!drag) return "";
+  let text="", ax, ay;
+  if(drag.mode==="draw2"){
+    const d=dist(drag.ax,drag.ay,drag.bx,drag.by);
+    if(d<0.02) return "";
+    const a=Math.abs(round2(deg(Math.atan2(drag.by-drag.ay,drag.bx-drag.ax))))%180;
+    text=`${fmtLen(d)}  ${a.toFixed(0)}\u00b0`;
+    ax=X((drag.ax+drag.bx)/2); ay=Y((drag.ay+drag.by)/2)-14;
+  } else if(drag.mode==="move" && snapHint && drag.items && drag.items[0]){
+    const p=posAt(drag.items[0].el);
+    text=snapHint; ax=X(p.x); ay=Y(p.y)-22;
+  } else return "";
+  const w=text.length*7.2+16;
+  return `<g pointer-events="none"><rect x="${(ax-w/2).toFixed(1)}" y="${(ay-15).toFixed(1)}" width="${w.toFixed(1)}" height="19" rx="5" fill="#12183a" opacity="0.92"/>
+    <text x="${ax.toFixed(1)}" y="${(ay-1.5).toFixed(1)}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(text)}</text></g>`;
+}
 function renderStageNotes(crossing){
   const n=$("#stageNote"); let h="";
   h += `<span class="chip">${esc(scene().name)} &nbsp;|&nbsp; ${els().length} elements &nbsp;|&nbsp; ${cameras().length} shots</span>`;
-  if(!els().length) h += `<span class="chip">Empty plan. Pick a tool on the left and click here, or press Templates in the top bar for a ready made setup.</span>`;
+  if(!els().length) h += `<span class="chip">Empty plan. <button class="chipbtn" data-act="addRoom" data-w="5" data-d="4">Draw a 5 &times; 4 m room</button> or pick a tool on the left. Templates in the top bar has ready made setups.</span>`;
   if(state.beat>0 || scene().beats>1) h += `<span class="chip">Beat ${state.beat+1} of ${scene().beats}</span>`;
   if(crossing && crossing.pair && crossing.bad.length)
     h += `<span class="chip warn">${crossing.bad.length} camera${crossing.bad.length>1?"s":""} cross the 180 degree line: ${crossing.bad.map(c=>esc(c.label)).join(", ")}</span>`;
@@ -3441,7 +3590,10 @@ function initCanvas(){
       if(dist(last[0],last[1],mouseWorld.x,mouseWorld.y) > 0.04) drag.el.pts.push([round2(mouseWorld.x),round2(mouseWorld.y)]);
       renderPlan(); return;
     }
-    if(drag.mode==="draw2"){ drag.bx=snapVal(wx(px)); drag.by=snapVal(wy(py));
+    if(drag.mode==="draw2"){
+      const sw = drag.type==="wall" ? snapWallEnd(drag.ax,drag.ay,wx(px),wy(py),drag.connectedTo)
+                                    : {x:snapVal(wx(px)), y:snapVal(wy(py))};
+      drag.bx=sw.x; drag.by=sw.y;
       if(ev.shiftKey){
         const dx=drag.bx-drag.ax, dy=drag.by-drag.ay;
         if(Math.abs(dx)>Math.abs(dy)) drag.by=drag.ay; else drag.bx=drag.ax;
@@ -3465,7 +3617,8 @@ function initCanvas(){
           it.el.elevation=round2(Math.max(0,it.elevation+(drag.sy-py)/Math.max(8,state.view.ppm)));
           continue;
         }
-        let nx=snapVal(mouseWorld.x-it.dx), ny=snapVal(mouseWorld.y-it.dy);
+        const sp=snapPlace(it.el, mouseWorld.x-it.dx, mouseWorld.y-it.dy);
+        let nx=sp.x, ny=sp.y;
         if(drag.axis==="x")ny=it.sy;
         if(drag.axis==="y")nx=it.sx;
         if(it.el.type==="door"||it.el.type==="window"){
@@ -3482,6 +3635,7 @@ function initCanvas(){
   });
 
   svg.addEventListener("pointerup", ev=>{
+    snapGuides=[]; snapHint=null;
     stage.classList.remove("grabbing");
     if(drag && drag.mode==="rotate") stage.style.cursor = pendingTool==="pan"?"grab":pendingTool==="select"?"default":"crosshair";
     if(!drag){ return; }
@@ -3897,7 +4051,7 @@ function inspectorScene(){
         <input type="range" min="0" max="80" step="5" value="${state.view.labelAlpha}" data-vrange2="labelAlpha"></div>
       <div class="row">
         <button class="btn full ${state.view.grid?"solid":""}" data-act="tGrid">Grid</button>
-        <button class="btn full ${state.view.snap?"solid":""}" data-act="tSnap">Snap 0.25 m</button>
+        <button class="btn full ${state.view.snap?"solid":""}" data-act="tSnap">Snap &amp; guides</button>
         <button class="btn full" data-act="fit">Fit to screen</button>
       </div>
       <p class="hint">Every one of these controls, plus the per category opacity sliders and the workspace tabs, also
@@ -4169,6 +4323,33 @@ function assetPicker(el){
   CAT[tool].groups.forEach(g=>g.items.forEach(i=>opts.push({v:i[0], n:g.n+": "+i[1]})));
   return fSelect("Catalogue item","elem",el.id,"asset",el.asset,opts);
 }
+const WALL_PRESETS={
+  custom:{n:"Custom",hint:"Keep the current values and edit each property independently."},
+  interior:{n:"Interior partition — recommended",thick:.125,height:2.7,material:"gypsum",finish:"matte-paint",color:"#d7d3ca",acousticRating:45,fireRating:60,loadBearing:false,hint:"General rooms, offices, classrooms and residential interiors."},
+  studio:{n:"Soundstage flat",thick:.10,height:3.0,material:"timber-flat",finish:"matte-paint",color:"#454b5d",acousticRating:25,fireRating:0,loadBearing:false,hint:"Lightweight scenic flat; brace it and do not treat it as structural."},
+  acoustic:{n:"Acoustic partition",thick:.20,height:3.0,material:"acoustic-panel",finish:"acoustic-fabric",color:"#4a5368",acousticRating:60,fireRating:60,loadBearing:false,hint:"Dialogue, recording and controlled studio spaces."},
+  masonry:{n:"Masonry wall",thick:.20,height:3.0,material:"block",finish:"plaster",color:"#c3beb3",acousticRating:50,fireRating:120,loadBearing:false,hint:"Durable internal blockwork; confirm structure with the location owner."},
+  exterior:{n:"Exterior concrete wall",thick:.25,height:3.2,material:"concrete",finish:"raw",color:"#9da1a6",acousticRating:55,fireRating:180,loadBearing:true,hint:"Heavy exterior or structural construction; values are planning estimates."},
+  glass:{n:"Full-height glazed wall",thick:.012,height:2.7,material:"glass",finish:"clear",color:"#9bc9df",acousticRating:35,fireRating:0,loadBearing:false,hint:"Use for glass partitions; check reflections, privacy and lighting spill."}
+};
+const WALL_MATERIALS=[
+  {v:"gypsum",n:"Gypsum board / drywall"},{v:"timber-flat",n:"Timber scenic flat"},{v:"block",n:"Concrete block"},
+  {v:"concrete",n:"Reinforced concrete"},{v:"brick",n:"Brick"},{v:"glass",n:"Architectural glass"},
+  {v:"acoustic-panel",n:"Acoustic panel system"},{v:"wood",n:"Solid timber / wood"},{v:"metal",n:"Metal panel"}
+];
+const WALL_FINISHES=[
+  {v:"matte-paint",n:"Matte paint"},{v:"satin-paint",n:"Satin paint"},{v:"plaster",n:"Plaster"},{v:"raw",n:"Raw material"},
+  {v:"brick-face",n:"Exposed brick"},{v:"wood-veneer",n:"Wood veneer"},{v:"tile",n:"Tile"},{v:"acoustic-fabric",n:"Acoustic fabric"},{v:"clear",n:"Clear / transparent"}
+];
+function applyWallPreset(id,key){
+  const w=byId(id),p=WALL_PRESETS[key]; if(!w||w.type!=="wall"||!p)return;
+  w.wallPreset=key;
+  if(key!=="custom") ["thick","height","material","finish","color","acousticRating","fireRating","loadBearing"].forEach(k=>w[k]=p[k]);
+}
+function markWallCustomFromBind(binding){
+  const m=String(binding||"").match(/^elem:([^:]+):(thick|height|material|finish|color|acousticRating|fireRating|loadBearing)$/);
+  if(!m)return; const w=byId(m[1]); if(w&&w.type==="wall")w.wallPreset="custom";
+}
 function inspectorGeneric(el){
   const p=posAt(el);
   let body = fInput("Label","elem",el.id,"label",el.label);
@@ -4189,9 +4370,19 @@ function inspectorGeneric(el){
     }
   }
   if(el.type==="wall"){
-    body += `<div class="row">${fInput("Thickness (m)","elem",el.id,"thick",el.thick,{type:"number",step:0.05,min:0.05})}
-      ${fInput("Height (m)","elem",el.id,"height",el.height,{type:"number",step:0.1,min:0.5})}</div>`
-      + `<p class="hint">Length ${fmtLen(dist(p.x,p.y,el.x2,el.y2))}. Drag either end handle when the wall is selected.</p>`;
+    const preset=el.wallPreset||"custom", recommendation=(WALL_PRESETS[preset]||WALL_PRESETS.custom).hint;
+    body += fSelect("Construction preset","elem",el.id,"wallPreset",preset,Object.entries(WALL_PRESETS).map(([v,x])=>({v,n:x.n})))
+      + `<p class="hint"><b>Recommendation:</b> ${esc(recommendation)}</p>`
+      + `<div class="row">${fInput("Thickness (m)","elem",el.id,"thick",el.thick==null?.125:el.thick,{type:"number",step:0.005,min:0.01,max:1})}
+      ${fInput("Height (m)","elem",el.id,"height",el.height||2.7,{type:"number",step:0.05,min:0.5,max:20})}</div>`
+      + `<div class="row">${fSelect("Material","elem",el.id,"material",el.material||"gypsum",WALL_MATERIALS)}
+      ${fSelect("Finish","elem",el.id,"finish",el.finish||"matte-paint",WALL_FINISHES)}</div>`
+      + `<div class="row">${fInput("Wall colour","elem",el.id,"color",el.color||"#d7d3ca",{type:"color"})}
+      ${fInput("Acoustic rating (STC)","elem",el.id,"acousticRating",el.acousticRating==null?45:el.acousticRating,{type:"number",step:1,min:0,max:80})}
+      ${fInput("Fire rating (minutes)","elem",el.id,"fireRating",el.fireRating||0,{type:"number",step:15,min:0,max:240})}</div>`
+      + fToggle("Structural role","elem",el.id,"loadBearing",!!el.loadBearing,"Load-bearing","Non-load-bearing")
+      + fArea("Construction / art-department notes","elem",el.id,"wallNotes",el.wallNotes||"","Bracing, practical finish, removable panels, wild wall, safety notes...")
+      + `<p class="hint">Length <b>${fmtLen(dist(p.x,p.y,el.x2,el.y2))}</b>. Drag either end handle when selected. Preset values are planning recommendations—not structural specifications; verify load, fire and acoustic requirements with qualified professionals.</p>`;
   }
   if(el.type==="door"){
     body += `<div class="row">${fInput("Width (m)","elem",el.id,"width",el.width,{type:"number",step:0.05,min:0.4})}
@@ -4864,7 +5055,8 @@ function vfSVG(cam,W,H,opt){
     const mid=[(q.x+w.x2)/2,(q.y+w.y2)/2,h/2];
     const view=[mid[0]-CX,mid[1]-CY,mid[2]-CZ];
     const flip = (view[0]*n[0]+view[1]*n[1])>0 ? -1 : 1;
-    push([[q.x,q.y,0],[w.x2,w.y2,0],[w.x2,w.y2,h],[q.x,q.y,h]], wallCol, lum([n[0]*flip,n[1]*flip,0]));
+    const wc=w.color||wallCol, glass=w.material==="glass";
+    push([[q.x,q.y,0],[w.x2,w.y2,0],[w.x2,w.y2,h],[q.x,q.y,h]], wc, lum([n[0]*flip,n[1]*flip,0]), glass?' opacity="0.48"':'');
     line3([q.x,q.y,h],[w.x2,w.y2,h], night?"#4d5a80":"#aab3c6", 1.2, 0.5);
   });
   els().filter(e=>e.type==="window").forEach(wn=>{
@@ -5006,8 +5198,6 @@ function vfSVG(cam,W,H,opt){
         /* artwork already carries its own tripod or C stand: draw the whole
            fixture from the floor to its rigged height and add no pole */
         if(exactBillboard(q,ez,h,h,exactLight,l.label,l.id))return;
-      } else if(FIXTURE_NO_POLE.has(l.asset)){
-        if(exactBillboard(q,ez+poleH,fw,fh,exactLight,l.label,l.id))return;
       } else {
         box3(q.x,q.y,ez,0.07,0.07,poleH,0,"#2b3350");
         if(exactBillboard(q,ez+poleH,fw,fh,exactLight,l.label,l.id))return;
@@ -8807,6 +8997,7 @@ const ACTIONS = {
     renderPanel(); save();
   },
   gearPackNone(){ ui().gearPacked={}; renderPanel(); save(); },
+  addRoom(t){ addRoom(+t.dataset.w||5, +t.dataset.d||4); },
   importScript(){ $("#fileScript").click(); },
   exportScriptTxt(){
     const sc=scene();
@@ -9183,7 +9374,7 @@ function initUI(){
       applyBind(t.dataset.toggle, t.dataset.val==="true" ? true : false);
       const path=t.dataset.toggle.split(":");
       if(path[0]==="proj" && path[1]==="units") state.project.units = t.dataset.val==="true" ? "ft":"m";
-      if(path[0]==="elem"){ const el=byId(path[1]); if(el) el[path[2]] = t.dataset.val==="true"; }
+      if(path[0]==="elem"){ const el=byId(path[1]); if(el){ el[path[2]] = t.dataset.val==="true"; if(el.type==="wall")el.wallPreset="custom"; } }
       renderAll(); save(); return;
     }
     const cl = ev.target.closest("[data-close]");
@@ -9275,11 +9466,15 @@ function initUI(){
   pb.addEventListener("input", ev=>{
     const el=ev.target.closest("[data-bind]"); if(!el) return;
     applyBind(el.dataset.bind, el.type==="checkbox"?el.checked:el.value, el.dataset.num==="1");
+    markWallCustomFromBind(el.dataset.bind);
     renderPlan(); renderSceneSelect(); save();
   });
   pb.addEventListener("change", ev=>{
     const el=ev.target.closest("[data-bind]"); if(!el) return;
+    const wallPresetMatch=el.dataset.bind.match(/^elem:([^:]+):wallPreset$/);
+    if(wallPresetMatch){ applyWallPreset(wallPresetMatch[1],el.value); renderAll(); save(); return; }
     applyBind(el.dataset.bind, el.value, el.dataset.num==="1");
+    markWallCustomFromBind(el.dataset.bind);
     renderAll(); save();
   });
   document.getElementById("veilExport").addEventListener("input", ev=>{

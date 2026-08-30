@@ -43,6 +43,21 @@ assets/3d/live-event/           broadcast, concert, staging, audio
 assets/environments/            backplates for the viewfinder preview
 ```
 
+## Drawing a plan
+
+The floor plan behaves like a home design tool rather than a drawing canvas:
+
+- An empty scene offers **Draw a 5 x 4 m room**, which lays four joined walls at once.
+- Dragging furniture near a wall makes it sit **flush against that wall** and turn its
+  back to it. Dragging it near another object **lines the two up**, and the guide lines
+  show which edges or centres matched.
+- Drawing a wall **rounds to a clean bearing** when it is within a few degrees of one,
+  and an endpoint dropped near an existing corner **welds onto it**, so rooms close.
+- The **length and angle** of a wall are shown while you draw it.
+
+All of that is controlled by the **Snap & guides** button in the View menu. Turn it
+off and every position stays exactly where you put it.
+
 ## Working on the artwork
 
 Character artwork comes in two forms. The full-body PNG (`characters/<name>.png`)
