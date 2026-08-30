@@ -484,6 +484,11 @@ body.presizing{cursor:col-resize;user-select:none}
 .sect.collapsed>.sbody{display:block;max-height:0;opacity:0;padding-top:0;padding-bottom:0}
 .sect>h4 .schev{transition:transform .22s ease}.sect.collapsed>h4 .schev{transform:rotate(-90deg)}
 .row{display:flex;gap:9px;margin-bottom:9px}
+/* a field paired with an action button: line the button up with the input,
+   not with the bottom of the field's margin, and keep it to its own width */
+.row.fieldaction{align-items:flex-end}
+.row.fieldaction>.f{margin-bottom:0}
+.row.fieldaction>.btn{flex:0 0 auto;white-space:nowrap}
 .row>*{flex:1;min-width:0}
 .f{display:block;margin-bottom:9px}
 .f>label,.lbl{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px}
@@ -567,7 +572,52 @@ table.grid select:hover,table.grid input:hover{border-color:var(--line);backgrou
 .helpchips,.helpactions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.helpchips button{border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:#fff;color:var(--muted);font-size:10.5px;font-weight:700}.helpchips button.on{background:var(--hct-blue);border-color:var(--hct-blue);color:#fff}
 #helpBody .sect{margin-bottom:9px;background:var(--card)}#helpBody .sect>h4{cursor:pointer}#helpBody .sect.help-hidden{display:none}#helpBody .sect.help-closed .sbody{display:none}
 #helpBody .sbody p{font-size:11.5px;line-height:1.65;color:var(--ink)}#helpBody kbd{display:inline-block;min-width:22px;padding:2px 6px;border:1px solid #cbd3e3;border-bottom-width:2px;border-radius:5px;background:#fff;color:#26365d;font:700 10px var(--mono);text-align:center}
-.helpactions .btn{font-size:10.5px}.helpempty{display:none;padding:24px;text-align:center;color:var(--muted)}
+.helpactions .btn{font-size:10.5px}
+/* ---- help guide ---- */
+.helpchips button{transition:transform .08s ease}
+.helpchips button:hover{transform:translateY(-1px)}
+.helpchips button.on{box-shadow:0 3px 9px rgba(0,36,156,.28)}
+.helphero{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;margin-bottom:14px}
+.helpstep{position:relative;border-radius:12px;padding:13px 13px 12px;color:#fff;overflow:hidden;
+  box-shadow:0 6px 16px rgba(20,35,78,.16)}
+.helpstep i{font-style:normal;font-size:22px;font-weight:800;opacity:.34;position:absolute;top:6px;right:12px;line-height:1}
+.helpstep b{display:block;font-size:12.5px;margin-bottom:3px}
+.helpstep span{font-size:11px;line-height:1.45;opacity:.93;display:block}
+.helpstep button{margin-top:9px;border:0;background:rgba(255,255,255,.92);color:#16204a;font:inherit;
+  font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:7px;cursor:pointer}
+.helpstep button:hover{background:#fff}
+/* each topic carries the colour of the part of the app it describes */
+#helpBody .sect{border-left:4px solid var(--hc,#00249C)}
+#helpBody .sect h4{gap:8px}
+#helpBody .sect h4 .hcdot{width:9px;height:9px;border-radius:50%;background:var(--hc,#00249C);flex:0 0 auto}
+#helpBody .sect h4 .hctag{margin-left:auto;font-size:9.5px;font-weight:800;letter-spacing:.4px;
+  color:var(--hc,#00249C);background:color-mix(in srgb,var(--hc,#00249C) 12%,transparent);
+  padding:2px 8px;border-radius:999px;text-transform:uppercase}
+.helpgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:9px;margin:2px 0 4px}
+.helpcard{border:1px solid var(--line);border-left:3px solid var(--hc,#00249C);border-radius:10px;padding:9px 11px;background:var(--soft)}
+.helpcard>b{display:block;font-size:11.5px;margin-bottom:3px;color:var(--ink)}
+.helpcard span b,.helpstep span b{display:inline;font-size:inherit;margin:0}
+.helpcard span{font-size:11px;color:var(--muted);line-height:1.5}
+.keygrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:5px 14px;margin-top:4px}
+.keyrow{display:flex;align-items:center;gap:8px;font-size:11px;padding:3px 0;border-bottom:1px dotted var(--line)}
+.keyrow span{color:var(--muted)}
+.keyrow kbd{flex:0 0 auto;min-width:22px;text-align:center}
+#helpBody kbd{display:inline-block;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;
+  padding:1px 6px;font:700 10.5px/1.6 var(--mono);background:#fff;color:var(--ink)}
+.helptip{border-radius:9px;padding:8px 11px;font-size:11px;line-height:1.5;margin:8px 0 0;
+  background:color-mix(in srgb,var(--hc,#00249C) 9%,transparent);
+  border-left:3px solid var(--hc,#00249C);color:var(--ink)}
+.helptip b{color:var(--hc,#00249C)}
+body.dark .helpcard{background:#151d2c}
+body.dark .helpstep button{background:#e9edf7;color:#16204a}
+body.dark .helpcard>b{color:#e8ecf7}
+/* on the dark theme the accent has to be lifted towards white to stay legible,
+   and the key caps need their own light-on-dark treatment */
+body.dark #helpBody kbd{background:#1d2740;border-color:#38455f;color:#e8ecf7}
+body.dark #helpBody .sect h4 .hctag{color:#fff;background:color-mix(in srgb,var(--hc,#00249C) 58%,transparent)}
+body.dark #helpBody .helptip{color:#dfe5f5;background:color-mix(in srgb,var(--hc,#00249C) 26%,transparent)}
+body.dark #helpBody .helptip b{color:color-mix(in srgb,var(--hc,#00249C) 30%,#ffffff)}
+body.dark #helpBody .sect h4 .hcdot{background:color-mix(in srgb,var(--hc,#00249C) 45%,#ffffff)}.helpempty{display:none;padding:24px;text-align:center;color:var(--muted)}
 body.dark .helpcontrols,body.dark .helpchips button,body.dark #helpBody kbd{background:#151d2c;border-color:#2c374b}
 .walljoin{opacity:.001;cursor:crosshair;transition:opacity .14s ease}.walljoin:hover{opacity:1}.walljoin circle{fill:#fff;stroke:#1745c8;stroke-width:2}.walljoin path{stroke:#1745c8;stroke-width:2;stroke-linecap:round;pointer-events:none}
 /* ---------- animatic timeline ---------- */
@@ -1734,7 +1784,7 @@ function poseHeightFactor(el){return el.seated?.72:1}
 /* one revision string for every asset path, so replacing artwork actually
    invalidates the browser cache. Must be declared before embedded3dPath,
    which ACTOR_PROFILES calls at module init. */
-const ASSET_RENDER_REV="20260830-library-v9";
+const ASSET_RENDER_REV="20260830-library-v8";
 function embedded3dPath(path){
   const clean=String(path||"").replace(/^assets\/3d\//,"").replace(/\.png(?:\?.*)?$/,"");
   return clean ? "assets/3d/"+clean+".png?v="+ASSET_RENDER_REV : "";
@@ -2111,7 +2161,7 @@ const ASSET_3D={
   hmi:"lighting/hmi",parcan:"lighting/par-can",china:"lighting/china-ball",bounce:"lighting/bounce-board",flagsolid:"lighting/solid-flag",
   flagsilk:"lighting/silk-frame",cucoloris:"lighting/cucoloris",stageplatform:"lighting/stage-platform",trusstower:"lighting/truss-tower",
   paspeaker:"lighting/pa-speaker",ledwall:"lighting/led-video-wall",stairs:"architecture/staircase",door:"architecture/open-door-3d",
-  window:"architecture/window-3d",column:"architecture/column",pillarround:"architecture/round-column",radiator:"architecture/radiator",railing:"architecture/railing",fireplace:"architecture/fireplace",
+  window:"architecture/window-3d",column:"architecture/column",railing:"architecture/railing",fireplace:"architecture/fireplace",
   fridge:"architecture/refrigerator",counterrun:"architecture/kitchen-counter",island:"architecture/kitchen-island",wc:"architecture/toilet",
   basin:"architecture/wash-basin",bath:"architecture/bathtub",shower:"architecture/shower",tree:"architecture/tree",bush:"architecture/hedge",rock:"architecture/boulder"
 };
@@ -4504,8 +4554,8 @@ function renderInspector(){
   const elevation=canElevate?sect('elevation','Elevation from ground',
     `<div class="f"><span class="lbl">Elevation <b style="float:right">${(+el.elevation||0).toFixed(2)} m</b></span>
       <input type="range" min="0" max="8" step="0.05" value="${+el.elevation||0}" ${bindAttr('elem',el.id,'elevation',true)}></div>
-     <div class="row">${fInput('Exact elevation (m)','elem',el.id,'elevation',+el.elevation||0,{type:'number',step:.05,min:0,max:50})}
-       <button class="btn" data-act="groundItem" data-id="${el.id}" style="align-self:end">Place on ground</button></div>
+     <div class="row fieldaction">${fInput('Exact elevation (m)','elem',el.id,'elevation',+el.elevation||0,{type:'number',step:.05,min:0,max:50})}
+       <button class="btn" data-act="groundItem" data-id="${el.id}">Place on ground</button></div>
      <p class="hint">Elevation is measured from the floor to the bottom of the item. Use it for wall-mounted screens, raised platforms, flying props and overhead equipment.</p>`,`${(+el.elevation||0).toFixed(2)} m`):'';
   return inspectorHeader(el)+body+elevation;
 }
@@ -9325,93 +9375,222 @@ function syncHud(){
 }
 
 /* ------------------------- help ------------------------- */
-const HELP = `
-<div class="helpcontrols">
-  <div class="helpsearch"><input id="helpSearch" type="search" placeholder="Search ShotCraft help — try camera, beats, export, keyboard…" aria-label="Search help"><button class="btn" id="helpExpand">Expand all</button></div>
-  <div class="helpchips"><button class="on" data-help-filter="">All topics</button><button data-help-filter="start">Getting started</button><button data-help-filter="camera">Camera</button><button data-help-filter="beat">Blocking</button><button data-help-filter="production">Production</button><button data-help-filter="keyboard">Shortcuts</button><button data-help-filter="export">Export</button></div>
-</div>
-<div class="sect"><h4>Start here: a five-step ShotCraft workflow</h4><div class="sbody">
-<p>1. Set the scene and scale. 2. Place actors and recognizable set items. 3. Add cameras and frame each shot. 4. Add beats and move items at each beat. 5. Review the board, production modules and export package.</p>
-<div class="helpactions"><button class="btn solid" data-help-go="inspector">Open Inspector</button><button class="btn" data-help-go="shots">Open Shots</button><button class="btn" data-help-go="story">Open Board</button><button class="btn" data-help-go="viewfinder">Open Viewfinder</button></div>
-</div></div>
-<div class="sect"><h4>The tool rail</h4><div class="sbody">
-<p class="hint">The rail is colour coded by family: grey for navigation, blue for talent and cameras, amber for lighting,
-dark for building the set, teal for the asset libraries, purple for geometry and moves, green for annotation, orange for
-reference images. Tools with a small dot open a library. Press the letter shown on a tool to select it, or press
-<b>Shift and Space</b> to search every asset in the app by name or code, for example "sofa", "HMI", "CEE32", "staircase".</p>
-</div></div>
-<div class="sect"><h4>Placing things</h4><div class="sbody">
-<p class="hint">Pick a tool, then click on the plan. Walls, dolly track, roads, arrows and the tape measure are drawn by
-pressing and dragging. Shapes are dragged out to size. Doors and windows snap to the nearest wall. A cable run is
-click, click, click for the corners, then double click or press Enter to finish it. The pen draws freehand and its
-colour and size bar appears above the canvas.</p>
-<p class="hint">Everything is in real metres. One grid square is one metre and the darker line is every five.</p>
-</div></div>
-<div class="sect"><h4>Moving and editing</h4><div class="sbody">
-<p class="hint"><b>Drag</b> to move. <b>Alt and drag</b> to rotate. <b>Shift and click</b> adds to the selection.
-<b>Arrow keys</b> nudge, <b>square brackets</b> rotate by 15 degrees, <b>Delete</b> removes. <b>Ctrl and D</b>
-duplicates, <b>Ctrl and Z</b> undoes, <b>Ctrl and A</b> selects everything. Scroll to zoom, hold <b>H</b> or the middle
-mouse button to pan.</p>
-</div></div>
-<div class="sect"><h4>Shots and the viewfinder</h4><div class="sbody">
-<p class="hint">Every camera becomes a numbered shot. The blue wedge is the true field of view for that lens on that
-sensor, and the solid arc is the focus distance. The inspector calculates the field of view, the frame width at the
-focus distance and the depth of field. The viewfinder projects the plan into the frame at the right lens, sensor,
-aspect ratio, height and tilt, with thirds and safe areas.</p>
-</div></div>
-<div class="sect"><h4>The 180 degree line</h4><div class="sbody">
-<p class="hint">Select two actors, then press <b>Set axis from two selected actors</b>. The red dashed line is the action
-axis. Any camera on the far side is flagged red on the plan, in the shot list, in the continuity module and on the
-printed sheet, because cutting to it reverses screen direction.</p>
-</div></div>
-<div class="sect"><h4>Lighting, power, rigging and DMX</h4><div class="sbody">
-<p class="hint">The light tool opens a library of 21 fixtures and grip items. Fixtures throw a beam; flags, nets, silks
-and cookies subtract light and are drawn as bars. Give each fixture a role, and the Lighting tab measures its angle off
-the lens axis, works out the key to fill ratio and writes assessment notes. Power groups the fixtures into circuits and
-warns when a group exceeds a 13 A outlet. Rigging totals the weight and the sandbags. DMX patches universes and
-addresses and flags clashes.</p>
-</div></div>
-<div class="sect"><h4>Production modules</h4><div class="sbody">
-<p class="hint">Turn any module on or off in <b>Viewing Options</b>. Crew holds the contact list and the key crew roles.
-Locations stores addresses and coordinates, which drive the sun calculation for exterior scenes. Schedule builds the
-stripboard with call and wrap times, banners for lunch and company moves, and a call sheet. Budget prices the crew list.
-Continuity, Run of show, Tasks, Logistics and Moodboard cover the rest of the paperwork.</p>
-</div></div>
-<div class="sect"><h4>Beats</h4><div class="sbody">
-<p class="hint">Add beats at the bottom of the window to block movement. Beat 1 is the starting position. Select the next beat, then move an actor, camera or item; ShotCraft records that position for the selected beat. Turn on <b>Show paths</b> to see every movement segment. Press Play to preview the blocking. Removing a camera removes its complete beat history.</p>
-</div></div>
-<div class="sect"><h4>Keyboard and mouse reference</h4><div class="sbody">
-<p><kbd>Space</kbd> hold and drag to pan · Mouse wheel to zoom · <kbd>Shift</kbd> + click for multi-select · <kbd>Alt</kbd> + drag to rotate · Arrow keys to nudge · <kbd>[</kbd> <kbd>]</kbd> to rotate 15°.</p>
-<p><kbd>Ctrl/Cmd</kbd> + <kbd>Z</kbd> undo · <kbd>Ctrl/Cmd</kbd> + <kbd>D</kbd> duplicate · <kbd>Ctrl/Cmd</kbd> + <kbd>A</kbd> select all · <kbd>Delete</kbd> remove · <kbd>Esc</kbd> cancel the active tool · <kbd>Enter</kbd> finish a cable path.</p>
-</div></div>
-<div class="sect"><h4>Troubleshooting and recovery</h4><div class="sbody">
-<p><b>Cannot see cones or paths?</b> Check the bottom view controls and Viewing Options. <b>An item will not move?</b> Unlock it in the Inspector and switch to Select. <b>Lost the plan?</b> use Fit View. <b>Need an earlier version?</b> open Your Productions and restore a save point. Save a project file before clearing browser data.</p>
-<div class="helpactions"><button class="btn" data-help-go="fit">Fit plan to window</button><button class="btn" data-help-go="viewing">Open Viewing Options</button></div>
-</div></div>
-<div class="sect"><h4>Handing work in</h4><div class="sbody">
-<p class="hint">Open <b>Export Plan</b>. The print studio has seventeen sheets: floor plan blueprint, shot list,
-storyboard, lined script, schedule, call sheet, contact list, equipment list, power plan, rigging plot, DMX patch, cable
-and signal, continuity, camera report, sound report, budget summary and the complete package. Fill in your name and
-student ID in the Project tab first, then choose <b>Print / Save as PDF</b>. Every sheet carries a signature strip for
-the assessor. <b>Save File</b> writes a .json you can reopen or hand to a partner. Everything stays on this computer.</p>
-</div></div>`;
+const HELP_TOPICS = [
+  {c:"start", col:"#00249C", tag:"Start", t:"Your first five minutes",
+   b:`<div class="helpgrid">
+        <div class="helpcard"><b>1. Build the room</b><span>An empty plan offers <b>Draw a 5 &times; 4 m room</b>. Or press <kbd>W</kbd> and drag each wall yourself.</span></div>
+        <div class="helpcard"><b>2. Dress the set</b><span>Press <kbd>P</kbd> for props, <kbd>F</kbd> for architecture, <kbd>A</kbd> for cast. Everything is in real metres.</span></div>
+        <div class="helpcard"><b>3. Place a camera</b><span>Press <kbd>C</kbd>. Each camera becomes a numbered shot with its own lens and height.</span></div>
+        <div class="helpcard"><b>4. Check the frame</b><span>Open the Viewfinder to see what that lens actually holds.</span></div>
+        <div class="helpcard"><b>5. Export</b><span>Seventeen printable sheets, from floor plan to call sheet.</span></div>
+      </div>
+      <p class="helptip"><b>Not sure where to start?</b> Open the worked example from the launch screen. It is a finished two scene short film you can pull apart.</p>`},
+
+  {c:"plan", col:"#5b6478", tag:"Floor plan", t:"Drawing walls and rooms",
+   b:`<p>Press <kbd>W</kbd> and drag to draw a wall. While you drag, its <b>length and angle</b> show on screen.</p>
+      <div class="helpgrid">
+        <div class="helpcard"><b>Clean angles</b><span>A wall within a few degrees of a round bearing rounds to it, so corners come out square.</span></div>
+        <div class="helpcard"><b>Corners weld</b><span>Drop an endpoint near an existing corner and it snaps exactly onto it, closing the room.</span></div>
+        <div class="helpcard"><b>Extend a wall</b><span>Select a wall and drag the round handle at either end to carry on from there.</span></div>
+        <div class="helpcard"><b>Construction</b><span>Each wall has a preset: partition, soundstage flat, acoustic, masonry, exterior or glazed. Thickness, height, material, colour and ratings follow.</span></div>
+      </div>
+      <p class="helptip">Preset values are planning figures. Confirm load, fire and acoustic requirements with a qualified professional before anyone builds anything.</p>`},
+
+  {c:"plan", col:"#5b6478", tag:"Floor plan", t:"Doors and windows",
+   b:`<p>Press <kbd>D</kbd> for a door or <kbd>N</kbd> for a window and click on a wall. They snap onto the nearest wall and take its angle automatically.</p>
+      <p>An opening always lies along its wall, so the rotate handle only flips it to face the other way rather than letting it swing free. In the viewfinder the artwork is mapped into the plane of the wall, so it foreshortens with the wall instead of turning to face the lens.</p>
+      <p class="helptip"><b>Set a window's sill and head</b> in the Inspector to control how much light and view falls inside the frame.</p>`},
+
+  {c:"plan", col:"#5b6478", tag:"Floor plan", t:"Snapping, guides and alignment",
+   b:`<p>Dragging anything shows what it is lining up with.</p>
+      <div class="helpgrid">
+        <div class="helpcard"><b>Flush to a wall</b><span>Furniture dragged near a wall sits against it and turns its back to it.</span></div>
+        <div class="helpcard"><b>Lines up with neighbours</b><span>Centres and edges snap to other objects, with a guide showing the match.</span></div>
+        <div class="helpcard"><b>Grid</b><span>Free positions round to a quarter metre.</span></div>
+        <div class="helpcard"><b>Turn it off</b><span><b>Snap &amp; guides</b> in the View menu. Everything then stays exactly where you drop it.</span></div>
+      </div>`},
+
+  {c:"place", col:"#12a3b8", tag:"Placing", t:"The tool rail and the asset libraries",
+   b:`<p>The rail is colour coded: grey for navigation, blue for talent and cameras, amber for lighting, dark for building the set, teal for the asset libraries, purple for geometry and moves, green for annotation, orange for reference images.</p>
+      <p>Tools with a small dot open a library. Press <kbd>Shift</kbd>+<kbd>Space</kbd> to search every asset in the app by name or code &mdash; try "sofa", "HMI" or "staircase".</p>
+      <p>Walls, dolly track, roads, arrows and the tape measure are drawn by pressing and dragging. Shapes drag out to size. A cable run is click, click, click for the corners, then double click or <kbd>Enter</kbd> to finish.</p>`},
+
+  {c:"place", col:"#12a3b8", tag:"Placing", t:"Moving, rotating and elevation",
+   b:`<div class="keygrid">
+        <div class="keyrow"><kbd>Drag</kbd><span>Move</span></div>
+        <div class="keyrow"><kbd>Alt</kbd><span>Hold and drag to rotate</span></div>
+        <div class="keyrow"><kbd>Shift</kbd><span>Click to add to the selection</span></div>
+        <div class="keyrow"><kbd>&larr;&uarr;&rarr;&darr;</kbd><span>Nudge</span></div>
+        <div class="keyrow"><kbd>[ ]</kbd><span>Rotate 15 degrees</span></div>
+        <div class="keyrow"><kbd>Del</kbd><span>Remove</span></div>
+      </div>
+      <p style="margin-top:9px"><b>Elevation</b> is measured from the floor to the bottom of an item. Use it for wall mounted screens, raised platforms, flying props and overhead rigging. <b>Place on ground</b> returns it to zero.</p>`},
+
+  {c:"camera", col:"#1828B3", tag:"Camera", t:"Shots, lenses and the viewfinder",
+   b:`<p>Every camera becomes a numbered shot. The blue wedge is the true field of view for that lens on that sensor; the solid arc is the focus distance.</p>
+      <div class="helpgrid">
+        <div class="helpcard"><b>The Inspector calculates</b><span>Field of view, frame width at the focus distance, and depth of field.</span></div>
+        <div class="helpcard"><b>The viewfinder projects</b><span>The plan into the frame at the chosen lens, sensor, aspect ratio, height and tilt.</span></div>
+        <div class="helpcard"><b>Overlays</b><span>Thirds, safe areas, centre cross and horizon.</span></div>
+        <div class="helpcard"><b>Send frame to storyboard</b><span>Turns the current frame into a board panel.</span></div>
+      </div>
+      <p class="helptip">The viewfinder is a framing guide built from the floor plan geometry, not a photographic render. Use it to decide coverage, not exposure.</p>`},
+
+  {c:"camera", col:"#1828B3", tag:"Camera", t:"The 180 degree line",
+   b:`<p>Pick the two actors who define the axis, and ShotCraft draws the line between them and checks every camera against it. Cameras on the wrong side are flagged so you can see a crossing before the day, not in the edit.</p>
+      <p class="helptip">Crossing the line is a choice, not a mistake. The warning is there so it is a deliberate one.</p>`},
+
+  {c:"light", col:"#e0a106", tag:"Lighting", t:"Lighting, power and rigging",
+   b:`<p>Press <kbd>L</kbd> for fixtures, modifiers and flags. Give each one a role &mdash; key, fill, rim, background or practical &mdash; and the lighting report assesses the plot: key offset from the lens axis, key to fill ratio, whether the rim is actually behind the subject.</p>
+      <div class="helpgrid">
+        <div class="helpcard"><b>Build three point</b><span>One button lays a key, fill and rim around the selected actor.</span></div>
+        <div class="helpcard"><b>Power</b><span>Total load, current at 230 V and how many circuits to plan for.</span></div>
+        <div class="helpcard"><b>Rigging</b><span>Stand and rigged weight per fixture.</span></div>
+        <div class="helpcard"><b>DMX</b><span>Patch and address list in the Gear tab.</span></div>
+      </div>`},
+
+  {c:"script", col:"#8b53d6", tag:"Script", t:"The screenplay editor",
+   b:`<p>The Script tab formats to entertainment industry standard: 12 pt Courier, a 1.5 inch binding margin, dialogue indented from the left margin with the character cue further in again, transitions flush right, and 55 lines to the page.</p>
+      <div class="helpgrid">
+        <div class="helpcard"><b>Real pagination</b><span>Each element wraps at its own column width, so the page count is the true one.</span></div>
+        <div class="helpcard"><b>Page breaks</b><span>Dialogue crossing a page carries <b>(MORE)</b> at the foot and <b>CONT'D</b> on the cue at the top.</span></div>
+        <div class="helpcard"><b>Final Draft</b><span>Import and export <b>.fdx</b>, so a scene moves between ShotCraft and Final Draft.</span></div>
+        <div class="helpcard"><b>Elements</b><span><kbd>Ctrl</kbd>+<kbd>1</kbd> to <kbd>6</kbd> for scene, action, character, parenthetical, dialogue and transition.</span></div>
+      </div>
+      <p style="margin-top:8px"><b>Lined coverage</b> ties each shot to the lines it covers, so the plan and the page stay in step. The <b>AV script</b> is the two column format for commercials and multi camera work.</p>`},
+
+  {c:"story", col:"#00249C", tag:"Story", t:"Beats and the storyboard",
+   b:`<p>A beat is a moment in the scene. Add beats and move people and cameras at each one; ShotCraft keeps a separate position per beat and plays the blocking back with <b>Show paths</b> tracing the moves.</p>
+      <p>The board holds a panel per shot with framing, action and notes, and can pull frames straight from the viewfinder.</p>`},
+
+  {c:"production", col:"#159e91", tag:"Production", t:"Production modules",
+   b:`<div class="helpgrid">
+        <div class="helpcard"><b>Gear</b><span>Built from what is on the plan, department by department.</span></div>
+        <div class="helpcard"><b>Schedule</b><span>Stripboard and day planning.</span></div>
+        <div class="helpcard"><b>Crew and cast</b><span>Roles, contacts and call times.</span></div>
+        <div class="helpcard"><b>Budget</b><span>Line items priced against the gear list.</span></div>
+        <div class="helpcard"><b>Locations</b><span>Addresses, access notes and permits.</span></div>
+        <div class="helpcard"><b>Tasks</b><span>What is outstanding and who owns it.</span></div>
+      </div>
+      <p class="helptip">Hide any module you are not using in <b>Viewing options</b>. The workspace preset only decides which tab opens first.</p>`},
+
+  {c:"keyboard", col:"#6f4bd8", tag:"Shortcuts", t:"Keyboard reference",
+   b:`<p><b>Tools</b></p>
+      <div class="keygrid">
+        <div class="keyrow"><kbd>V</kbd><span>Select and move</span></div>
+        <div class="keyrow"><kbd>H</kbd><span>Pan the canvas</span></div>
+        <div class="keyrow"><kbd>A</kbd><span>Actor / talent</span></div>
+        <div class="keyrow"><kbd>C</kbd><span>Camera and shot</span></div>
+        <div class="keyrow"><kbd>L</kbd><span>Light and grip</span></div>
+        <div class="keyrow"><kbd>W</kbd><span>Wall / flat</span></div>
+        <div class="keyrow"><kbd>D</kbd><span>Door</span></div>
+        <div class="keyrow"><kbd>N</kbd><span>Window</span></div>
+        <div class="keyrow"><kbd>P</kbd><span>Props and dressing</span></div>
+        <div class="keyrow"><kbd>E</kbd><span>Staging and live events</span></div>
+        <div class="keyrow"><kbd>U</kbd><span>Studio and grip</span></div>
+        <div class="keyrow"><kbd>F</kbd><span>Architecture</span></div>
+        <div class="keyrow"><kbd>S</kbd><span>Shape / zone</span></div>
+        <div class="keyrow"><kbd>T</kbd><span>Dolly track</span></div>
+        <div class="keyrow"><kbd>R</kbd><span>Street / road</span></div>
+        <div class="keyrow"><kbd>M</kbd><span>Tape measure</span></div>
+        <div class="keyrow"><kbd>G</kbd><span>Movement arrow</span></div>
+        <div class="keyrow"><kbd>K</kbd><span>Cable run</span></div>
+        <div class="keyrow"><kbd>X</kbd><span>Text</span></div>
+        <div class="keyrow"><kbd>B</kbd><span>Pen / freehand</span></div>
+        <div class="keyrow"><kbd>I</kbd><span>Reference image</span></div>
+      </div>
+      <p style="margin-top:10px"><b>Editing and view</b></p>
+      <div class="keygrid">
+        <div class="keyrow"><kbd>Ctrl</kbd>+<kbd>Z</kbd><span>Undo</span></div>
+        <div class="keyrow"><kbd>Ctrl</kbd>+<kbd>D</kbd><span>Duplicate</span></div>
+        <div class="keyrow"><kbd>Ctrl</kbd>+<kbd>A</kbd><span>Select everything</span></div>
+        <div class="keyrow"><kbd>Shift</kbd>+<kbd>Space</kbd><span>Search every asset</span></div>
+        <div class="keyrow"><kbd>Esc</kbd><span>Back to the select tool</span></div>
+        <div class="keyrow"><kbd>Scroll</kbd><span>Zoom</span></div>
+      </div>`},
+
+  {c:"export", col:"#2fa35f", tag:"Export", t:"Handing work in",
+   b:`<p>The print studio has seventeen sheets: floor plan blueprint, shot list, storyboard, lined script, schedule, call sheet, contacts, gear, power, rigging, budget, locations, continuity, run of show, tasks, logistics and mood board.</p>
+      <p>Set the title, module and instructor on the title page so every sheet carries them. Save a project file to keep a copy you can reopen or hand over.</p>
+      <p class="helptip"><b>Everything is stored in this browser on this computer.</b> Export a project file before you clear your browser data or move to another machine.</p>`},
+
+  {c:"start", col:"#c4342a", tag:"Help", t:"When something looks wrong",
+   b:`<div class="helpgrid">
+        <div class="helpcard"><b>An item vanished from the frame</b><span>Check it is inside the camera's field of view, and that a door or window is on a wall.</span></div>
+        <div class="helpcard"><b>Nothing lines up</b><span><b>Snap &amp; guides</b> may be off in the View menu.</span></div>
+        <div class="helpcard"><b>Lost the plan</b><span>Press <b>Fit</b> to bring everything back on screen.</span></div>
+        <div class="helpcard"><b>Went too far</b><span><kbd>Ctrl</kbd>+<kbd>Z</kbd> steps back through your edits.</span></div>
+        <div class="helpcard"><b>Old artwork showing</b><span>Reload the page; assets are cached by version.</span></div>
+        <div class="helpcard"><b>Start again</b><span>Templates in the top bar has ready made setups.</span></div>
+      </div>`}
+];
+const HELP_CATS = [["","All topics","#16204a"],["start","Getting started","#00249C"],["plan","Floor plan","#5b6478"],
+  ["place","Placing","#12a3b8"],["camera","Camera","#1828B3"],["light","Lighting","#e0a106"],
+  ["script","Script","#8b53d6"],["story","Story","#00249C"],["production","Production","#159e91"],
+  ["keyboard","Shortcuts","#6f4bd8"],["export","Export","#2fa35f"]];
+const HELP_STEPS = [
+  {n:"1",c:"#00249C",t:"Build the room",d:"Draw walls, or drop a ready made room on an empty plan.",go:"fit",go_n:"Fit the plan"},
+  {n:"2",c:"#12a3b8",t:"Dress the set",d:"Props, architecture and cast, all in real metres.",go:"inspector",go_n:"Open Inspector"},
+  {n:"3",c:"#1828B3",t:"Frame the shots",d:"Add cameras and check each lens in the viewfinder.",go:"viewfinder",go_n:"Open Viewfinder"},
+  {n:"4",c:"#8b53d6",t:"Write and board",d:"Screenplay, lined coverage and storyboard panels.",go:"script",go_n:"Open Script"},
+  {n:"5",c:"#2fa35f",t:"Hand it in",d:"Seventeen printable sheets and a project file.",go:"shots",go_n:"Open Shots"}
+];
+function helpHTML(){
+  const chips=HELP_CATS.map(([v,n,c],i)=>
+    `<button class="${i?"":"on"}" data-help-filter="${v}" style="${i?`--hc:${c}`:""}">${esc(n)}</button>`).join("");
+  const steps=HELP_STEPS.map(s=>`<div class="helpstep" style="background:linear-gradient(135deg,${s.c},${s.c}cc)">
+      <i>${s.n}</i><b>${esc(s.t)}</b><span>${esc(s.d)}</span>
+      <button data-help-go="${s.go}">${esc(s.go_n)}</button></div>`).join("");
+  const topics=HELP_TOPICS.map(t=>`<div class="sect" data-help-cat="${t.c}" style="--hc:${t.col}">
+      <h4 role="button" tabindex="0"><span class="hcdot"></span><span class="stitle">${esc(t.t)}</span>
+        <span class="hctag">${esc(t.tag)}</span><span class="schev">&#8964;</span></h4>
+      <div class="sbody">${t.b}</div></div>`).join("");
+  return `<div class="helpcontrols">
+      <div class="helpsearch"><input id="helpSearch" type="search" placeholder="Search the guide \u2014 try wall, lens, fdx, snap, export\u2026" aria-label="Search help"><button class="btn" id="helpExpand">Collapse all</button></div>
+      <div class="helpchips">${chips}</div>
+    </div>
+    <div class="helphero">${steps}</div>
+    ${topics}`;
+}
 
 function openHelp(){
-  const body=$("#helpBody"); body.innerHTML=HELP+'<div class="helpempty">No matching help topics. Try a different word.</div>';
-  const sections=Array.from(body.querySelectorAll(".sect")), search=$("#helpSearch"), empty=body.querySelector(".helpempty");
-  const filter=q=>{
-    q=(q||"").trim().toLowerCase(); let shown=0;
-    sections.forEach(s=>{ const match=!q||s.textContent.toLowerCase().includes(q); s.classList.toggle("help-hidden",!match); if(match) shown++; });
+  const body=$("#helpBody");
+  body.innerHTML=helpHTML()+'<div class="helpempty">No matching help topics. Try a different word.</div>';
+  const sections=Array.from(body.querySelectorAll(".sect")), search=$("#helpSearch"),
+        empty=body.querySelector(".helpempty"), hero=body.querySelector(".helphero");
+  let cat="";
+  /* the chips filter by topic, and the box filters by words. They combine, so
+     you can narrow to Camera and then search inside it. */
+  const filter=()=>{
+    const q=(search.value||"").trim().toLowerCase();
+    let shown=0;
+    sections.forEach(sec=>{
+      const inCat = !cat || sec.dataset.helpCat===cat;
+      const inText = !q || sec.textContent.toLowerCase().includes(q);
+      const on = inCat && inText;
+      sec.classList.toggle("help-hidden",!on);
+      if(on) shown++;
+    });
     empty.style.display=shown?"none":"block";
+    if(hero) hero.style.display=(cat||q)?"none":"";     /* the five steps are the front page */
   };
-  search.oninput=e=>filter(e.target.value);
-  body.querySelectorAll("[data-help-filter]").forEach(b=>b.onclick=()=>{
-    body.querySelectorAll("[data-help-filter]").forEach(x=>x.classList.remove("on")); b.classList.add("on"); search.value=b.dataset.helpFilter; filter(search.value);
+  search.oninput=filter;
+  body.querySelectorAll("[data-help-filter]").forEach(btn=>btn.onclick=()=>{
+    body.querySelectorAll("[data-help-filter]").forEach(x=>x.classList.remove("on"));
+    btn.classList.add("on"); cat=btn.dataset.helpFilter; filter();
   });
-  sections.forEach(s=>s.querySelector("h4").onclick=()=>s.classList.toggle("help-closed"));
-  $("#helpExpand").onclick=e=>{ const close=!sections.some(s=>s.classList.contains("help-closed")); sections.forEach(s=>s.classList.toggle("help-closed",close)); e.currentTarget.textContent=close?"Expand all":"Collapse all"; };
-  body.querySelectorAll("[data-help-go]").forEach(b=>b.onclick=()=>{
-    const go=b.dataset.helpGo; $("#veilHelp").classList.remove("show");
+  sections.forEach(sec=>{
+    const h=sec.querySelector("h4");
+    h.onclick=()=>sec.classList.toggle("help-closed");
+    h.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); h.click(); } };
+  });
+  $("#helpExpand").onclick=e=>{
+    const close=!sections.some(sec=>sec.classList.contains("help-closed"));
+    sections.forEach(sec=>sec.classList.toggle("help-closed",close));
+    e.currentTarget.textContent=close?"Expand all":"Collapse all";
+  };
+  body.querySelectorAll("[data-help-go]").forEach(btn=>btn.onclick=()=>{
+    const go=btn.dataset.helpGo; $("#veilHelp").classList.remove("show");
     if(go==="viewfinder") openViewfinder();
     else if(go==="fit") fitView();
     else if(go==="viewing") renderViewing();
