@@ -1734,7 +1734,7 @@ function poseHeightFactor(el){return el.seated?.72:1}
 /* one revision string for every asset path, so replacing artwork actually
    invalidates the browser cache. Must be declared before embedded3dPath,
    which ACTOR_PROFILES calls at module init. */
-const ASSET_RENDER_REV="20260830-library-v8";
+const ASSET_RENDER_REV="20260830-library-v9";
 function embedded3dPath(path){
   const clean=String(path||"").replace(/^assets\/3d\//,"").replace(/\.png(?:\?.*)?$/,"");
   return clean ? "assets/3d/"+clean+".png?v="+ASSET_RENDER_REV : "";
@@ -2111,7 +2111,7 @@ const ASSET_3D={
   hmi:"lighting/hmi",parcan:"lighting/par-can",china:"lighting/china-ball",bounce:"lighting/bounce-board",flagsolid:"lighting/solid-flag",
   flagsilk:"lighting/silk-frame",cucoloris:"lighting/cucoloris",stageplatform:"lighting/stage-platform",trusstower:"lighting/truss-tower",
   paspeaker:"lighting/pa-speaker",ledwall:"lighting/led-video-wall",stairs:"architecture/staircase",door:"architecture/open-door-3d",
-  window:"architecture/window-3d",column:"architecture/column",railing:"architecture/railing",fireplace:"architecture/fireplace",
+  window:"architecture/window-3d",column:"architecture/column",pillarround:"architecture/round-column",radiator:"architecture/radiator",railing:"architecture/railing",fireplace:"architecture/fireplace",
   fridge:"architecture/refrigerator",counterrun:"architecture/kitchen-counter",island:"architecture/kitchen-island",wc:"architecture/toilet",
   basin:"architecture/wash-basin",bath:"architecture/bathtub",shower:"architecture/shower",tree:"architecture/tree",bush:"architecture/hedge",rock:"architecture/boulder"
 };
@@ -2471,6 +2471,14 @@ function nearestWall(x,y,maxD){
     if(d<(maxD||1.0) && (!best||d<best.d)) best={w,d,px,py,t,ang:deg(Math.atan2(dy,dx))};
   }
   return best;
+}
+function openingAngle(el){
+  const w = el.wallId ? byId(el.wallId) : null;
+  const host = (w && w.type==="wall") ? w
+             : (nearestWall(posAt(el).x, posAt(el).y, 0.8)||{}).w;
+  if(!host) return posAt(el).rot||0;
+  const a=posAt(host);
+  return deg(Math.atan2(host.y2-a.y, host.x2-a.x));
 }
 function axisActors(){
   const a = actors();
@@ -3599,6 +3607,14 @@ function initCanvas(){
         if(Math.abs(dx)>Math.abs(dy)) drag.by=drag.ay; else drag.bx=drag.ax;
       }
       renderPlan(); return; }
+    if(drag.mode==="rotate" && drag.el && (drag.el.type==="door"||drag.el.type==="window")){
+      /* an opening only has two sensible orientations: along its wall, either way round */
+      const base=openingAngle(drag.el);
+      const aim=deg(Math.atan2(py-drag.cy, px-drag.cx));
+      const flip=Math.abs(((aim-base+540)%360)-180)>90;
+      setRot(drag.el, round2(((base+(flip?180:0))%360+360)%360));
+      renderPlan(); return;
+    }
     if(drag.mode==="rotate"){
       let a = deg(Math.atan2(py-drag.cy, px-drag.cx)) + (drag.off||0);
       if(ev.shiftKey) a = Math.round(a/15)*15;
@@ -5102,7 +5118,7 @@ function vfSVG(cam,W,H,opt){
     return true;
   }
   els().filter(e=>e.type==="window").forEach(wn=>{
-    const q=posAt(wn), a=rad(q.rot), hw=wn.width/2;
+    const q=posAt(wn), a=rad(openingAngle(wn)), hw=wn.width/2;
     const a1=[q.x-Math.cos(a)*hw, q.y-Math.sin(a)*hw], b1=[q.x+Math.cos(a)*hw, q.y+Math.sin(a)*hw];
     const s=wn.sill==null?0.9:wn.sill, hd=wn.head==null?2.2:wn.head;
     if(openingImage(a1,b1,s,hd,asset3d("window"),wn.id)) return;
@@ -5111,7 +5127,7 @@ function vfSVG(cam,W,H,opt){
     line3([a1[0],a1[1],(s+hd)/2],[b1[0],b1[1],(s+hd)/2], "#dfeaf7", 1.4, 0.6);
   });
   els().filter(e=>e.type==="door").forEach(d=>{
-    const q=posAt(d), a=rad(q.rot), hw=d.width/2;
+    const q=posAt(d), a=rad(openingAngle(d)), hw=d.width/2;
     const a1=[q.x-Math.cos(a)*hw, q.y-Math.sin(a)*hw], b1=[q.x+Math.cos(a)*hw, q.y+Math.sin(a)*hw];
     const dh=d.height||2.05;
     if(openingImage(a1,b1,0,dh,asset3d("door"),d.id)) return;
