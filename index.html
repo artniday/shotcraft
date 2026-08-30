@@ -2953,7 +2953,7 @@ function drawElement(el,crossing){
     g = `<ellipse cx="${cx}" cy="${cy+ah*.42}" rx="${aw*.46}" ry="7" fill="#091126" opacity=".25"/>
       <defs><clipPath id="${clipId}"><rect x="${cx-aw/2}" y="${cy-ah/2}" width="${aw}" height="${ah}" rx="11"/></clipPath></defs>
       <g clip-path="url(#${clipId})">
-        <image x="${imageX}" y="${cy-ah/2}" width="${imageW}" height="${ah}" href="${imageHref}" preserveAspectRatio="xMidYMax meet"/>
+        <image x="${imageX}" y="${cy-ah/2}" width="${imageW}" height="${ah}" href="${imageHref}" preserveAspectRatio="xMidYMax meet"${flipAttr(el,imageX,imageW)}/>
         <path d="M${cx-aw/2+3} ${cy-ah/2+5} Q${cx} ${cy-ah/2-3} ${cx+aw/2-4} ${cy-ah/2+8}" fill="none" stroke="#fff" stroke-width="3" opacity=".55"/>
       </g>
       <g pointer-events="none"><circle cx="${cx-aw*.38}" cy="${cy-ah*.32}" r="10" fill="${el.color}" stroke="#fff" stroke-width="2"/>
@@ -3394,6 +3394,15 @@ function deleteSelected(){
   deleteElementsEveryBeat(state.sel);
   state.sel=[]; renderAll(); save();
 }
+/* Mirror the selected characters. Only things drawn from artwork can be
+   flipped; a camera or a wall has no left and right to swap. */
+function flipSelected(){
+  const targets=selected().filter(e=>e.type==="actor"&&!e.locked);
+  if(!targets.length) return;
+  pushHistory();
+  targets.forEach(e=>{ e.flip=!e.flip; });
+  renderAll(); save();
+}
 function duplicateSelected(){
   const sel=selected(); if(!sel.length) return;
   pushHistory();
@@ -3822,6 +3831,7 @@ function initKeys(){
     if((ev.ctrlKey||ev.metaKey)&&k==="a"){ ev.preventDefault(); state.sel=els().map(e=>e.id); renderAll(); return; }
     if((ev.ctrlKey||ev.metaKey)&&k==="s"){ ev.preventDefault(); savePlanFile(); return; }
     if(ev.ctrlKey||ev.metaKey) return;
+    if(ev.shiftKey&&k==="f"){ ev.preventDefault(); flipSelected(); return; }
     if(k==="delete"||k==="backspace"){ ev.preventDefault(); deleteSelected(); return; }
     if(k==="enter"){ if(cableDraft){ ev.preventDefault(); finishCable(); } return; }
     if(k==="escape"){
@@ -3938,6 +3948,14 @@ function fSelect(labelText,scope,a,b,val,options){
 }
 function fArea(labelText,scope,a,b,val,ph){
   return `<label class="f"><span>${esc(labelText)}</span><textarea placeholder="${esc(ph||"")}" ${bindAttr(scope,a,b)}>${esc(val)}</textarea></label>`;
+}
+/* Mirror a character's artwork about the centre of its own image box, so the
+   figure faces the other way without moving. Used by the plan, the perspective
+   view and the viewfinder so a flipped actor looks the same in all three. */
+function flipAttr(el,x,w){
+  if(!el || !el.flip) return "";
+  const cx=(+x)+(+w)/2;
+  return ` transform="translate(${(2*cx).toFixed(2)},0) scale(-1,1)"`;
 }
 function fToggle(labelText,scope,a,b,val,onText,offText){
   return `<div class="f"><span class="lbl">${esc(labelText)}</span><div class="seg">
@@ -4219,7 +4237,9 @@ function inspectorActor(el){
       `<div class="row">${fInput("X position","elem",el.id,"x",p.x,{type:"number",step:0.1})}
         ${fInput("Y position","elem",el.id,"y",p.y,{type:"number",step:0.1})}</div>`
     + fInput("Facing (degrees)","elem",el.id,"rot",Math.round(p.rot),{type:"number",step:5})
-    + `<p class="hint">Hold Alt and drag to rotate on the plan. Arrow keys nudge, square brackets rotate by 15 degrees.</p>`,
+    + fToggle("Mirror the figure","elem",el.id,"flip",!!el.flip,"Flipped","Normal")
+    + `<p class="hint">Hold Alt and drag to rotate on the plan. Arrow keys nudge, square brackets rotate by 15 degrees.
+      <b>Shift and F</b> mirrors the selected character left to right, for when the pose reads better facing the other way.</p>`,
       `X ${p.x} Y ${p.y} | ${Math.round(p.rot)} deg`);
 
   h += sect("beatpos","Blocking across beats",
@@ -5288,11 +5308,14 @@ function vfSVG(cam,W,H,opt){
   cameras().filter(c=>c.id!==cam.id).forEach(c=>{
     const q=posAt(c), h=c.height||1.6,ez=+c.elevation||0;
     shadow(q.x,q.y,0.34,0.34);
-    /* legs to lens height, then the body at its own size on top, instead of one
-       camera image stretched from the floor to the lens */
+    /* The camera body hangs at its lens height with nothing drawn underneath.
+       The rig that actually holds it up is whatever the plan says, and drawing
+       a generic post under every camera implied a tripod even on a crane, a
+       shoulder mount or a drone. The ground shadow still marks the position.
+       bodyH/2 centres the body on the lens height, rather than hanging the
+       whole body below it. */
     const bodyH=0.34, art=RIG_ART[c.rig]||"production/cinema-camera";
-    box3(q.x,q.y,ez,0.09,0.09,Math.max(.1,h-bodyH),0,"#39445e");
-    if(exactBillboard(q,ez+Math.max(.1,h-bodyH),0.55,bodyH,embedded3dPath(art),c.label,c.id))return;
+    if(exactBillboard(q,ez+Math.max(.02,h-bodyH/2),0.55,bodyH,embedded3dPath(art),c.label,c.id))return;
     box3(q.x,q.y,ez+h-0.12,0.30,0.20,0.20,q.rot,"#00249C", o.mini?"":c.label);
   });
 
@@ -5346,7 +5369,7 @@ function vfSVG(cam,W,H,opt){
       const female=(ac.gender||"female")==="female",hasProfile=!!ac.profile,isAnimal=profile.kind==="animal",assetBoxW=hasProfile?iw:iw*2/* iw is ih*profile.r, and r is the artwork's own aspect, so the box matches
    the figure. It used to be forced square for humans, which left the image
    box about three times wider than the person inside it. */,ix=hasProfile?F[0]-assetBoxW*.5:(female?F[0]-iw*1.5:F[0]-iw*.5),imgW=assetBoxW,imgHref=hasProfile?profile.file:"assets/3d/characters/legacy-pair.png?v=20260830g";
-      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${imgW.toFixed(1)}" height="${ih.toFixed(1)}" href="${imgHref}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)}</text>`:""}`});
+      items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${imgW.toFixed(1)}" height="${ih.toFixed(1)}" href="${imgHref}" preserveAspectRatio="xMidYMax meet"${flipAttr(ac,ix,imgW)}/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)}</text>`:""}`});
       return;
     }
     const skin = (ac.gender||"neutral")==="female" ? "#d9a07f" : (ac.gender||"neutral")==="male" ? "#b97857" : "#c98d6d";
@@ -8181,7 +8204,7 @@ function frontElevationSVG(){
     const x=Xf(p.x)-w*sc/2,y=Zf(elev+z),ww=Math.max(7,w*sc),hh=Math.max(5,z*sc);
     if(e.type==="actor"){
       const clip="frontActor"+String(e.id).replace(/[^a-zA-Z0-9_-]/g,"")+"_"+Math.random().toString(36).slice(2,8),female=(e.gender||"female")==="female",profile=e.profile&&actorProfile(e),imageX=profile?Xf(p.x)-ww*.5:(female?Xf(p.x)-ww*1.5:Xf(p.x)-ww*.5),imageW=profile?ww:ww*2,imageHref=profile?profile.file:"assets/3d/characters/legacy-pair.png?v=20260830g";
-      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${imageX}" y="${y}" width="${imageW}" height="${hh}" href="${imageHref}" preserveAspectRatio="xMidYMax meet"/></g>`;
+      g+=`<ellipse cx="${Xf(p.x)}" cy="${ground-elev*sc+4}" rx="${ww*.48}" ry="8" fill="#020617" opacity=".45" filter="url(#frontShadow)"/><defs><clipPath id="${clip}"><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(10,ww*.12)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${imageX}" y="${y}" width="${imageW}" height="${hh}" href="${imageHref}" preserveAspectRatio="xMidYMax meet"${flipAttr(e,imageX,imageW)}/></g>`;
     }
     else g+=`<rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="${col}" stroke="#fff" stroke-opacity=".65"/><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${Math.min(8,ww*.08)}" fill="url(#frontObj)"/>`;
     g+=`<text x="${Xf(p.x)}" y="${Math.max(18,y-8)}" text-anchor="middle" font-size="12" font-weight="800" fill="#f7f9ff" stroke="#101a30" stroke-width="3" paint-order="stroke">${esc(e.label||e.type)} · ${elev.toFixed(2)} m</text>`;});
@@ -9423,7 +9446,9 @@ const HELP_TOPICS = [
         <div class="keyrow"><kbd>&larr;&uarr;&rarr;&darr;</kbd><span>Nudge</span></div>
         <div class="keyrow"><kbd>[ ]</kbd><span>Rotate 15 degrees</span></div>
         <div class="keyrow"><kbd>Del</kbd><span>Remove</span></div>
+        <div class="keyrow"><kbd>Shift</kbd>+<kbd>F</kbd><span>Mirror a character</span></div>
       </div>
+      <p style="margin-top:9px"><b>Mirror a character</b> with <kbd>Shift</kbd>+<kbd>F</kbd>, or the toggle under Position and facing, when the pose reads better facing the other way. Rotation turns the figure on the plan; mirroring flips the artwork itself.</p>
       <p style="margin-top:9px"><b>Elevation</b> is measured from the floor to the bottom of an item. Use it for wall mounted screens, raised platforms, flying props and overhead rigging. <b>Place on ground</b> returns it to zero.</p>`},
 
   {c:"camera", col:"#1828B3", tag:"Camera", t:"Shots, lenses and the viewfinder",
@@ -9505,6 +9530,7 @@ const HELP_TOPICS = [
         <div class="keyrow"><kbd>Ctrl</kbd>+<kbd>D</kbd><span>Duplicate</span></div>
         <div class="keyrow"><kbd>Ctrl</kbd>+<kbd>A</kbd><span>Select everything</span></div>
         <div class="keyrow"><kbd>Shift</kbd>+<kbd>Space</kbd><span>Search every asset</span></div>
+        <div class="keyrow"><kbd>Shift</kbd>+<kbd>F</kbd><span>Mirror the selected character</span></div>
         <div class="keyrow"><kbd>Esc</kbd><span>Back to the select tool</span></div>
         <div class="keyrow"><kbd>Scroll</kbd><span>Zoom</span></div>
       </div>`},
