@@ -1,0 +1,65 @@
+# ShotCraft
+
+A single-file browser tool for shot design and floor plans, built for the Applied Media
+Division at Higher Colleges of Technology. Plan a set from above, place cast and
+equipment, check what falls inside the frame, and export a print pack.
+
+No build step and no dependencies. `index.html` is the whole application; everything
+else is artwork it loads at runtime.
+
+## Running it
+
+Open `index.html` in a browser, or serve the folder:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then visit <http://localhost:8000>.
+
+Opening the file directly with `file://` works in most browsers, but some block
+local image loads. If artwork does not appear, use the server command above.
+
+## Publishing to GitHub Pages
+
+Push the repository contents to the branch you publish from, then set
+**Settings → Pages → Build and deployment** to *Deploy from a branch*, and choose
+that branch with the `/ (root)` folder. `index.html` and `assets/` must both sit at
+the root of what you publish. The `.nojekyll` file keeps Pages from running the
+files through Jekyll.
+
+## Layout
+
+```
+index.html                      the application
+assets/3d/characters/           cast: default, Emirati, animals, plus circular face crops
+assets/3d/furniture/            furniture, dressing, vehicles, hand props
+assets/3d/production/           cameras, movement, monitoring, sound, grip
+assets/3d/lighting/             film lights, modifiers, live-event staging
+assets/3d/architecture/         architectural, kitchen, bathroom, exterior
+assets/3d/props-extra/          expanded props and vehicles
+assets/3d/hand-stunt/           hand props and supervised action markers
+assets/3d/live-event/           broadcast, concert, staging, audio
+assets/environments/            backplates for the viewfinder preview
+```
+
+## Working on the artwork
+
+Character artwork comes in two forms. The full-body PNG (`characters/<name>.png`)
+is drawn on the plan; the face crop (`characters/faces/<name>.png`) fills the round
+portrait in the cast picker.
+
+Face crops are framed on the **face**, not on the bounding box of the figure. Headwear
+inflates a bounding box, so a tight crop pushes the face smaller and higher in the
+circle and the set stops looking consistent. The current target across every portrait
+is a face box **42% of the image height** with its centre **39% from the top**. Match
+that when adding or replacing a face crop.
+
+Assets referenced with a `?v=` query string are cache-busted. If you replace one of
+those files, bump the string everywhere it appears in `index.html`, or browsers will
+keep serving the old artwork.
+
+## Licence
+
+No licence has been declared. All rights reserved by the author unless stated
+otherwise; the third-party artwork in `assets/` is subject to its own terms.
