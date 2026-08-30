@@ -2122,12 +2122,85 @@ Object.assign(ASSET_3D,{
   linearray:"live-event/line-array",subs:"live-event/subwoofers",wedge:"live-event/floor-wedge",foh:"live-event/foh-console",monmix:"live-event/monitor-console",
   micstand:"live-event/mic-stand",barrier:"live-event/barrier",obtruck:"live-event/ob-truck",engvan:"live-event/eng-van",uplink:"live-event/uplink-truck",comms:"live-event/comms-rack"
 });
+/* Dedicated transparent 3D renders for catalogue entries that previously
+   fell back to a coloured square. */
+Object.assign(ASSET_3D,{
+  sidetable:"catalog-missing/sidetable",curtain:"catalog-missing/curtain",
+  officechair:"catalog-missing/officechair",whiteboard:"catalog-missing/whiteboard",receptiondesk:"catalog-missing/receptiondesk",
+  van:"catalog-missing/van",motorcycle:"catalog-missing/motorcycle",minibus:"catalog-missing/minibus",
+  tablet:"catalog-missing/tablet",bottle:"catalog-missing/bottle",tray:"catalog-missing/tray",stillscamera:"catalog-missing/stillscamera",
+  lectern:"catalog-missing/lectern",followspot:"catalog-missing/followspot",
+  applebox:"catalog-missing/applebox",magliner:"catalog-missing/magliner",chroma:"catalog-missing/chroma",
+  makeup:"catalog-missing/makeup",combostand:"catalog-missing/combostand",overhead12:"catalog-missing/overhead12",
+  ladder:"catalog-missing/ladder",generator:"catalog-missing/generator",crafttable:"catalog-missing/crafttable",
+  hob:"catalog-missing/hob",kitchensink:"catalog-missing/kitchensink",wallunit:"catalog-missing/wallunit",
+  kino:"catalog-missing/kino",spacelight:"catalog-missing/spacelight",sun:"catalog-missing/sun",
+  flagnet:"catalog-missing/flagnet",flagcutter:"catalog-missing/flagcutter",branch:"catalog-missing/branch",
+  barndoor:"catalog-missing/barndoor",overhead:"catalog-missing/overhead"
+});
 /* the camera rig decides which body is drawn in the viewfinder */
 const RIG_ART = {"Tripod":"production/cinema-camera","Static clamp":"production/cinema-camera",
   "Handheld":"production/dslr-camera","Shoulder rig":"production/broadcast-camera",
   "Slider":"production/cinema-camera","Dana dolly / rail":"production/doorway-dolly",
   "Gimbal":"production/gimbal-camera","Jib / crane":"production/camera-crane",
   "Drone":"production/gimbal-camera","Car mount":"production/dslr-camera"};
+/* Aspect ratio of every scene asset, measured from the cropped artwork.
+   The viewfinder sizes an image box from this so the drawn height always
+   equals the item's real height. Sizing the box from the plan silhouette
+   instead made tall thin items collapse when they were rotated. */
+const ASSET_AR={
+  "architecture/bathtub":1.152,"architecture/boulder":1.117,"architecture/column":0.354,"architecture/door":0.447,
+  "architecture/fireplace":0.855,"architecture/hedge":1.303,"architecture/kitchen-counter":1.251,"architecture/kitchen-island":1.273,
+  "architecture/railing":0.835,"architecture/refrigerator":0.597,"architecture/shower":0.561,"architecture/staircase":0.792,
+  "architecture/toilet":0.678,"architecture/tree":0.961,"architecture/wash-basin":1.118,"architecture/window":0.626,
+  "catalog-missing/applebox":1.173,"catalog-missing/barndoor":0.909,"catalog-missing/bottle":0.453,"catalog-missing/branch":0.837,
+  "catalog-missing/chroma":1.046,"catalog-missing/combostand":0.642,"catalog-missing/crafttable":1.243,"catalog-missing/curtain":1.067,
+  "catalog-missing/flagcutter":0.605,"catalog-missing/flagnet":0.753,"catalog-missing/followspot":0.802,"catalog-missing/generator":1.167,
+  "catalog-missing/hob":1.566,"catalog-missing/kino":0.655,"catalog-missing/kitchensink":1.176,"catalog-missing/ladder":0.669,
+  "catalog-missing/lectern":0.606,"catalog-missing/magliner":1.024,"catalog-missing/makeup":0.822,"catalog-missing/minibus":1.531,
+  "catalog-missing/motorcycle":1.082,"catalog-missing/officechair":0.613,"catalog-missing/overhead":0.959,"catalog-missing/overhead12":0.957,
+  "catalog-missing/receptiondesk":1.766,"catalog-missing/sidetable":0.809,"catalog-missing/spacelight":0.779,"catalog-missing/stillscamera":1.109,
+  "catalog-missing/sun":0.989,"catalog-missing/tablet":1.284,"catalog-missing/tray":1.749,"catalog-missing/van":1.439,
+  "catalog-missing/wallunit":1.358,"catalog-missing/whiteboard":0.621,"characters/adult-man":0.288,"characters/adult-woman":0.349,
+  "characters/animals/cat":0.865,"characters/animals/chicken":0.6,"characters/animals/dog":0.862,"characters/animals/falcon":0.785,
+  "characters/animals/horse":0.682,"characters/animals/rabbit":0.676,"characters/baby":0.446,"characters/child":0.306,
+  "characters/emirati/adult-man":0.297,"characters/emirati/adult-woman":0.286,"characters/emirati/boy":0.286,"characters/emirati/girl":0.279,
+  "characters/emirati/senior-man":0.335,"characters/emirati/senior-woman":0.287,"characters/emirati/teenage-girl":0.309,"characters/emirati/teenager":0.295,
+  "characters/legacy-pair":0.758,"characters/senior-man":0.322,"characters/senior-woman":0.312,"furniture/armchair":1.005,
+  "furniture/bicycle":1.181,"furniture/bookshelf":0.554,"furniture/clapperboard":0.791,"furniture/coffee-table":1.494,
+  "furniture/dining-chair":0.667,"furniture/dining-table":1.808,"furniture/executive-desk":1.837,"furniture/floor-lamp":0.327,
+  "furniture/king-bed":1.484,"furniture/park-bench":1.29,"furniture/potted-plant":0.84,"furniture/sedan":1.976,
+  "furniture/sofa-3":1.896,"furniture/suitcase":0.567,"furniture/wardrobe":0.721,"hand-stunt/book":1.026,
+  "hand-stunt/box":1.0,"hand-stunt/breakaway-glass":0.675,"hand-stunt/briefcase":1.058,"hand-stunt/envelope":1.197,
+  "hand-stunt/lamp-post":0.226,"hand-stunt/litter-bin":0.542,"hand-stunt/mug":1.08,"hand-stunt/pillar":0.328,
+  "hand-stunt/platform":1.191,"hand-stunt/prop-handgun":1.269,"hand-stunt/prop-rifle":1.687,"hand-stunt/pyro-marker":1.015,
+  "hand-stunt/stunt-mat":2.012,"lighting/bounce-board":0.753,"lighting/china-ball":0.469,"lighting/cucoloris":0.522,
+  "lighting/fresnel":0.735,"lighting/hmi":0.841,"lighting/led-panel":1.046,"lighting/led-video-wall":0.976,
+  "lighting/leko":1.1,"lighting/pa-speaker":0.373,"lighting/par-can":0.859,"lighting/silk-frame":0.706,
+  "lighting/softbox":0.751,"lighting/solid-flag":0.57,"lighting/stage-platform":1.566,"lighting/truss-tower":0.567,
+  "lighting/tube-light":0.484,"live-event/amp-stack":0.716,"live-event/barrier":1.332,"live-event/comms-rack":0.616,
+  "live-event/drum-riser":1.875,"live-event/eng-van":1.094,"live-event/floor-wedge":1.441,"live-event/foh-console":1.593,
+  "live-event/keyboard-rig":0.988,"live-event/line-array":0.58,"live-event/mic-stand":0.646,"live-event/monitor-console":1.092,
+  "live-event/ob-truck":1.483,"live-event/runway":1.212,"live-event/stage-riser":1.592,"live-event/subwoofers":1.173,
+  "live-event/uplink-truck":1.063,"production/boom-microphone":1.023,"production/broadcast-camera":1.389,"production/c-stand":0.574,
+  "production/camera-crane":0.994,"production/cinema-camera":1.209,"production/director-chair":0.658,"production/dit-cart":0.954,
+  "production/dolly-track":1.208,"production/doorway-dolly":1.113,"production/dslr-camera":1.178,"production/field-monitor":1.05,
+  "production/gimbal-camera":0.675,"production/light-stand":0.471,"production/road-case":1.131,"production/sandbag":1.423,
+  "production/video-village":0.947,"props-extra/bar-counter":1.503,"props-extra/bar-stool":0.576,"props-extra/dining-set":1.498,
+  "props-extra/filing-cabinet":0.708,"props-extra/grip-truck":1.471,"props-extra/laptop":1.048,"props-extra/nightstand":0.952,
+  "props-extra/phone":0.628,"props-extra/police-cruiser":1.82,"props-extra/queen-bed":1.384,"props-extra/round-dining-set":1.299,
+  "props-extra/rug":1.303,"props-extra/sectional":2.26,"props-extra/suv":1.675,"props-extra/television":1.051,
+  "props-extra/tv-stand":2.052
+};
+function assetAR(href){const m=String(href||"").match(/assets\/3d\/([a-z0-9\-\/]+)\.png/);
+  return m?(ASSET_AR[m[1]]||0):0;}
+/* Fixture artwork that already includes its own tripod or C stand. Anything
+   not listed here is a bare head on a yoke and still needs a pole drawn. */
+const FIXTURE_ON_STAND = new Set(["fresnel","softbox","tube","china","bounce",
+  "flagsolid","flagsilk","cucoloris","kino","flagnet","flagcutter","branch","overhead","spacelight"]);
+/* The sun marker is not a fixture on the floor: draw it at its rigged height
+   with no stand and no pole underneath. */
+const FIXTURE_NO_POLE = new Set(["sun"]);
 function asset3d(id){const p=ASSET_3D[id];return p?embedded3dPath(p):""}
 
 /* =====================================================================
@@ -4836,7 +4909,11 @@ function vfSVG(cam,W,H,opt){
            2.10 m across the front and 0.90 m from the end, not always its longest side */
         thv=rad(q.rot||0)-Math.atan2(q.y-CY,q.x-CX),
         sil=Math.abs(pr.w*Math.sin(thv))+Math.abs(pr.h*Math.cos(thv)),
-        iw=clamp(ih*(sil/Math.max(.12,z)),4,ih*14),clip="vfAsset"+String(pr.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);
+        /* the artwork is a fixed three quarter view, so its own aspect sets the
+           box. Deriving the width from the plan silhouette made "meet" fit the
+           image by width instead, and tall thin items lost most of their height. */
+        arA=assetAR(exactAsset),
+        iw=clamp(ih*(arA||(sil/Math.max(.12,z))),4,ih*14),clip="vfAsset"+String(pr.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);
         items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${exactAsset}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(pr.label)}</text>`:""}`});
       }
       return;
@@ -4902,7 +4979,7 @@ function vfSVG(cam,W,H,opt){
   /* Local offset in the item's own axes: dx runs along its width, dy along its depth,
      which is the same convention the plan symbols use. Front of an item is +dy. */
   function atLocal(x,y,rotDeg,dx,dy){const a=rad(rotDeg||0);return [x+dx*Math.cos(a)-dy*Math.sin(a), y+dx*Math.sin(a)+dy*Math.cos(a)];}
-  function exactBillboard(q,ez,w,h,href,label,id){const feet=prj([q.x,q.y,ez]),top3=prj([q.x,q.y,ez+h]);if(feet.d<=NEAR||top3.d<=NEAR)return false;const F=scr(feet),T=scr(top3),ih=Math.max(6,Math.abs(F[1]-T[1])),iw=clamp(ih*w/Math.max(.12,h),4,ih*14),clip="vfExact"+String(id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${href}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(label)}</text>`:""}`});return true;}
+  function exactBillboard(q,ez,w,h,href,label,id){const feet=prj([q.x,q.y,ez]),top3=prj([q.x,q.y,ez+h]);if(feet.d<=NEAR||top3.d<=NEAR)return false;const F=scr(feet),T=scr(top3),ih=Math.max(6,Math.abs(F[1]-T[1])),arB=assetAR(href),iw=clamp(ih*(arB||w/Math.max(.12,h)),4,ih*14),clip="vfExact"+String(id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,6);items.push({d:feet.d-.025,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${(F[0]-iw/2).toFixed(1)}" y="${T[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" href="${href}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(T[1]-6).toFixed(1)}" text-anchor="middle" font-size="${clamp(100/feet.d,8,13).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(label)}</text>`:""}`});return true;}
 
   /* ---- other cameras ---- */
   cameras().filter(c=>c.id!==cam.id).forEach(c=>{
@@ -4925,8 +5002,16 @@ function vfSVG(cam,W,H,opt){
     const fw = l.flag ? (l.width||1.2) : 0.62, fh = l.flag ? (l.width||1.2) : 0.55;
     const poleH = Math.max(0.1, h - fh*0.5);
     if(exactLight){
-      box3(q.x,q.y,ez,0.07,0.07,poleH,0,"#2b3350");
-      if(exactBillboard(q,ez+poleH,fw,fh,exactLight,l.label,l.id))return;
+      if(FIXTURE_ON_STAND.has(l.asset)){
+        /* artwork already carries its own tripod or C stand: draw the whole
+           fixture from the floor to its rigged height and add no pole */
+        if(exactBillboard(q,ez,h,h,exactLight,l.label,l.id))return;
+      } else if(FIXTURE_NO_POLE.has(l.asset)){
+        if(exactBillboard(q,ez+poleH,fw,fh,exactLight,l.label,l.id))return;
+      } else {
+        box3(q.x,q.y,ez,0.07,0.07,poleH,0,"#2b3350");
+        if(exactBillboard(q,ez+poleH,fw,fh,exactLight,l.label,l.id))return;
+      }
     }
     box3(q.x,q.y,ez,0.07,0.07,h-0.18,0,"#2b3350");
     if(l.flag) box3(q.x,q.y,ez+h-0.18,l.width||1.2,0.05,l.width||1.2,q.rot,"#1c2233", o.mini?"":l.label);
@@ -4957,7 +5042,9 @@ function vfSVG(cam,W,H,opt){
       shadow(q.x,q.y,ac.seated?.42:.28,ac.seated?.38:.24);
       const F=scr(feet),Hh=scr(head),ih=Math.max(28,Math.abs(F[1]-Hh[1])),bodyRatio=profile.r||(profile.kind==="animal"?1:ac.profile==="baby"?.52:ac.profile==="child"?.40:.43),widthScale=((+ac.w||.48)/.48)/actorScale,iw=ih*bodyRatio*widthScale;
       const clip="vfActor"+String(ac.id).replace(/[^a-zA-Z0-9_-]/g,"")+Math.random().toString(36).slice(2,5);
-      const female=(ac.gender||"female")==="female",hasProfile=!!ac.profile,isAnimal=profile.kind==="animal",assetBoxW=isAnimal?iw:(hasProfile?ih:iw*2),ix=hasProfile?F[0]-assetBoxW*.5:(female?F[0]-iw*1.5:F[0]-iw*.5),imgW=assetBoxW,imgHref=hasProfile?profile.file:"assets/3d/characters/legacy-pair.png?v=20260830g";
+      const female=(ac.gender||"female")==="female",hasProfile=!!ac.profile,isAnimal=profile.kind==="animal",assetBoxW=hasProfile?iw:iw*2/* iw is ih*profile.r, and r is the artwork's own aspect, so the box matches
+   the figure. It used to be forced square for humans, which left the image
+   box about three times wider than the person inside it. */,ix=hasProfile?F[0]-assetBoxW*.5:(female?F[0]-iw*1.5:F[0]-iw*.5),imgW=assetBoxW,imgHref=hasProfile?profile.file:"assets/3d/characters/legacy-pair.png?v=20260830g";
       items.push({d:feet.d-.03,s:`<defs><clipPath id="${clip}"><rect x="${(F[0]-iw*.5).toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}"/></clipPath></defs><g clip-path="url(#${clip})"><image x="${ix.toFixed(1)}" y="${Hh[1].toFixed(1)}" width="${imgW.toFixed(1)}" height="${ih.toFixed(1)}" href="${imgHref}" preserveAspectRatio="xMidYMax meet"/></g>${!o.mini?`<text x="${F[0].toFixed(1)}" y="${(Hh[1]-8).toFixed(1)}" text-anchor="middle" font-size="${clamp(110/feet.d,8,15).toFixed(1)}" font-weight="700" fill="#fff" font-family="Tahoma,sans-serif">${esc(ac.label)}</text>`:""}`});
       return;
     }
