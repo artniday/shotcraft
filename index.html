@@ -1169,6 +1169,19 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
 .floorgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.floorbtn{display:flex;align-items:center;gap:9px;padding:8px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--ink);font-size:10px;font-weight:800;cursor:pointer;text-align:left}.floorbtn.on{border-color:#159e91;box-shadow:0 0 0 2px #159e9122}.floorswatch{width:38px;height:30px;flex:0 0 auto;border-radius:7px;background:var(--floor);box-shadow:inset 0 0 0 1px #0002}.axisbtn{font:800 10px/1 ui-monospace,monospace!important;min-width:32px}.axisbtn[data-axis="x"].on{background:#d84b42!important;color:#fff!important}.axisbtn[data-axis="y"].on{background:#2d9b68!important;color:#fff!important}.axisbtn[data-axis="z"].on{background:#3478db!important;color:#fff!important}
 .envhero{position:relative;padding-right:104px!important}.envclearall{position:absolute;right:12px;top:12px;padding:8px 11px;border:1px solid #ffffff66;border-radius:9px;background:#ffffff18;color:#fff;font-size:10px;font-weight:850;cursor:pointer}.envclearall:hover{background:#fff;color:#0b5367}.envclearrow{display:flex;justify-content:flex-end;margin:0 0 8px}.envclear{padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--muted);font-size:9px;font-weight:800;cursor:pointer}.envclear:hover{border-color:#c4342a;color:#c4342a;background:#c4342a0d}
 .actorsection{padding:10px;overflow-y:auto;min-height:0;overscroll-behavior:contain}.actorsection::-webkit-scrollbar{width:9px}.actorsection::-webkit-scrollbar-thumb{background:#c7d0e5;border-radius:9px}.actorsubhead{margin:3px 2px 8px;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.actorsubhead:not(:first-child){margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.actorgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;align-items:stretch}.actorchoice img.actorphoto.animal{object-fit:contain!important;padding:4px;background:#edf2ff}
+.hud .hudviewfinder{color:#fff;background:linear-gradient(145deg,#0bb6c8,#087da9);box-shadow:0 5px 13px rgba(5,133,166,.32),inset 0 1px 0 rgba(255,255,255,.3);margin-left:3px}
+.hud .hudviewfinder:hover{color:#fff;background:linear-gradient(145deg,#14c9d8,#096e9c);box-shadow:0 8px 18px rgba(5,133,166,.42),inset 0 1px 0 rgba(255,255,255,.35);transform:translateY(-1px)}
+.hud .hudviewfinder:focus-visible{outline:3px solid rgba(11,182,200,.28);outline-offset:2px}
+#veilVF{background:transparent;padding:0;place-items:initial;pointer-events:none}
+#veilVF.show{display:block}
+#veilVF .vfwindow{position:fixed;z-index:70;top:68px;right:18px;left:auto;width:min(720px,calc(100vw - 36px));max-width:none!important;max-height:calc(100vh - 86px);pointer-events:auto;resize:both;overflow:auto;border:1px solid #33436b;box-shadow:0 24px 70px rgba(2,8,25,.48),0 0 0 1px rgba(88,225,184,.12)}
+#veilVF .vfdrag{cursor:move;user-select:none;background:linear-gradient(90deg,#10182f,#12243d);position:sticky;top:0;z-index:4}
+#veilVF .vfdrag select,#veilVF .vfdrag button{cursor:pointer;user-select:auto}
+#veilVF .vflive{display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:3px 7px;border-radius:999px;background:#e7473c;color:#fff;font:800 9px/1 var(--mono);letter-spacing:.08em;box-shadow:0 0 0 3px rgba(231,71,60,.15)}
+#veilVF .vflive:before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.2)}
+#veilVF .vf{border-radius:8px}
+#veilVF .mbody{padding:12px}
+@media(max-width:760px){#veilVF .vfwindow{top:58px;right:8px;width:calc(100vw - 16px);max-height:calc(100vh - 66px)}}
 
 
 .storyscene{margin:0 0 18px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);box-shadow:0 8px 22px rgba(19,34,75,.07)}
@@ -1323,10 +1336,10 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
 </div>
 
 <div class="veil" id="veilVF">
-  <div class="modal dark" style="max-width:940px">
-    <header style="border-color:#232a45">
+  <div class="modal dark vfwindow" id="vfWindow">
+    <header class="vfdrag" id="vfDragHandle" style="border-color:#232a45">
       <div>
-        <h3>DIRECTOR'S VIEWFINDER</h3>
+        <h3>DIRECTOR'S VIEWFINDER <span class="vflive">LIVE</span></h3>
         <p style="color:#98a3c4" id="vfSub">No camera selected</p>
       </div>
       <select class="ui" id="vfCam" style="width:220px;background:#161c33;border-color:#2c3557;color:#e8ecf7"></select>
@@ -2827,6 +2840,7 @@ function renderPlan(){
   svg.innerHTML = composePlan(body,crossing,tod) + marquee + ghost;
   $("#zoomVal").textContent = Math.round(state.view.ppm/46*100)+"%";
   renderStageNotes(crossing);
+  refreshFloatingVF();
 }
 
 function renderStageNotes(crossing){
@@ -5014,12 +5028,38 @@ function vfSVG(cam,W,H,opt){
   </svg>`;
 }
 
+
+function refreshFloatingVF(){
+  const veil=$("#veilVF");if(!veil||!veil.classList.contains("show"))return;
+  const cam=byId($("#vfCam")?.value)||cameras()[0],box=veil.querySelector(".vf");
+  if(!cam||!box||box.classList.contains("vf-panning"))return;
+  box.innerHTML=vfSVG(cam,960,540,{});
+  const sub=$("#vfSub");if(sub)sub.textContent=`${cam.label} | ${shotNo(cam)} | ${cam.rig} | height ${cam.height} m | ${cam.size}`;
+  const yaw=$("#vfYaw"),tilt=$("#vfTilt");
+  if(yaw)yaw.textContent=Math.round(((cam.rot||0)%360+360)%360)+"°";
+  if(tilt)tilt.textContent=camTilt(cam).toFixed(1)+"°";
+}
+function enableFloatingViewfinder(){
+  const win=$("#vfWindow"),handle=$("#vfDragHandle");if(!win||!handle||handle.dataset.dragReady)return;
+  handle.dataset.dragReady="1";
+  handle.addEventListener("pointerdown",ev=>{
+    if(ev.button!==0||ev.target.closest("button,select,input"))return;
+    ev.preventDefault();const r=win.getBoundingClientRect(),sx=ev.clientX,sy=ev.clientY;
+    win.style.left=r.left+"px";win.style.top=r.top+"px";win.style.right="auto";
+    handle.setPointerCapture(ev.pointerId);
+    const move=e=>{const maxX=Math.max(0,innerWidth-win.offsetWidth),maxY=Math.max(0,innerHeight-52);win.style.left=clamp(r.left+e.clientX-sx,0,maxX)+"px";win.style.top=clamp(r.top+e.clientY-sy,0,maxY)+"px";};
+    const up=e=>{handle.releasePointerCapture?.(e.pointerId);handle.removeEventListener("pointermove",move);handle.removeEventListener("pointerup",up);handle.removeEventListener("pointercancel",up);};
+    handle.addEventListener("pointermove",move);handle.addEventListener("pointerup",up);handle.addEventListener("pointercancel",up);
+  });
+}
+
 function openViewfinder(id){
   const cams=cameras();
   if(!cams.length){ alert("Place a camera first. Press C then click on the plan."); return; }
   const cam = byId(id) || cams.find(c=>state.sel.includes(c.id)) || cams[0];
   state.sel=[cam.id];
   $("#veilVF").classList.add("show");
+  enableFloatingViewfinder();
   $("#vfCam").innerHTML = cams.map(c=>`<option value="${c.id}"${c.id===cam.id?" selected":""}>${esc(c.label)} | ${esc(shotNo(c))} | ${c.lens}mm</option>`).join("");
   drawVF();
 }
