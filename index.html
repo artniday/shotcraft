@@ -1172,7 +1172,7 @@ body.dark .lnrow input,body.dark .lncheck,body.dark .lnhint{background:#101827;b
 .actorportrait{width:78px;height:78px;display:block;position:relative;overflow:hidden;border-radius:50%;background:#edf2ff;border:3px solid #fff;box-shadow:0 0 0 3px #d8e0f3,0 8px 18px rgba(28,43,83,.12)}
 .actorportrait .actorphoto{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border:0!important;border-radius:0!important;background:transparent!important;object-fit:cover!important;object-position:50% 38%!important;transform:none!important;max-width:none!important;max-height:none!important}
 .actorportrait.emirati .actorphoto{object-fit:cover!important;object-position:50% 27%!important;transform:none!important}
-.actorportrait.animal .actorphoto{object-fit:contain!important;object-position:50% 50%!important;transform:scale(.78)!important;transform-origin:center!important;padding:2px}
+.actorportrait.animal .actorphoto{object-fit:cover!important;object-position:50% 50%!important;transform:none!important;transform-origin:center!important;padding:0!important;border-radius:50%!important;box-shadow:none!important;filter:none!important;background:transparent!important}
 .hud .hudviewfinder{color:#fff;background:linear-gradient(145deg,#0bb6c8,#087da9);box-shadow:0 5px 13px rgba(5,133,166,.32),inset 0 1px 0 rgba(255,255,255,.3);margin-left:3px}
 .hud .hudviewfinder:hover{color:#fff;background:linear-gradient(145deg,#14c9d8,#096e9c);box-shadow:0 8px 18px rgba(5,133,166,.42),inset 0 1px 0 rgba(255,255,255,.35);transform:translateY(-1px)}
 .hud .hudviewfinder:focus-visible{outline:3px solid rgba(11,182,200,.28);outline-offset:2px}
@@ -1728,12 +1728,12 @@ const ACTOR_PROFILES={
   "emirati-old-woman":{n:"Emirati senior woman",gender:"female",kind:"emirati",h:1.57,file:"assets/3d/characters/emirati/senior-woman.png?v=20260830a",face:"assets/3d/characters/emirati/faces/senior-woman.png?v=20260830a"},
   "emirati-girl":{n:"Emirati girl",gender:"female",kind:"emirati",h:1.38,file:"assets/3d/characters/emirati/girl.png?v=20260830a",face:"assets/3d/characters/emirati/faces/girl.png?v=20260830a"},
   "emirati-boy":{n:"Emirati boy",gender:"male",kind:"emirati",h:1.36,file:"assets/3d/characters/emirati/boy.png?v=20260830a",face:"assets/3d/characters/emirati/faces/boy.png?v=20260830a"},
-  dog:{n:"Dog",gender:"animal",kind:"animal",h:.62,r:1.55,file:"assets/3d/characters/animals/dog.png",face:"assets/3d/characters/animals/dog.png"},
-  cat:{n:"Cat",gender:"animal",kind:"animal",h:.28,r:1.65,file:"assets/3d/characters/animals/cat.png",face:"assets/3d/characters/animals/cat.png"},
-  horse:{n:"Horse",gender:"animal",kind:"animal",h:1.62,r:1.28,file:"assets/3d/characters/animals/horse.png",face:"assets/3d/characters/animals/horse.png"},
-  rabbit:{n:"Rabbit",gender:"animal",kind:"animal",h:.32,r:.72,file:"assets/3d/characters/animals/rabbit.png",face:"assets/3d/characters/animals/rabbit.png"},
-  chicken:{n:"Chicken",gender:"animal",kind:"animal",h:.42,r:.72,file:"assets/3d/characters/animals/chicken.png",face:"assets/3d/characters/animals/chicken.png"},
-  falcon:{n:"Falcon",gender:"animal",kind:"animal",h:.48,r:.78,file:"assets/3d/characters/animals/falcon.png?v=20260830a",face:"assets/3d/characters/animals/falcon.png?v=20260830a"}
+  dog:{n:"Dog",gender:"animal",kind:"animal",h:.62,r:1.55,file:"assets/3d/characters/animals/dog.png?v=20260830b",face:"assets/3d/characters/animals/dog.png?v=20260830b"},
+  cat:{n:"Cat",gender:"animal",kind:"animal",h:.28,r:1.65,file:"assets/3d/characters/animals/cat.png?v=20260830b",face:"assets/3d/characters/animals/cat.png?v=20260830b"},
+  horse:{n:"Horse",gender:"animal",kind:"animal",h:1.62,r:1.28,file:"assets/3d/characters/animals/horse.png?v=20260830b",face:"assets/3d/characters/animals/horse.png?v=20260830b"},
+  rabbit:{n:"Rabbit",gender:"animal",kind:"animal",h:.32,r:.72,file:"assets/3d/characters/animals/rabbit.png?v=20260830b",face:"assets/3d/characters/animals/rabbit.png?v=20260830b"},
+  chicken:{n:"Chicken",gender:"animal",kind:"animal",h:.42,r:.72,file:"assets/3d/characters/animals/chicken.png?v=20260830b",face:"assets/3d/characters/animals/chicken.png?v=20260830b"},
+  falcon:{n:"Falcon",gender:"animal",kind:"animal",h:.48,r:.78,file:"assets/3d/characters/animals/falcon.png?v=20260830b",face:"assets/3d/characters/animals/falcon.png?v=20260830b"}
 };
 function actorProfile(el){return ACTOR_PROFILES[el.profile||((el.gender||"female")==="male"?"adult-man":"adult-woman")]}
 function nextActorName(gender){
