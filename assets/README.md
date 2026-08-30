@@ -52,6 +52,19 @@ Target for every crop in `characters/faces/` and `characters/emirati/faces/`:
 `characters/faces/` predates this rule and still varies between roughly 37% and 46%
 face height; `characters/emirati/faces/` is normalised to it.
 
+## Framing rule for animals
+
+Animals render with `object-fit: contain` rather than `cover`, so the whole canvas is
+fitted into the circle and any dead space in the PNG becomes visible off-centring.
+Each animal is therefore stored on a square canvas with its alpha bounding box exactly
+centred.
+
+The canvas is also sized so no part of the animal is cut by the round mask: the
+furthest subject pixel from the centre sits at 97% of the circle radius. A tail or ear
+that sticks out diagonally is what usually pushes past the edge, so this is measured on
+the actual pixels, not the bounding box. Wider animals end up drawn slightly smaller
+than narrow ones — that is the circle's geometry, not an inconsistency.
+
 ## Dimensions
 
 Real-world sizes live in the `ACTOR_PROFILES` and asset tables in `index.html`, in
