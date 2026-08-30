@@ -53,6 +53,19 @@ Target for every crop in `characters/faces/` and `characters/emirati/faces/`:
 `characters/faces/` predates this rule and still varies between roughly 37% and 46%
 face height; `characters/emirati/faces/` is normalised to it.
 
+## Doors and windows
+
+`open-door-3d` and `window-3d` are flat, front-on renders, and the viewfinder maps
+them into the plane of the wall rather than turning them to face the lens. That is
+why front-on art matters here: an angled render would look wrong as soon as the
+wall foreshortened.
+
+An SVG matrix is affine and the perspective image of a rectangle is not a
+parallelogram, so the opening is drawn as a row of narrow vertical strips, each
+mapped separately. The strip count scales with how oblique the wall is, from one
+strip head-on up to twelve. Replacement art should be flat and front-on, framed
+tight to the frame edges.
+
 ## Framing rule for animals
 
 Animals render with `object-fit: contain` rather than `cover`, so the whole canvas is
