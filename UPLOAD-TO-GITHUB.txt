@@ -1,6 +1,0 @@
-ShotCraft GitHub Pages package — Layers navigation fix, build 2026-08-29-1428
-
-1. Extract this ZIP.
-2. Upload index.html, the assets folder, and the three shotcraft PNG files to the repository root.
-3. Do not upload the ZIP itself as the website; GitHub Pages does not extract ZIP archives.
-4. In repository Settings > Pages, publish from the main branch / root.
