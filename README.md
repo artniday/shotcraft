@@ -58,6 +58,38 @@ The floor plan behaves like a home design tool rather than a drawing canvas:
 All of that is controlled by the **Snap & guides** button in the View menu. Turn it
 off and every position stays exactly where you put it.
 
+## Timeline, keyframes and live cutting (stage 1 merge)
+
+The beat bar is now a timeline in seconds. Each actor, camera and prop has a row of
+keyframe diamonds. Move the playhead, drag the element, and a keyframe is recorded
+(AUTO-KEY). Drag the orange square on a path to bend it, double-click a path to add a
+keyframe, right-click a diamond to delete it. Beats are markers on the ruler and the
+storyboard still uses them.
+
+The switcher above the plan cuts between cameras at the playhead (click, or keys 1-9).
+Cuts land in the red CUTS track; the live camera shows a LIVE badge and the viewfinder
+can follow the cuts. Older projects and templates migrate their beats to keyframes on
+first load.
+
+## Render (stage 2 merge)
+
+**Render** in the top bar plays the scene once and saves it: the floor plan animation,
+the viewfinder following the cuts (the edit), one camera, or both side by side. Output is
+a video (MP4 where the browser can encode it, otherwise WebM, recorded in real time at
+30 fps), a PNG image sequence in a zip, or a single PNG of the current frame. Figures
+that travel between keyframes bob and sway in the viewfinder like a walk cycle.
+
+`assets/inline/` holds a script copy of every picture. It exists only so the renderer
+can read the pictures when `index.html` is opened straight from disk (`file://`), where
+browsers block `fetch()`. Regenerate it after changing artwork (see `tools/` note below)
+or delete it if the app is only ever served over http.
+
+## Language
+
+The **عربي / EN** button in the top bar and on the launch screen switches the whole
+interface between English and Arabic (right-to-left). Add phrases to `I18N_AR` in
+`index.html` to extend the translation.
+
 ## Working on the artwork
 
 Character artwork comes in two forms. The full-body PNG (`characters/<name>.png`)
