@@ -2595,7 +2595,25 @@ function posAt(el,beat){
 }
 /* rounded copy for the inspector fields; the plan and viewfinder use raw values so motion stays smooth */
 function posAtR(el){ const p=posAt(el); return {x:round2(p.x), y:round2(p.y), rot:round2(p.rot)}; }
-function syncBase(el){ const p=samplePose(el,0,true); el.x=round2(p.x); el.y=round2(p.y); el.rot=round2(p.rot); }
+function syncBase(el){ if(el.smooth) smoothControls(el); const p=samplePose(el,0,true); el.x=round2(p.x); el.y=round2(p.y); el.rot=round2(p.rot); }
+/* Round the corners of a path: every leg's control point is placed so the curve
+   flows through each keyframe along a Catmull-Rom style tangent. tension 0 is a
+   straight polyline, 1 is very round. */
+function smoothControls(el,tension){
+  const pk=posKfs(el); if(pk.length<3){ pk.forEach(k=>{ delete k.bx; delete k.by; }); return; }
+  const t=tension==null?(el.smoothAmount!=null?+el.smoothAmount:0.5):tension;
+  const tang=i=>{ const a=pk[Math.max(0,i-1)], b=pk[Math.min(pk.length-1,i+1)]; return {x:(b.x-a.x)*0.5, y:(b.y-a.y)*0.5}; };
+  for(let i=0;i<pk.length-1;i++){
+    const a=pk[i], b=pk[i+1], Ta=tang(i), Tb=tang(i+1);
+    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2, len=Math.hypot(b.x-a.x,b.y-a.y);
+    /* the quadratic that best matches a Catmull-Rom cubic through a and b has its
+       control point at the midpoint plus (Ta - Tb)/4; tension scales that bulge */
+    let bx=(Ta.x-Tb.x)/4*(2*t), by=(Ta.y-Tb.y)/4*(2*t); const mag=Math.hypot(bx,by), cap=len*0.6;
+    if(mag>cap){ bx*=cap/mag; by*=cap/mag; }
+    a.bx=round2(bx); a.by=round2(by);
+  }
+  const last=pk[pk.length-1]; delete last.bx; delete last.by;
+}
 function setKeyframe(el,t,partial){
   t=snapT(clamp(t,0,sceneDuration()));
   const ks=ensureKeys(el);
@@ -3857,6 +3875,7 @@ function initCanvas(){
     if(bh){
       pushHistory();
       if(ev.button===2){ delete bh.a.bx; delete bh.a.by; renderAll(); save(); return; }
+      bh.el.smooth=false;
       drag={mode:"bend",el:bh.el,a:bh.a,b:bh.b}; stage.style.cursor="move"; return;
     }
     const priorityHandle=rotateHandle();
@@ -4389,6 +4408,8 @@ function applyBind(path,value,isNum){
     if(parts[2]==="rot"){ setRot(el,v); return; }
     if(parts[2]==="pov"){ el.pov=v||null; if(el.pov) el.keys=[]; return; }
     if(parts[2]==="split"){ el.split=!!v; return; }
+    if(parts[2]==="smooth"){ el.smooth=!!v; if(el.smooth) smoothControls(el); return; }
+    if(parts[2]==="smoothAmount"){ el.smoothAmount=clamp(+v||0,0,1); if(el.smooth) smoothControls(el); return; }
     if(parts[2].includes(".")) setDeep(el,parts[2],v); else el[parts[2]] = v;
     if(el.type==="actor"&&(parts[2]==="character"||parts[2]==="label")) el.autoActorName=false;
     if(el.type==="actor"&&parts[2]==="gender"&&el.autoActorName){
@@ -4757,7 +4778,13 @@ function sectAnimation(el){
        + (el.type==="camera" ? fInput("Handheld shake (0-100)","elem",el.id,"handheld",+el.handheld||0,{type:"number",min:0,max:100,step:5}) : "") + `</div>`;
   }
   if(el.type==="camera") h += fSelect("Point of view","elem",el.id,"pov",el.pov||"",[{v:"",n:"Free camera"}].concat(actors().filter(a=>a.id!==el.id).map(a=>({v:a.id,n:a.label||("Actor "+a.letter)}))));
-  if(!isPov) h += `<div class="row" style="margin-top:6px"><button class="btn" data-act="straightenPath" data-id="${el.id}">Straighten path</button><button class="btn danger" data-act="clearAnim" data-id="${el.id}">Clear animation</button></div>`;
+  if(!isPov && ks.length){
+    h += `<div class="row" style="margin-top:6px;align-items:flex-end">`
+       + fSelect("Corners","elem",el.id,"smooth",el.smooth?"1":"",[{v:"",n:"Sharp (bend each leg by hand)"},{v:"1",n:"Rounded automatically"}])
+       + fInput("Roundness (0 to 1)","elem",el.id,"smoothAmount",el.smoothAmount!=null?+el.smoothAmount:0.5,{type:"number",min:0,max:1,step:0.1}) + `</div>`
+       + `<div class="row"><button class="btn" data-act="smoothPath" data-id="${el.id}">Round the corners once</button><button class="btn" data-act="straightenPath" data-id="${el.id}">Straighten path</button></div>`;
+  }
+  if(!isPov) h += `<div class="row" style="margin-top:6px"><button class="btn danger full" data-act="clearAnim" data-id="${el.id}">Clear animation</button></div>`;
   if(el.type==="camera") h += `<button class="btn full" style="margin-top:6px" data-act="cutHere" data-id="${el.id}">Cut to this camera at ${(state.time||0).toFixed(1)} s</button>`;
   return sect("anim","Animation and keyframes",h, ks.length?ks.length+" keys":"");
 }
@@ -6334,7 +6361,7 @@ function renderSwitcher(force){
   const cams=cameras(), live=liveCamera();
   const sig=cams.map(c=>c.id+":"+c.label+":"+shotNo(c)).join("|")+"#"+(live?live.id:"");
   if(!force && switcherSig===sig) return; switcherSig=sig;
-  if(!cams.length){ box.innerHTML=`<span class="livetag">LIVE</span><span class="hint">Place a camera (C) to start cutting</span>`; return; }
+  if(!cams.length){ box.innerHTML=""; return; }
   box.innerHTML = `<span class="livetag">LIVE</span>` + cams.map((c,i)=>`<button class="${live&&live.id===c.id?"live":""}" data-cutcam="${c.id}" title="Cut to ${esc(c.label)} at the playhead${i<9?" (key "+(i+1)+")":""}">${i<9?`<b>${i+1}</b>`:""}${esc(c.label)}<span style="opacity:.7;font-weight:600">&nbsp;${esc(shotNo(c))}</span></button>`).join("");
 }
 let playFrame=0;
@@ -9691,7 +9718,11 @@ const ACTIONS = {
   delWaypoint(b){ ACTIONS.delKey(b); },
   straightenPath(b){
     const el=byId(b.dataset.id); if(!el||!el.keys) return;
-    pushHistory(); el.keys.forEach(k=>{ delete k.bx; delete k.by; }); renderAll(); save();
+    pushHistory(); el.smooth=false; el.keys.forEach(k=>{ delete k.bx; delete k.by; }); renderAll(); save();
+  },
+  smoothPath(b){
+    const el=byId(b.dataset.id); if(!el||!el.keys) return;
+    pushHistory(); smoothControls(el); renderAll(); save();
   },
   clearAnim(b){
     const el=byId(b.dataset.id); if(!el) return;
@@ -10197,6 +10228,7 @@ const HELP_TOPICS = [
         <div class="helpcard"><b>Keyframes</b><span>Drag a diamond to retime it. Right-click to delete it. Ctrl-click or drag a box across rows to select several, then drag them together.</span></div>
         <div class="helpcard"><b>AUTO-KEY</b><span>On: a move records a keyframe at the playhead. Off: the whole path moves without adding keyframes.</span></div>
         <div class="helpcard"><b>Paths on the plan</b><span>Drag the orange square to bend a leg, right-click it to straighten. Double-click a path to add a keyframe on it without changing the shape.</span></div>
+        <div class="helpcard"><b>Rounded corners</b><span>In the inspector set <b>Corners</b> to "Rounded automatically" and the path flows smoothly through every keyframe. Roundness 0 is straight, 1 is very round.</span></div>
         <div class="helpcard"><b>Inspector</b><span>The <b>Animation and keyframes</b> section sets easing, facing (follow the path or manual), handheld shake and point-of-view cameras.</span></div>
         <div class="helpcard"><b>Beats</b><span>Beats are labels on the ruler for the storyboard. Press <b>+ Beat</b> at the playhead to name a moment.</span></div>
         <div class="helpcard"><b>Length</b><span>Set the scene length from 1 to 300 seconds. Keyframes past the end are trimmed.</span></div>
@@ -11290,6 +11322,7 @@ Object.assign(I18N_AR,{
 "One PNG per interval, plus the last frame, packed into a zip.":"صورة PNG لكل فاصل زمني مع الإطار الأخير، معبأة في zip.","Saves the picture at the current playhead position.":"يحفظ الصورة عند موضع مؤشر الزمن الحالي.","Drawing the frame...":"جارٍ رسم الإطار...","Saved one PNG frame.":"حُفظ إطار PNG واحد.",
 "images saved in a zip.":"صورة محفوظة في zip.","Video saved.":"حُفظ الفيديو.","This browser records WebM; it plays in Chrome, Edge, Firefox and VLC.":"يسجل هذا المتصفح WebM؛ يعمل في Chrome وEdge وFirefox وVLC.","Cancelled.":"أُلغي.","The render failed: ":"فشل التصيير: ",
 "This browser cannot record video. Try Chrome or Edge, or render an image sequence instead.":"لا يستطيع هذا المتصفح تسجيل الفيديو. جرّب Chrome أو Edge، أو صيّر تسلسل صور بدلًا من ذلك.",
+"Corners":"الزوايا","Sharp (bend each leg by hand)":"حادة (اثنِ كل ضلع يدويًا)","Rounded automatically":"مستديرة تلقائيًا","Rounded corners":"زوايا مستديرة","In the inspector set":"في الفاحص اضبط","to \"Rounded automatically\" and the path flows smoothly through every keyframe. Roundness 0 is straight, 1 is very round.":"على «مستديرة تلقائيًا» فيتدفق المسار بسلاسة عبر كل إطار مفتاحي. الاستدارة 0 مستقيم و1 شديد الاستدارة.","Roundness (0 to 1)":"الاستدارة (0 إلى 1)","Round the corners once":"تدوير الزوايا مرة واحدة",
 "Tick":"حدد","Keyframes":"الإطارات المفتاحية","How the timeline, keyframes and cuts work":"كيف يعمل الخط الزمني والإطارات المفتاحية والقطعات",
 "Remove every keyframe from this element? It will stay where it is right now.":"إزالة كل الإطارات المفتاحية من هذا العنصر؟ سيبقى حيث هو الآن.","Paths on the plan":"المسارات على المخطط","Length":"الطول","Inspector":"الفاحص","Beats":"الإيقاعات",
 "Cut":"قطع","Cuts":"القطعات","Trash":"حذف","Open Layers":"فتح الطبقات","Open Environment":"فتح البيئة","Open Gear":"فتح المعدات","Open Board":"فتح اللوحة","Open Crew":"فتح الطاقم","Open Schedule":"فتح الجدول","Open Budget":"فتح الميزانية","Open Project":"فتح المشروع",
