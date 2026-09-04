@@ -2532,6 +2532,7 @@ function migrateScene(sc){
       el.orient="manual";
     }
     delete el.beats;
+    if(Array.isArray(el.keys)){ const pk=el.keys.filter(k=>k.x!==undefined); for(let i=0;i<pk.length-1;i++) quadToCubic(pk[i],pk[i+1]); }
   });
 }
 function migrateAll(){ (state.scenes||[]).forEach(migrateScene); if(state.time==null) state.time=0; if(state.autoKey==null) state.autoKey=true; }
@@ -2540,7 +2541,26 @@ function keysOf(el){ return Array.isArray(el.keys)&&el.keys.length ? el.keys : n
 function ensureKeys(el){ if(!keysOf(el)) el.keys=[{t:0,x:el.x,y:el.y,rot:el.rot||0}]; return el.keys; }
 function posKfs(el){ return (keysOf(el)||[]).filter(k=>k.x!==undefined); }
 function rotKfs(el){ return (keysOf(el)||[]).filter(k=>k.rot!==undefined); }
-function segControl(a,b){ return {x:(a.x+b.x)/2+(a.bx||0), y:(a.y+b.y)/2+(a.by||0)}; }
+/* Each leg is a cubic Bezier. a.ox/a.oy is the handle leaving a, b.ix/b.iy the
+   handle arriving at b, both as offsets from their own keyframe. Older files used a
+   single quadratic control (bx/by at the midpoint); migrateScene converts them. */
+function segCtrl(a,b){
+  const c1={x:a.x+(a.ox||0), y:a.y+(a.oy||0)}, c2={x:b.x+(b.ix||0), y:b.y+(b.iy||0)};
+  const straight=!(a.ox||a.oy||b.ix||b.iy);
+  return {c1,c2,straight};
+}
+function segPoint(a,b,f){
+  const {c1,c2,straight}=segCtrl(a,b); if(straight) return {x:a.x+(b.x-a.x)*f, y:a.y+(b.y-a.y)*f};
+  const g=1-f, w0=g*g*g, w1=3*g*g*f, w2=3*g*f*f, w3=f*f*f;
+  return {x:w0*a.x+w1*c1.x+w2*c2.x+w3*b.x, y:w0*a.y+w1*c1.y+w2*c2.y+w3*b.y};
+}
+function segControl(a,b){ /* kept for older callers: the midpoint of the two handles */ const {c1,c2}=segCtrl(a,b); return {x:(c1.x+c2.x)/2, y:(c1.y+c2.y)/2}; }
+function quadToCubic(a,b){ /* legacy bx/by -> handles */
+  if(a.bx==null&&a.by==null) return;
+  const c={x:(a.x+b.x)/2+(a.bx||0), y:(a.y+b.y)/2+(a.by||0)};
+  a.ox=round2((c.x-a.x)*2/3); a.oy=round2((c.y-a.y)*2/3); b.ix=round2((c.x-b.x)*2/3); b.iy=round2((c.y-b.y)*2/3);
+  delete a.bx; delete a.by;
+}
 function easeF(k,f){ if(k.ease==="in") return f*f; if(k.ease==="out") return 1-(1-f)*(1-f); if(k.ease==="inout") return f*f*(3-2*f); return f; }
 function lerpAngle(a,b,f){ const d=((b-a)%360+540)%360-180; return a+d*f; }
 function findSeg(kfs,t){
@@ -2552,8 +2572,9 @@ function findSeg(kfs,t){
   return {a:last,b:last,f:0};
 }
 function curveTangent(a,b,f){
-  const c=segControl(a,b);
-  let tx=2*(1-f)*(c.x-a.x)+2*f*(b.x-c.x), ty=2*(1-f)*(c.y-a.y)+2*f*(b.y-c.y);
+  const {c1,c2,straight}=segCtrl(a,b); let tx,ty;
+  if(straight){ tx=b.x-a.x; ty=b.y-a.y; }
+  else { const g=1-f; tx=3*g*g*(c1.x-a.x)+6*g*f*(c2.x-c1.x)+3*f*f*(b.x-c2.x); ty=3*g*g*(c1.y-a.y)+6*g*f*(c2.y-c1.y)+3*f*f*(b.y-c2.y); }
   if(Math.hypot(tx,ty)<1e-4){ tx=b.x-a.x; ty=b.y-a.y; }
   if(Math.hypot(tx,ty)<1e-4) return null;
   return deg(Math.atan2(ty,tx));
@@ -2581,8 +2602,7 @@ function samplePose(el,t,plain,depth){
   let x=+el.x||0, y=+el.y||0, rot=+el.rot||0;
   if(ks){
     const pk=ks.filter(k=>k.x!==undefined), rk=ks.filter(k=>k.rot!==undefined);
-    if(pk.length){ const {a,b,f}=findSeg(pk,t); const c=segControl(a,b), g=1-f;
-      x=g*g*a.x+2*f*g*c.x+f*f*b.x; y=g*g*a.y+2*f*g*c.y+f*f*b.y; }
+    if(pk.length){ const {a,b,f}=findSeg(pk,t); const p=segPoint(a,b,f); x=p.x; y=p.y; }
     if(rk.length){ const {a,b,f}=findSeg(rk,t); rot=lerpAngle(a.rot,b.rot,f); }
     if(isAutoOrient(el)){ const tg=pathTangent(pk,t); if(tg!==null) rot=tg; }
   }
@@ -2600,19 +2620,21 @@ function syncBase(el){ if(el.smooth) smoothControls(el); const p=samplePose(el,0
    flows through each keyframe along a Catmull-Rom style tangent. tension 0 is a
    straight polyline, 1 is very round. */
 function smoothControls(el,tension){
-  const pk=posKfs(el); if(pk.length<3){ pk.forEach(k=>{ delete k.bx; delete k.by; }); return; }
+  const pk=posKfs(el); if(pk.length<3){ pk.forEach(k=>{ delete k.bx; delete k.by; delete k.ox; delete k.oy; delete k.ix; delete k.iy; }); return; }
   const t=tension==null?(el.smoothAmount!=null?+el.smoothAmount:0.5):tension;
-  const tang=i=>{ const a=pk[Math.max(0,i-1)], b=pk[Math.min(pk.length-1,i+1)]; return {x:(b.x-a.x)*0.5, y:(b.y-a.y)*0.5}; };
+  const tang=i=>{ if(pk[i].corner==="sharp") return {x:0,y:0}; const a=pk[Math.max(0,i-1)], b=pk[Math.min(pk.length-1,i+1)]; return {x:(b.x-a.x)*0.5, y:(b.y-a.y)*0.5}; };
   for(let i=0;i<pk.length-1;i++){
     const a=pk[i], b=pk[i+1], Ta=tang(i), Tb=tang(i+1);
     const mx=(a.x+b.x)/2, my=(a.y+b.y)/2, len=Math.hypot(b.x-a.x,b.y-a.y);
-    /* the quadratic that best matches a Catmull-Rom cubic through a and b has its
-       control point at the midpoint plus (Ta - Tb)/4; tension scales that bulge */
-    let bx=(Ta.x-Tb.x)/4*(2*t), by=(Ta.y-Tb.y)/4*(2*t); const mag=Math.hypot(bx,by), cap=len*0.6;
-    if(mag>cap){ bx*=cap/mag; by*=cap/mag; }
-    a.bx=round2(bx); a.by=round2(by);
+    /* Catmull-Rom: the handle leaving a is Ta/3, the handle arriving at b is -Tb/3 */
+    const capLen=len*0.5, k=2*t/3;
+    let ox=Ta.x*k, oy=Ta.y*k, ix=-Tb.x*k, iy=-Tb.y*k;
+    let m=Math.hypot(ox,oy); if(m>capLen){ ox*=capLen/m; oy*=capLen/m; }
+    m=Math.hypot(ix,iy); if(m>capLen){ ix*=capLen/m; iy*=capLen/m; }
+    a.ox=round2(ox); a.oy=round2(oy); b.ix=round2(ix); b.iy=round2(iy);
+    delete a.bx; delete a.by;
   }
-  const last=pk[pk.length-1]; delete last.bx; delete last.by;
+  pk[0].ix=pk[0].iy=undefined; const last=pk[pk.length-1]; last.ox=last.oy=undefined;
 }
 function setKeyframe(el,t,partial){
   t=snapT(clamp(t,0,sceneDuration()));
@@ -2666,13 +2688,16 @@ function setRot(el,r){
 function splitPathAt(el,t){
   const pk=posKfs(el); if(pk.length<2) return null;
   const s=findSegRaw(pk,t); if(!s || s.a===s.b) return setKeyframe(el,t,{});
-  const {a,b,f}=s, c=segControl(a,b), g=1-f;
-  const P={x:g*g*a.x+2*f*g*c.x+f*f*b.x, y:g*g*a.y+2*f*g*c.y+f*f*b.y};
-  const q1={x:a.x+(c.x-a.x)*f, y:a.y+(c.y-a.y)*f}, q2={x:c.x+(b.x-c.x)*f, y:c.y+(b.y-c.y)*f};
+  const {a,b,f}=s, {c1,c2,straight}=segCtrl(a,b);
+  const L=(p,q)=>({x:p.x+(q.x-p.x)*f, y:p.y+(q.y-p.y)*f});
+  const m0=L(a,c1), m1=L(c1,c2), m2=L(c2,b), n0=L(m0,m1), n1=L(m1,m2), P=L(n0,n1);
   const rotAt=samplePose(el,t,true).rot;
-  a.bx=round2(q1.x-(a.x+P.x)/2); a.by=round2(q1.y-(a.y+P.y)/2);
   const kf=setKeyframe(el,t,{x:round2(P.x),y:round2(P.y),rot:round2(rotAt)});
-  kf.bx=round2(q2.x-(P.x+b.x)/2); kf.by=round2(q2.y-(P.y+b.y)/2);
+  if(!straight){
+    a.ox=round2(m0.x-a.x); a.oy=round2(m0.y-a.y);
+    kf.ix=round2(n0.x-P.x); kf.iy=round2(n0.y-P.y); kf.ox=round2(n1.x-P.x); kf.oy=round2(n1.y-P.y);
+    b.ix=round2(m2.x-b.x); b.iy=round2(m2.y-b.y);
+  }
   if(a.ease) kf.ease=a.ease;
   return kf;
 }
@@ -2685,9 +2710,9 @@ function findSegRaw(kfs,t){
 function nearestOnPath(el,px,py){
   const pk=posKfs(el); if(pk.length<2) return null;
   let best=null;
-  for(let i=0;i<pk.length-1;i++){ const a=pk[i],b=pk[i+1],c=segControl(a,b);
-    for(let s=0;s<=40;s++){ const f=s/40, g=1-f;
-      const x=X(g*g*a.x+2*f*g*c.x+f*f*b.x), y=Y(g*g*a.y+2*f*g*c.y+f*f*b.y);
+  for(let i=0;i<pk.length-1;i++){ const a=pk[i],b=pk[i+1];
+    for(let s=0;s<=40;s++){ const f=s/40; const pt=segPoint(a,b,f);
+      const x=X(pt.x), y=Y(pt.y);
       const d=dist(px,py,x,y);
       if(!best||d<best.d){ /* undo the easing so the time lands where the point is drawn */
         let raw=f; if(a.ease==="in") raw=Math.sqrt(f); else if(a.ease==="out") raw=1-Math.sqrt(1-f);
@@ -3332,7 +3357,13 @@ function bendHandles(){
   const el=byId(state.sel[0]); if(!el||el.locked||!isAnimated(el)||!elVisible(el)) return [];
   if(!state.view.waypointCues || !dc("waypoints")) return [];
   const pk=posKfs(el), out=[];
-  for(let i=0;i<pk.length-1;i++){ const a=pk[i],b=pk[i+1]; const c=segControl(a,b); out.push({el,a,b,i,hx:X(c.x),hy:Y(c.y)}); }
+  /* a handle that has not been pulled out yet sits a little way along its leg, so
+     it can be seen and grabbed without covering the keyframe or the figure */
+  const rest=(from,to)=>{ const dx=X(to.x)-X(from.x), dy=Y(to.y)-Y(from.y), L=Math.hypot(dx,dy)||1; return {x:X(from.x)+dx/L*Math.min(26,L*0.3), y:Y(from.y)+dy/L*Math.min(26,L*0.3)}; };
+  for(let i=0;i<pk.length-1;i++){ const a=pk[i],b=pk[i+1]; const {c1,c2}=segCtrl(a,b);
+    const o=(a.ox||a.oy)?{x:X(c1.x),y:Y(c1.y)}:rest(a,b), n=(b.ix||b.iy)?{x:X(c2.x),y:Y(c2.y)}:rest(b,a);
+    out.push({el,a,b,i,kind:"out",key:a,hx:o.x,hy:o.y,ax:X(a.x),ay:Y(a.y)});
+    out.push({el,a,b,i,kind:"in",key:b,hx:n.x,hy:n.y,ax:X(b.x),ay:Y(b.y)}); }
   return out;
 }
 function drawBeatPaths(){
@@ -3345,12 +3376,12 @@ function drawBeatPaths(){
     const col = el.type==="actor" ? el.color : el.type==="camera" ? "#00249C" : "#5b6478";
     if(pk.length>1){
       let d="";
-      for(let i=0;i<pk.length-1;i++){ const a=pk[i],b=pk[i+1],c=segControl(a,b);
-        d += (i===0?`M${X(a.x).toFixed(1)} ${Y(a.y).toFixed(1)}`:"") + ` Q${X(c.x).toFixed(1)} ${Y(c.y).toFixed(1)} ${X(b.x).toFixed(1)} ${Y(b.y).toFixed(1)}`; }
+      for(let i=0;i<pk.length-1;i++){ const a=pk[i],b=pk[i+1],{c1,c2,straight}=segCtrl(a,b);
+        d += (i===0?`M${X(a.x).toFixed(1)} ${Y(a.y).toFixed(1)}`:"") + (straight?` L${X(b.x).toFixed(1)} ${Y(b.y).toFixed(1)}`:` C${X(c1.x).toFixed(1)} ${Y(c1.y).toFixed(1)} ${X(c2.x).toFixed(1)} ${Y(c2.y).toFixed(1)} ${X(b.x).toFixed(1)} ${Y(b.y).toFixed(1)}`); }
       g += `<path d="${d}" fill="none" stroke="#fff" stroke-width="5" opacity="0.55" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="${d}" fill="none" stroke="${col}" stroke-width="2.2" stroke-dasharray="9 6" opacity="0.9" stroke-linecap="round" stroke-linejoin="round"/>`;
-      for(let i=0;i<pk.length-1;i++){ const a=pk[i],b=pk[i+1],c=segControl(a,b);
-        const mx=.25*a.x+.5*c.x+.25*b.x, my=.25*a.y+.5*c.y+.25*b.y;
+      for(let i=0;i<pk.length-1;i++){ const a=pk[i],b=pk[i+1];
+        const mp=segPoint(a,b,0.5), mx=mp.x, my=mp.y;
         const tg=curveTangent(a,b,0.5); if(tg===null) continue; const ang=rad(tg);
         const sx=X(mx),sy=Y(my);
         g+=`<path d="M${(sx-7*Math.cos(ang)-5*Math.sin(ang)).toFixed(1)} ${(sy-7*Math.sin(ang)+5*Math.cos(ang)).toFixed(1)} L${sx.toFixed(1)} ${sy.toFixed(1)} L${(sx-7*Math.cos(ang)+5*Math.sin(ang)).toFixed(1)} ${(sy-7*Math.sin(ang)-5*Math.cos(ang)).toFixed(1)}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`; }
@@ -3359,8 +3390,10 @@ function drawBeatPaths(){
       if(k.x===undefined) return;
       const sx=X(k.x), sy=Y(k.y), cur=Math.abs(k.t-state.time)<0.051;
       const selKf = state.selKf && state.selKf.id===el.id && state.selKf.index===i;
-      g += `<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${cur?8:6.5}" fill="${selKf?col:"#fff"}" stroke="${col}" stroke-width="${cur?3:2}"/>
-        <text x="${sx.toFixed(1)}" y="${(sy-11).toFixed(1)}" text-anchor="middle" font-size="9.5" font-weight="800" fill="${col}" font-family="Tahoma,sans-serif" paint-order="stroke" stroke="#fff" stroke-width="3">${k.t}s</text>`;
+      g += k.corner==="sharp"&&el.smooth
+        ? `<rect x="${(sx-6).toFixed(1)}" y="${(sy-6).toFixed(1)}" width="12" height="12" fill="${selKf?col:"#fff"}" stroke="${col}" stroke-width="${cur?3:2}"/>`
+        : `<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${cur?8:6.5}" fill="${selKf?col:"#fff"}" stroke="${col}" stroke-width="${cur?3:2}"/>`;
+      g += `<text x="${sx.toFixed(1)}" y="${(sy-11).toFixed(1)}" text-anchor="middle" font-size="9.5" font-weight="800" fill="${col}" font-family="Tahoma,sans-serif" paint-order="stroke" stroke="#fff" stroke-width="3">${k.t}s</text>`;
       if(el.type==="actor" && !cur){ const ghost=S(0.30);
         g += `<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${Math.max(11,ghost)}" fill="${col}" opacity="0.12" stroke="${col}" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="4 3"/>`; }
       const rr=samplePose(el,k.t,true).rot||0; const ax=sx+Math.cos(rad(rr))*16, ay=sy+Math.sin(rad(rr))*16;
@@ -3368,9 +3401,8 @@ function drawBeatPaths(){
     });
   });
   let hb="";
-  bendHandles().forEach(h=>{ hb += `<line x1="${X(h.a.x).toFixed(1)}" y1="${Y(h.a.y).toFixed(1)}" x2="${h.hx.toFixed(1)}" y2="${h.hy.toFixed(1)}" stroke="#e2762a" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/>
-    <line x1="${X(h.b.x).toFixed(1)}" y1="${Y(h.b.y).toFixed(1)}" x2="${h.hx.toFixed(1)}" y2="${h.hy.toFixed(1)}" stroke="#e2762a" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/>
-    <rect x="${(h.hx-6).toFixed(1)}" y="${(h.hy-6).toFixed(1)}" width="12" height="12" rx="2" fill="#e2762a" stroke="#fff" stroke-width="2"/>`; });
+  bendHandles().forEach(h=>{ hb += `<line x1="${h.ax.toFixed(1)}" y1="${h.ay.toFixed(1)}" x2="${h.hx.toFixed(1)}" y2="${h.hy.toFixed(1)}" stroke="#e2762a" stroke-width="1.2" opacity=".7"/>
+    <rect x="${(h.hx-5.5).toFixed(1)}" y="${(h.hy-5.5).toFixed(1)}" width="11" height="11" rx="${h.kind==="out"?2:5.5}" fill="#e2762a" stroke="#fff" stroke-width="2"/>`; });
   return (g||hb) ? `<g class="beatpath" pointer-events="none">${g}${hb}</g>` : "";
 }
 function drawLiveBadge(){
@@ -3871,12 +3903,19 @@ function initCanvas(){
       drag={mode:"pan",sx:px,sy:py,ox:state.view.ox,oy:state.view.oy};
       stage.classList.add("grabbing"); return;
     }
+    if(ev.button===2 && pendingTool==="select" && state.sel.length===1){
+      const el=byId(state.sel[0]);
+      if(el && el.smooth && isAnimated(el)){
+        const pk=posKfs(el); const hit=pk.findIndex((k,i)=>i>0&&i<pk.length-1&&dist(px,py,X(k.x),Y(k.y))<10);
+        if(hit>=0){ pushHistory(); pk[hit].corner = pk[hit].corner==="sharp"?"round":"sharp"; smoothControls(el); renderAll(); save(); return; }
+      }
+    }
     const bh = pendingTool==="select" ? bendHandles().find(h=>dist(px,py,h.hx,h.hy)<10) : null;
     if(bh){
       pushHistory();
-      if(ev.button===2){ delete bh.a.bx; delete bh.a.by; renderAll(); save(); return; }
+      if(ev.button===2){ if(bh.kind==="out"){ delete bh.key.ox; delete bh.key.oy; } else { delete bh.key.ix; delete bh.key.iy; } renderAll(); save(); return; }
       bh.el.smooth=false;
-      drag={mode:"bend",el:bh.el,a:bh.a,b:bh.b}; stage.style.cursor="move"; return;
+      drag={mode:"bend",el:bh.el,h:bh}; stage.style.cursor="move"; return;
     }
     const priorityHandle=rotateHandle();
     if(priorityHandle && priorityHandle.resizable && dist(px,py,priorityHandle.rx,priorityHandle.ry)<14){
@@ -4056,10 +4095,12 @@ function initCanvas(){
       renderPlan(); return;
     }
     if(drag.mode==="bend"){
-      const mx=(drag.a.x+drag.b.x)/2, my=(drag.a.y+drag.b.y)/2;
-      let bx=round2(wx(px)-mx), by=round2(wy(py)-my);
-      if(ev.shiftKey || Math.hypot(bx,by)<0.08){ bx=0; by=0; }
-      drag.a.bx=bx; drag.a.by=by; renderPlan(); return;
+      const h=drag.h, k=h.key;
+      let dx=round2(wx(px)-k.x), dy=round2(wy(py)-k.y);
+      if(ev.shiftKey || Math.hypot(dx,dy)<0.08){ dx=0; dy=0; }
+      if(h.kind==="out"){ k.ox=dx; k.oy=dy; if(ev.altKey){ k.ix=-dx; k.iy=-dy; } }
+      else { k.ix=dx; k.iy=dy; if(ev.altKey){ k.ox=-dx; k.oy=-dy; } }
+      renderPlan(); return;
     }
     if(drag.mode==="rotate"){
       let a = deg(Math.atan2(py-drag.cy, px-drag.cx)) + (drag.off||0);
@@ -4763,12 +4804,13 @@ function sectAnimation(el){
     const ch=byId(el.pov);
     h += `<p class="hint" style="margin-top:0">This camera is a point of view. It follows <b>${esc(ch?ch.label:"?")}</b> and has no keyframes of its own.</p>`;
   } else {
-    h += `<p class="hint" style="margin-top:0">Move the playhead, then drag the element or press the button. A keyframe is recorded at that time and the plan animates between keyframes. Double-click a path to add a keyframe on it; drag the orange square to bend a leg.</p>
+    h += `<p class="hint" style="margin-top:0">Move the playhead, then drag the element or press the button. A keyframe is recorded at that time and the plan animates between keyframes. Double-click a path to add a keyframe on it. Each leg has two orange Bezier handles: drag them to shape it, hold Alt to keep the corner smooth, Shift to snap straight, right-click a handle to remove it.</p>
     <button class="btn full green" data-act="addKey" data-id="${el.id}">${cur>=0?"Update":"+"} keyframe at ${(state.time||0).toFixed(1)} s</button>`;
     if(ks.length){
       h += `<div style="margin-top:8px">` + ks.map((k,i)=>`<div class="row" style="align-items:center">
         <button class="btn${selKf===k?" solid":" subtle"}" style="flex:0 0 66px" data-act="gotoKey" data-id="${el.id}" data-k="${i}" title="Jump to this keyframe">${(+k.t).toFixed(1)} s</button>
         <span class="hint" style="flex:1">${k.x!==undefined?`X ${round2(k.x)} Y ${round2(k.y)}`:"&mdash;"} &nbsp; ${k.rot!==undefined?Math.round(k.rot)+" deg":""}${k.ease?" &middot; "+esc(k.ease):""}</span>
+        ${el.smooth&&k.x!==undefined&&i>0&&i<ks.length-1?`<button class="btn${k.corner==="sharp"?"":" solid"}" style="flex:0 0 auto" data-act="toggleCorner" data-id="${el.id}" data-k="${i}" title="Round or sharp corner at this keyframe">${k.corner==="sharp"?"Sharp":"Round"}</button>`:""}
         <button class="btn danger" style="flex:0 0 auto" data-act="delKey" data-id="${el.id}" data-k="${i}">Remove</button></div>`).join("") + `</div>`;
     } else h += `<p class="hint">No keyframes yet. The element stays where it is placed.</p>`;
     h += `<div class="row" style="margin-top:8px">`
@@ -6427,7 +6469,7 @@ function pasteKeyframes(){
   const ok=e=>e && ANIM_TYPES.has(e.type) && !(e.type==="camera"&&e.pov);
   const apply=(e,it)=>{ const part={}; if(it.x!==undefined){part.x=it.x;part.y=it.y;} if(it.rot!==undefined) part.rot=it.rot;
     if(!isAnimated(e)) ensureKeys(e);
-    const kf=setKeyframe(e,(state.time||0)+(it.dt||0),part); if(it.bx!==undefined){kf.bx=it.bx;kf.by=it.by;} if(it.ease) kf.ease=it.ease; return kf; };
+    const kf=setKeyframe(e,(state.time||0)+(it.dt||0),part); ["ox","oy","ix","iy","corner"].forEach(kk=>{ if(it[kk]!==undefined) kf[kk]=it[kk]; }); if(it.ease) kf.ease=it.ease; return kf; };
   const placed=[];
   pushHistory();
   if(c.multi){
@@ -9718,7 +9760,11 @@ const ACTIONS = {
   delWaypoint(b){ ACTIONS.delKey(b); },
   straightenPath(b){
     const el=byId(b.dataset.id); if(!el||!el.keys) return;
-    pushHistory(); el.smooth=false; el.keys.forEach(k=>{ delete k.bx; delete k.by; }); renderAll(); save();
+    pushHistory(); el.smooth=false; el.keys.forEach(k=>{ delete k.bx; delete k.by; delete k.ox; delete k.oy; delete k.ix; delete k.iy; }); renderAll(); save();
+  },
+  toggleCorner(b){
+    const el=byId(b.dataset.id); if(!el||!el.keys) return; const k=el.keys[+b.dataset.k]; if(!k) return;
+    pushHistory(); k.corner = k.corner==="sharp" ? "round" : "sharp"; if(el.smooth) smoothControls(el); renderAll(); save();
   },
   smoothPath(b){
     const el=byId(b.dataset.id); if(!el||!el.keys) return;
@@ -10227,8 +10273,8 @@ const HELP_TOPICS = [
       <div class="helpgrid">
         <div class="helpcard"><b>Keyframes</b><span>Drag a diamond to retime it. Right-click to delete it. Ctrl-click or drag a box across rows to select several, then drag them together.</span></div>
         <div class="helpcard"><b>AUTO-KEY</b><span>On: a move records a keyframe at the playhead. Off: the whole path moves without adding keyframes.</span></div>
-        <div class="helpcard"><b>Paths on the plan</b><span>Drag the orange square to bend a leg, right-click it to straighten. Double-click a path to add a keyframe on it without changing the shape.</span></div>
-        <div class="helpcard"><b>Rounded corners</b><span>In the inspector set <b>Corners</b> to "Rounded automatically" and the path flows smoothly through every keyframe. Roundness 0 is straight, 1 is very round.</span></div>
+        <div class="helpcard"><b>Bezier paths</b><span>Every leg has two orange handles (a square leaving a keyframe, a circle arriving at the next). Drag them to shape the curve, hold Alt to keep the corner smooth on both sides, Shift to snap straight, right-click a handle to remove it. Double-click a path to add a keyframe on it without changing the shape.</span></div>
+        <div class="helpcard"><b>Rounded corners</b><span>In the inspector set <b>Corners</b> to "Rounded automatically" and the path flows smoothly through every keyframe. Roundness 0 is straight, 1 is very round. Each keyframe has its own Round / Sharp button, or right-click its dot on the plan (a square dot is a sharp corner).</span></div>
         <div class="helpcard"><b>Inspector</b><span>The <b>Animation and keyframes</b> section sets easing, facing (follow the path or manual), handheld shake and point-of-view cameras.</span></div>
         <div class="helpcard"><b>Beats</b><span>Beats are labels on the ruler for the storyboard. Press <b>+ Beat</b> at the playhead to name a moment.</span></div>
         <div class="helpcard"><b>Length</b><span>Set the scene length from 1 to 300 seconds. Keyframes past the end are trimmed.</span></div>
@@ -10983,7 +11029,7 @@ const I18N_AR = {
 "Facing":"الاتجاه","Manual (rotate handle)":"يدوي (مقبض التدوير)","Follow the path":"اتباع المسار","Position and rotation":"الموضع والدوران","Keyed together":"مفاتيح مشتركة","Keyed separately":"مفاتيح منفصلة",
 "Handheld shake (0-100)":"اهتزاز الكاميرا اليدوية (0-100)","Point of view":"وجهة نظر","Free camera":"كاميرا حرة","Straighten path":"تقويم المسار","Clear animation":"مسح الحركة","Remove":"إزالة",
 "No keyframes yet. The element stays where it is placed.":"لا توجد إطارات مفتاحية بعد. يبقى العنصر حيث وُضع.",
-"Move the playhead, then drag the element or press the button. A keyframe is recorded at that time and the plan animates between keyframes. Double-click a path to add a keyframe on it; drag the orange square to bend a leg.":"حرّك مؤشر الزمن ثم اسحب العنصر أو اضغط الزر. يُسجَّل إطار مفتاحي عند ذلك الزمن ويتحرك المخطط بين الإطارات. انقر مرتين على المسار لإضافة إطار مفتاحي، واسحب المربع البرتقالي لثني الضلع.",
+"Move the playhead, then drag the element or press the button. A keyframe is recorded at that time and the plan animates between keyframes. Double-click a path to add a keyframe on it. Each leg has two orange Bezier handles: drag them to shape it, hold Alt to keep the corner smooth, Shift to snap straight, right-click a handle to remove it.":"حرّك مؤشر الزمن ثم اسحب العنصر أو اضغط الزر. يُسجَّل إطار مفتاحي عند ذلك الزمن ويتحرك المخطط بين الإطارات. انقر مرتين على المسار لإضافة إطار مفتاحي. لكل ضلع مقبضا بيزييه برتقاليان: اسحبهما لتشكيله، واضغط Alt لإبقاء الزاوية ناعمة، وShift للتقويم، وانقر بالزر الأيمن على المقبض لإزالته.",
 "Role in the lighting plot":"الدور في مخطط الإضاءة","Fixture from the catalogue":"الوحدة من الكتالوج","Modifier":"المعدّل","Output (W)":"القدرة (واط)","Colour temp (K)":"درجة حرارة اللون (كلفن)","Dimmer (%)":"المخفّت (%)",
 "Beam (deg)":"الشعاع (درجات)","Aim (degrees)":"التصويب (درجات)","Stand":"الحامل","Lighting assessment":"تقييم الإضاءة","Element label":"تسمية العنصر","Element name / label":"اسم العنصر / التسمية","Label":"التسمية",
 "Catalogue item":"عنصر الكتالوج","Width (m)":"العرض (م)","Depth (m)":"العمق (م)","Rotation (degrees)":"الدوران (درجات)","Layer":"الطبقة","Colour":"اللون","Opacity":"الشفافية","Note":"ملاحظة",
@@ -11322,7 +11368,7 @@ Object.assign(I18N_AR,{
 "One PNG per interval, plus the last frame, packed into a zip.":"صورة PNG لكل فاصل زمني مع الإطار الأخير، معبأة في zip.","Saves the picture at the current playhead position.":"يحفظ الصورة عند موضع مؤشر الزمن الحالي.","Drawing the frame...":"جارٍ رسم الإطار...","Saved one PNG frame.":"حُفظ إطار PNG واحد.",
 "images saved in a zip.":"صورة محفوظة في zip.","Video saved.":"حُفظ الفيديو.","This browser records WebM; it plays in Chrome, Edge, Firefox and VLC.":"يسجل هذا المتصفح WebM؛ يعمل في Chrome وEdge وFirefox وVLC.","Cancelled.":"أُلغي.","The render failed: ":"فشل التصيير: ",
 "This browser cannot record video. Try Chrome or Edge, or render an image sequence instead.":"لا يستطيع هذا المتصفح تسجيل الفيديو. جرّب Chrome أو Edge، أو صيّر تسلسل صور بدلًا من ذلك.",
-"Corners":"الزوايا","Sharp (bend each leg by hand)":"حادة (اثنِ كل ضلع يدويًا)","Rounded automatically":"مستديرة تلقائيًا","Rounded corners":"زوايا مستديرة","In the inspector set":"في الفاحص اضبط","to \"Rounded automatically\" and the path flows smoothly through every keyframe. Roundness 0 is straight, 1 is very round.":"على «مستديرة تلقائيًا» فيتدفق المسار بسلاسة عبر كل إطار مفتاحي. الاستدارة 0 مستقيم و1 شديد الاستدارة.","Roundness (0 to 1)":"الاستدارة (0 إلى 1)","Round the corners once":"تدوير الزوايا مرة واحدة",
+"Corners":"الزوايا","Round":"مستدير","Bezier paths":"مسارات بيزييه","Every leg has two orange handles (a square leaving a keyframe, a circle arriving at the next). Drag them to shape the curve, hold Alt to keep the corner smooth on both sides, Shift to snap straight, right-click a handle to remove it. Double-click a path to add a keyframe on it without changing the shape.":"لكل ضلع مقبضان برتقاليان (مربع يغادر الإطار المفتاحي ودائرة تصل إلى التالي). اسحبهما لتشكيل المنحنى، واضغط Alt لإبقاء الزاوية ناعمة من الجانبين، وShift للتقويم، وانقر بالزر الأيمن على المقبض لإزالته. انقر مرتين على المسار لإضافة إطار مفتاحي دون تغيير الشكل.","Sharp":"حاد","Round or sharp corner at this keyframe":"زاوية مستديرة أو حادة عند هذا الإطار المفتاحي","Sharp (bend each leg by hand)":"حادة (اثنِ كل ضلع يدويًا)","Rounded automatically":"مستديرة تلقائيًا","Rounded corners":"زوايا مستديرة","In the inspector set":"في الفاحص اضبط","to \"Rounded automatically\" and the path flows smoothly through every keyframe. Roundness 0 is straight, 1 is very round. Each keyframe has its own Round / Sharp button, or right-click its dot on the plan (a square dot is a sharp corner).":"على «مستديرة تلقائيًا» فيتدفق المسار بسلاسة عبر كل إطار مفتاحي. الاستدارة 0 مستقيم و1 شديد الاستدارة. لكل إطار مفتاحي زر مستدير/حاد خاص به، أو انقر بالزر الأيمن على نقطته في المخطط (النقطة المربعة زاوية حادة).","Roundness (0 to 1)":"الاستدارة (0 إلى 1)","Round the corners once":"تدوير الزوايا مرة واحدة",
 "Tick":"حدد","Keyframes":"الإطارات المفتاحية","How the timeline, keyframes and cuts work":"كيف يعمل الخط الزمني والإطارات المفتاحية والقطعات",
 "Remove every keyframe from this element? It will stay where it is right now.":"إزالة كل الإطارات المفتاحية من هذا العنصر؟ سيبقى حيث هو الآن.","Paths on the plan":"المسارات على المخطط","Length":"الطول","Inspector":"الفاحص","Beats":"الإيقاعات",
 "Cut":"قطع","Cuts":"القطعات","Trash":"حذف","Open Layers":"فتح الطبقات","Open Environment":"فتح البيئة","Open Gear":"فتح المعدات","Open Board":"فتح اللوحة","Open Crew":"فتح الطاقم","Open Schedule":"فتح الجدول","Open Budget":"فتح الميزانية","Open Project":"فتح المشروع",
