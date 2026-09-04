@@ -10,16 +10,16 @@
   --hct-blue:#00249C;
   --hct-green:#47D7AC;
   --am-blue:#1828B3;
-  --ink:#0d1330;
-  --muted:#5b6478;
-  --line:#dfe3ee;
-  --bg:#f4f6fb;
+  --ink:#111a35;
+  --muted:#46536e;
+  --line:#c8d2e4;
+  --bg:#eef3fb;
   --panel:#ffffff;
   --card:#ffffff;
-  --soft:#f7f9fd;
-  --soft2:#eef1f9;
+  --soft:#f4f7fc;
+  --soft2:#e5ebf6;
   --field:#ffffff;
-  --canvas:#e9edf6;
+  --canvas:#dce6f5;
   --shadow:rgba(11,22,60,.12);
   --warn:#c4342a;
   --amber:#e0a106;
@@ -28,15 +28,15 @@
 }
 body.dark{
   --ink:#e8ecf7;
-  --muted:#95a0bb;
-  --line:#2a3352;
+  --muted:#b0bad1;
+  --line:#394565;
   --bg:#0d1122;
   --panel:#141a30;
   --card:#1a2138;
   --soft:#182039;
   --soft2:#212a45;
   --field:#1c2440;
-  --canvas:#0a0e1c;
+  --canvas:#0f1629;
   --shadow:rgba(0,0,0,.5);
   --hct-blue:#3f68ff;
   --am-blue:#3f68ff;
@@ -1137,7 +1137,7 @@ body.launching .app{display:none}
 .p-sign{margin-top:22px;display:flex;gap:40px}
 .p-sign div{flex:1;border-top:1px solid #000;padding-top:4px;font-size:10px}
 /* ---------- ShotCraft professional interface refinement ---------- */
-:root{--hct-blue:#1739b8;--am-blue:#0e1f71;--hct-green:#58e1b8;--bg:#e9edf6;--line:#d5dbea;--shadow:rgba(15,28,70,.16)}
+:root{--hct-blue:#1739b8;--am-blue:#0e1f71;--hct-green:#58e1b8;--bg:#eef3fb;--line:#c6d0e4;--shadow:rgba(15,28,70,.18)}
 body{letter-spacing:.005em}
 .topbar{height:58px;flex-basis:58px;padding:0 14px;gap:9px;background:linear-gradient(110deg,#09184e 0%,#1739b8 58%,#2253d4 100%);border-bottom:1px solid rgba(255,255,255,.16);box-shadow:0 8px 24px rgba(6,16,54,.24);z-index:20}
 .brand .mark{border-radius:11px;box-shadow:0 5px 14px rgba(0,0,0,.25),inset 0 1px 0 #fff}
@@ -1742,11 +1742,11 @@ const STATUS_COL = {Planned:"#5b6478",Rehearsed:"#e0a106",Ready:"#2fa35f",Done:"
 const STATUS_MIGRATE = {Shot:"Done",Reshoot:"Rehearsed",Cut:"Omit"};
 function migrateStatus(v){ return STATUS.includes(v) ? v : (STATUS_MIGRATE[v]||"Planned"); }
 const TODS   = {
-  dayint:{n:"Day INT (interior daylight)",bg:"#f4f6fb",bgd:"#141a2e",amb:0.55},
-  nightint:{n:"Night INT (interior night)",bg:"#e6e9f4",bgd:"#10142a",amb:0.18},
-  dayext:{n:"Day EXT (exterior sun)",bg:"#f2f7f0",bgd:"#15201c",amb:0.85},
-  nightext:{n:"Night EXT (exterior night)",bg:"#e4e7f2",bgd:"#0c0f22",amb:0.12},
-  studio:{n:"Studio black box",bg:"#eceef6",bgd:"#101218",amb:0.25}
+  dayint:{n:"Day INT (interior daylight)",bg:"#eef3fb",bgd:"#141a2e",amb:0.55},
+  nightint:{n:"Night INT (interior night)",bg:"#d9e0f0",bgd:"#10142a",amb:0.18},
+  dayext:{n:"Day EXT (exterior sun)",bg:"#eaf3e8",bgd:"#15201c",amb:0.85},
+  nightext:{n:"Night EXT (exterior night)",bg:"#d8deed",bgd:"#0c0f22",amb:0.12},
+  studio:{n:"Studio black box",bg:"#e2e7f1",bgd:"#101218",amb:0.25}
 };
 function isDark(){ return (state && state.view && state.view.theme)==="dark"; }
 function todBg(t){ return isDark() ? (t.bgd||"#12162a") : t.bg; }
@@ -2949,7 +2949,7 @@ function arrowMarkers(){
     <linearGradient id="objectBlue3d" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6291ff"/><stop offset=".42" stop-color="#2457d6"/><stop offset="1" stop-color="#0b246f"/></linearGradient>
     <linearGradient id="objectDark3d" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#71809f"/><stop offset=".4" stop-color="#35415e"/><stop offset="1" stop-color="#11182c"/></linearGradient>
     <radialGradient id="objectGlow3d" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#fff"/><stop offset=".28" stop-color="#ffe89c"/><stop offset="1" stop-color="#e0a106"/></radialGradient>
-    <filter id="itemShadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="2.2" dy="3.2" stdDeviation="2.4" flood-color="#07112e" flood-opacity=".28"/></filter>
+    <filter id="itemShadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="2.2" dy="3.2" stdDeviation="2.4" flood-color="#07112e" flood-opacity=".36"/></filter>
   </defs>`;
 }
 function drawGrid(){
@@ -2961,7 +2961,7 @@ function drawGrid(){
   for(let x=x0;x<=x1;x+=step){ const sx=X(x).toFixed(1); (Math.abs(x%5)<1e-6?(pm+=`M${sx} 0V${VIEW.h}`):(p+=`M${sx} 0V${VIEW.h}`)); }
   for(let y=y0;y<=y1;y+=step){ const sy=Y(y).toFixed(1); (Math.abs(y%5)<1e-6?(pm+=`M0 ${sy}H${VIEW.w}`):(p+=`M0 ${sy}H${VIEW.w}`)); }
   const sc = S(step).toFixed(0);
-  const gl = isDark()?"#252d47":"#d5dcec", gm = isDark()?"#333d5e":"#c0cade";
+  const gl = isDark()?"#303a58":"#c2cde0", gm = isDark()?"#425071":"#9dacc6";
   const gt = isDark()?"#8794b8":"#5b6478";
   return `<g class="grid"><path d="${p}" stroke="${gl}" stroke-width="1" fill="none"/>
     <path d="${pm}" stroke="${gm}" stroke-width="1.2" fill="none"/>
@@ -5466,6 +5466,19 @@ function hex2rgb(h){
 }
 function rgb2hex(c){ return "#"+c.map(v=>Math.round(clamp(v,0,255)).toString(16).padStart(2,"0")).join(""); }
 function mixc(a,b,t){ return a.map((v,i)=>v+(b[i]-v)*t); }
+function kelvinToHex(k){
+  let t=clamp(+k||5600,1000,40000)/100, r,g,b;
+  if(t<=66){
+    r=255;
+    g=99.4708025861*Math.log(t)-161.1195681661;
+    b=t<=19?0:138.5177312231*Math.log(t-10)-305.0447927307;
+  }else{
+    r=329.698727446*Math.pow(t-60,-0.1332047592);
+    g=288.1221695283*Math.pow(t-60,-0.0755148492);
+    b=255;
+  }
+  return rgb2hex([r,g,b]);
+}
 function vfShade(base, lum, depth, fog, fogCol){
   let c = hex2rgb(base);
   c = lum<1 ? mixc(c,[8,10,20],1-lum) : mixc(c,[255,255,255],Math.min(0.55,(lum-1)*0.9));
@@ -5536,7 +5549,7 @@ function vfSVG(cam,W,H,opt){
   let skyBot  = night?"#0d1424":studio?"#12161f":ext?"#b9cde4":"#33445f";
   let floorCol= night?"#1c2136":studio?"#171a22":ext?"#5d5f63":"#3a3f52";
   let wallCol = night?"#2b3352":studio?"#22262f":ext?"#7b7f88":"#4a5573";
-  const amb     = night?0.42:studio?0.5:ext?0.95:0.72;
+  const amb     = night?0.30:studio?0.40:ext?0.90:0.62;
   const fogCol  = hex2rgb(night?"#0a1020":studio?"#0d1017":ext?"#a9bed6":"#1b2540");
   const fogAmt  = o.mini?0.55:0.8;
   const env=environmentState(scene());
@@ -5545,7 +5558,10 @@ function vfSVG(cam,W,H,opt){
   floorCol=floorPalette[env.floor]||floorCol;
 
   /* dominant light direction for the lambert term */
-  const keyL = lights().filter(l=>!l.flag).sort((x,y)=>(y.watts*y.dimmer)-(x.watts*x.dimmer))[0];
+  const sceneLights = lights().filter(l=>!l.flag && (+l.dimmer||0)>0);
+  const keyL = sceneLights.slice().sort((x,y)=>(y.watts*y.dimmer)-(x.watts*x.dimmer))[0];
+  const keyTintHex = keyL ? kelvinToHex(keyL.kelvin) : "#ffffff";
+  const keyTintAmt = keyL ? clamp((keyL.dimmer/100)*((keyL.watts||100)/1200)*0.20,0,0.20) : 0;
   let LD = [0.45,-0.6,-0.65];
   if(keyL){
     const q=posAt(keyL);
@@ -5563,7 +5579,8 @@ function vfSVG(cam,W,H,opt){
     if(dav>60) return;
     const S = cs.map(scr);
     if(S.every(q=>q[0]<-fw||q[0]>fw*2)) return;
-    const fill = vfShade(col, l, dav, fogAmt, fogCol);
+    let fill = vfShade(col, l, dav, fogAmt, fogCol);
+    if(keyTintAmt) fill = rgb2hex(mixc(hex2rgb(fill),hex2rgb(keyTintHex),keyTintAmt));
     items.push({d:dav, s:`<polygon points="${S.map(q=>q[0].toFixed(1)+","+q[1].toFixed(1)).join(" ")}"
       fill="${fill}"${stroke?` stroke="${stroke}" stroke-width="1"`:""}${extra||""}/>`});
   };
@@ -5970,6 +5987,53 @@ function vfSVG(cam,W,H,opt){
   const envArt=vfEnvironmentArt(W,top,fw,fh,cid,env);
   const horizonY = top + fh/2 + Math.tan(pitch)*ky;
 
+  /* Lighting simulation: fixtures create visible pools in the environment and
+     screen-space illumination over characters. The effect is calculated from
+     the real plan values (aim, beam, wattage, dimmer, height and Kelvin). */
+  let lightDefs="", lightFx="";
+  const angleDelta=(a,b)=>Math.abs(((a-b+540)%360)-180);
+  sceneLights.forEach((l,li)=>{
+    const q=posAt(l), dim=clamp((+l.dimmer||0)/100,0,1);
+    const watts=Math.max(40,+l.watts||80), beam=clamp(+l.beam||60,5,360);
+    const reach=clamp(2.8+Math.sqrt(watts)*0.24,3,13)*(0.35+0.65*dim);
+    const power=clamp(dim*Math.sqrt(watts/300),0.08,1.65);
+    const col=kelvinToHex(l.kelvin||5600), lid=`${cid}L${li}`;
+    const rz=(+l.elevation||0)+(+l.height||2);
+    const aa=rad(q.rot||0), target=[q.x+Math.cos(aa)*reach,q.y+Math.sin(aa)*reach,Math.max(.12,rz-reach*.22)];
+    const tc=prj(target);
+    if(tc.d>NEAR){
+      const T=scr(tc), rx=clamp(90+beam*2.5,105,fw*.62), ry=clamp(rx*.34,42,fh*.38);
+      const op=clamp(power*(beam<45?.34:beam<120?.24:.16),.035,.40);
+      lightDefs+=`<radialGradient id="${lid}pool"><stop offset="0" stop-color="#fff" stop-opacity=".90"/><stop offset=".22" stop-color="${col}" stop-opacity=".72"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient>`;
+      lightFx+=`<ellipse cx="${T[0].toFixed(1)}" cy="${T[1].toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="url(#${lid}pool)" opacity="${op.toFixed(3)}" style="mix-blend-mode:screen"/>`;
+    }
+    const sc=prj([q.x,q.y,rz]);
+    if(sc.d>NEAR){
+      const S=scr(sc), rr=clamp(34/sc.d,5,30);
+      lightDefs+=`<radialGradient id="${lid}src"><stop offset="0" stop-color="#fff"/><stop offset=".28" stop-color="${col}" stop-opacity=".95"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient>`;
+      lightFx+=`<circle cx="${S[0].toFixed(1)}" cy="${S[1].toFixed(1)}" r="${(rr*2.6).toFixed(1)}" fill="url(#${lid}src)" opacity="${clamp(power*.42,.08,.62).toFixed(3)}" style="mix-blend-mode:screen"/>`;
+    }
+    actors().forEach((ac,ai)=>{
+      const a=posAt(ac), d=dist(q.x,q.y,a.x,a.y);
+      if(d>reach*1.35) return;
+      const bearing=deg(Math.atan2(a.y-q.y,a.x-q.x)), half=beam>=350?180:beam/2;
+      const off=angleDelta(bearing,q.rot||0);
+      if(beam<350 && off>half) return;
+      const angular=beam>=350?1:Math.pow(clamp(1-off/Math.max(2,half),0,1),.7);
+      const fall=1/(1+Math.pow(d/Math.max(1.5,reach*.68),2));
+      const hit=clamp(power*angular*fall,0,.95);
+      if(hit<.045) return;
+      const profile=actorProfile(ac), actorScale=(+ac.h||.65)/.65;
+      const standingH=(+ac.heightM||(profile.h||1.72)*actorScale), figureH=standingH*poseHeightFactor(ac), ez=+ac.elevation||0;
+      const feet=prj([a.x,a.y,ez]), head=prj([a.x,a.y,ez+figureH]);
+      if(feet.d<=NEAR||head.d<=NEAR) return;
+      const Fp=scr(feet), Hp=scr(head), ih=Math.max(24,Math.abs(Fp[1]-Hp[1])), cy=(Fp[1]+Hp[1])*.5;
+      const aid=`${lid}A${ai}`;
+      lightDefs+=`<radialGradient id="${aid}"><stop offset="0" stop-color="#fff" stop-opacity=".96"/><stop offset=".30" stop-color="${col}" stop-opacity=".78"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient>`;
+      lightFx+=`<ellipse cx="${Fp[0].toFixed(1)}" cy="${cy.toFixed(1)}" rx="${clamp(ih*.38,16,105).toFixed(1)}" ry="${clamp(ih*.58,26,150).toFixed(1)}" fill="url(#${aid})" opacity="${clamp(hit*.58,.04,.55).toFixed(3)}" style="mix-blend-mode:screen"/>`;
+    });
+  });
+
   let ov="";
   const showT=o.mini?false:VF.thirds, showS=o.mini?false:VF.safe, showC=o.mini?false:VF.cross, showH=o.mini?false:VF.horizon;
   if(showH) ov += `<line x1="0" y1="${horizonY.toFixed(1)}" x2="${fw}" y2="${horizonY.toFixed(1)}"
@@ -5988,6 +6052,7 @@ function vfSVG(cam,W,H,opt){
       <text x="12" y="${top+18}" fill="#ff5b4a">REC</text>
       <text x="46" y="${top+18}">${esc(cam.label)} | ${esc(shotNo(cam))} | ${esc(cam.size)}</text>
       <text x="${fw-12}" y="${top+18}" text-anchor="end">${cam.lens}mm  ${esc(cam.iris)}  ISO ${esc(cam.iso)}  ${esc(cam.shutter)}</text>
+      <text x="${fw/2}" y="${top+18}" text-anchor="middle" fill="#dbe8ff">LIGHT SIM ${sceneLights.length}</text>
       <text x="12" y="${top+fh-12}">${esc(RATIOS[state.project.aspect].n)}   FRAME ${fmtLen(2*cam.focusDist*Math.tan(hf))} x ${fmtLen(2*cam.focusDist*Math.tan(vf))} at focus</text>
       <text x="${fw-12}" y="${top+fh-12}" text-anchor="end">${esc(SENSORS[cam.sensor].n.split(" (")[0])}  HFOV ${hfov(cam.lens,cam.sensor).toFixed(1)}  TILT ${camTilt(cam).toFixed(1)}  H ${cam.height} m</text>
     </g>`;
@@ -5998,9 +6063,10 @@ function vfSVG(cam,W,H,opt){
       <clipPath id="${cid}"><rect x="0" y="${top}" width="${fw}" height="${fh}"/></clipPath>
       <linearGradient id="sky${cid}" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="${skyTop}"/><stop offset="1" stop-color="${skyBot}"/></linearGradient>
+      ${lightDefs}
     </defs>
     <rect width="${W}" height="${H}" fill="#05070f"/>
-    <g clip-path="url(#${cid})">${envArt.back}${items.map(i=>i.s).join("")}${ov}${envArt.over}</g>
+    <g clip-path="url(#${cid})">${envArt.back}${items.map(i=>i.s).join("")}${lightFx}${ov}${envArt.over}</g>
     ${hud}
     <rect x="0.5" y="${top+0.5}" width="${fw-1}" height="${fh-1}" fill="none" stroke="#2c3557" stroke-width="1"/>
   </svg>`;

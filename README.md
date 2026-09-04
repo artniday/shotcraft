@@ -84,6 +84,12 @@ exists only so the renderer can read the pictures when `index.html` is opened st
 from disk (`file://`), where browsers block `fetch()`. Leave it out when uploading to a
 web host; regenerate it after changing artwork.
 
+## Visibility and lighting simulation (stage 2.1)
+
+This showcase build increases plan/UI contrast so objects, labels, grid lines and controls read more clearly on screen.
+
+The viewfinder now uses each placed fixture's **aim, beam angle, wattage, dimmer, height and Kelvin value** to simulate visible light pools and colour on the environment and characters. This is an educational previsualisation effect rather than a physically based renderer, but it makes key, fill, rim, practical and background lighting choices much easier to demonstrate.
+
 ## Language
 
 The **عربي / EN** button in the top bar and on the launch screen switches the whole
