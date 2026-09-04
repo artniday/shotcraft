@@ -1537,6 +1537,11 @@ html[dir=rtl] .stagenote{left:auto;right:12px;align-items:flex-end}
           <select class="ui" id="rdEvery">
             <option value="0.5">0.5 s</option><option value="1" selected>1 s</option><option value="2">2 s</option><option value="3">3 s</option><option value="5">5 s</option>
           </select></label>
+        <label class="f" id="rdFormatWrap"><span>Video format</span>
+          <select class="ui" id="rdFormat">
+            <option value="mp4">MP4 (H.264) — plays everywhere; pick WebM if it looks jerky</option>
+            <option value="webm">WebM (VP9) — exact 30 fps, encoded off line</option>
+          </select></label>
         <label class="f"><span>Overlays</span>
           <select class="ui" id="rdOverlay">
             <option value="1" selected>Show paths, labels and the LIVE badge</option>
@@ -1544,7 +1549,7 @@ html[dir=rtl] .stagenote{left:auto;right:12px;align-items:flex-end}
           </select></label>
       </div>
       <p class="hint">Frame the plan on screen first: the video shows the plan exactly as you see it.</p>
-      <p class="hint" id="rdNote">The video is recorded in real time, so a 20 second scene takes 20 seconds to render. Keep this tab in front while it runs.</p>
+      <p class="hint" id="rdNote">Every frame is drawn first, then recorded at a steady 30 frames a second. A 20 second scene takes about a minute. Keep this tab in front while it runs.</p>
       <div id="rdProgressWrap" style="display:none;margin:8px 0">
         <div style="height:10px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--soft)"><div id="rdBar" style="height:100%;width:0;background:var(--hct-blue);transition:width .15s"></div></div>
         <div class="hint" id="rdStatus" style="margin-top:6px"></div>
@@ -4411,7 +4416,8 @@ function walkMotion(el,t){
   if(speed<0.08) return null;
   const stride=clamp(speed,0.3,2.2);
   const phase=tt*stride*3.4*Math.PI;                    /* about 1.7 steps a second at walking pace */
-  return {speed, bob:Math.abs(Math.sin(phase))*clamp(stride*2.2,1,4), sway:Math.sin(phase)*clamp(stride*1.6,0.8,3)};
+  const bobShape=0.5-0.5*Math.cos(2*phase);          /* smooth 0..1..0 twice per stride, no cusps */
+  return {speed, bob:bobShape*clamp(stride*2.0,1,3.5), sway:Math.sin(phase)*clamp(stride*1.2,0.6,2.2)};
 }
 function flipAttr(el,x,w){
   if(!el || !el.flip) return "";
@@ -10880,9 +10886,54 @@ async function paintFrame(outCtx,W,H,t,o){
   ctx.fillStyle="rgba(0,0,0,.55)"; ctx.fillRect(W-118,H-30,110,22); ctx.fillStyle="#fff"; ctx.font="bold 13px monospace"; ctx.textAlign="right"; ctx.fillText(t.toFixed(1)+" s",W-14,H-14);
   outCtx.drawImage(RD.off,0,0);
 }
+/* ---- WebM (Matroska) writer for VP9/VP8 frames from WebCodecs ---- */
+function ebmlId(id){ const a=[]; while(id>0){ a.unshift(id&255); id=Math.floor(id/256); } return a; }
+function ebmlSize(n){ /* 8-byte size so any length fits */ const a=new Array(8); a[0]=0x01; let v=n; for(let i=7;i>=1;i--){ a[i]=v&255; v=Math.floor(v/256); } return a; }
+function ebmlUint(n){ const a=[]; let v=n; do{ a.unshift(v&255); v=Math.floor(v/256);}while(v>0); return a; }
+function ebmlEl(id,payload){ const body = payload instanceof Uint8Array ? payload : new Uint8Array(payload); const head=new Uint8Array([...ebmlId(id),...ebmlSize(body.length)]); const out=new Uint8Array(head.length+body.length); out.set(head); out.set(body,head.length); return out; }
+function ebmlCat(parts){ let n=0; parts.forEach(p=>n+=p.length); const out=new Uint8Array(n); let o=0; parts.forEach(p=>{ out.set(p,o); o+=p.length; }); return out; }
+function ebmlStr(s){ return new TextEncoder().encode(s); }
+function ebmlFloat(f){ const b=new ArrayBuffer(8); new DataView(b).setFloat64(0,f); return new Uint8Array(b); }
+function makeWebM(codecId,W,H,fps,chunks){
+  /* chunks: [{data:Uint8Array, key:bool, ms:number}] */
+  const header=ebmlEl(0x1A45DFA3,ebmlCat([ebmlEl(0x4286,ebmlUint(1)),ebmlEl(0x42F7,ebmlUint(1)),ebmlEl(0x42F2,ebmlUint(4)),ebmlEl(0x42F3,ebmlUint(8)),ebmlEl(0x4282,ebmlStr("webm")),ebmlEl(0x4287,ebmlUint(4)),ebmlEl(0x4285,ebmlUint(2))]));
+  const dur=chunks.length?chunks[chunks.length-1].ms+1000/fps:0;
+  const info=ebmlEl(0x1549A966,ebmlCat([ebmlEl(0x2AD7B1,ebmlUint(1000000)),ebmlEl(0x4D80,ebmlStr("ShotCraft")),ebmlEl(0x5741,ebmlStr("ShotCraft")),ebmlEl(0x4489,ebmlFloat(dur))]));
+  const video=ebmlEl(0xE0,ebmlCat([ebmlEl(0xB0,ebmlUint(W)),ebmlEl(0xBA,ebmlUint(H))]));
+  const track=ebmlEl(0xAE,ebmlCat([ebmlEl(0xD7,ebmlUint(1)),ebmlEl(0x73C5,ebmlUint(1)),ebmlEl(0x83,ebmlUint(1)),ebmlEl(0x9C,ebmlUint(0)),ebmlEl(0x86,ebmlStr(codecId)),ebmlEl(0x23E383,ebmlUint(Math.round(1e9/fps))),video]));
+  const tracks=ebmlEl(0x1654AE6B,track);
+  const clusters=[]; let cl=null, clStart=0;
+  chunks.forEach(c=>{
+    if(!cl || c.ms-clStart>20000 && c.key){ if(cl) clusters.push(ebmlEl(0x1F43B675,ebmlCat(cl))); clStart=c.ms; cl=[ebmlEl(0xE7,ebmlUint(Math.round(clStart)))]; }
+    const rel=Math.round(c.ms-clStart); const hdr=new Uint8Array([0x81,(rel>>8)&255,rel&255,c.key?0x80:0x00]);
+    cl.push(ebmlEl(0xA3,ebmlCat([hdr,c.data])));
+  });
+  if(cl) clusters.push(ebmlEl(0x1F43B675,ebmlCat(cl)));
+  const segment=ebmlEl(0x18538067,ebmlCat([info,tracks,...clusters]));
+  return new Blob([header,segment],{type:"video/webm"});
+}
+async function encodeWebMOffline(canvas,frames,fps,W,H,onProgress){
+  const cfg={codec:"vp09.00.10.08",width:W,height:H,bitrate:Math.round(clamp(W*H*0.12,2e6,14e6)),framerate:fps,latencyMode:"quality"};
+  let codecId="V_VP9";
+  if(!(await VideoEncoder.isConfigSupported(cfg)).supported){ cfg.codec="vp8"; codecId="V_VP8"; if(!(await VideoEncoder.isConfigSupported(cfg)).supported) throw new Error("No VP9 or VP8 encoder in this browser"); }
+  const out=[]; let err=null;
+  const enc=new VideoEncoder({output:(chunk)=>{ const d=new Uint8Array(chunk.byteLength); chunk.copyTo(d); out.push({data:d,key:chunk.type==="key",ms:chunk.timestamp/1000}); }, error:e=>{ err=e; }});
+  enc.configure(cfg);
+  for(let i=0;i<frames.length;i++){
+    if(err) throw err;
+    const bmp=await createImageBitmap(frames[i]);
+    const vf=new VideoFrame(bmp,{timestamp:Math.round(i*1e6/fps),duration:Math.round(1e6/fps)});
+    enc.encode(vf,{keyFrame:i%(fps*2)===0}); vf.close(); bmp.close&&bmp.close();
+    if(enc.encodeQueueSize>4) await new Promise(r=>setTimeout(r,10));
+    if(i%5===0) onProgress(i/frames.length);
+  }
+  await enc.flush(); enc.close();
+  if(err) throw err;
+  return makeWebM(codecId,W,H,fps,out);
+}
 function rdOptions(){
   const [W,H]=$("#rdSize").value.split("x").map(Number);
-  return {source:$("#rdSource").value, output:$("#rdOutput").value, W, H, every:+$("#rdEvery").value, overlays:$("#rdOverlay").value==="1", camId:$("#rdCam").value};
+  return {source:$("#rdSource").value, output:$("#rdOutput").value, W, H, every:+$("#rdEvery").value, overlays:$("#rdOverlay").value==="1", camId:$("#rdCam").value, format:$("#rdFormat").value};
 }
 function rdProgress(f,msg){ $("#rdProgressWrap").style.display="block"; $("#rdBar").style.width=Math.round(f*100)+"%"; if(msg!=null) $("#rdStatus").textContent=msg; }
 function pickMime(){
@@ -10919,23 +10970,41 @@ async function startRender(){
       }
       if(!RD.cancel){ download(`${safeName()}-frames.zip`,makeZip(files),"application/zip"); rdProgress(1,`${files.length} ${tr("images saved in a zip.")}`); }
     } else {
-      const mime=pickMime(); if(!mime){ alert(tr("This browser cannot record video. Try Chrome or Edge, or render an image sequence instead.")); return; }
-      const fps=30, stream=canvas.captureStream(fps);
-      const bps=Math.round(clamp(30e6*8/Math.max(1,dur),0.5e6,10e6));
-      const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:bps}); const chunks=[]; rec.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
-      const done=new Promise(r=>rec.onstop=r);
-      await withPlanView(()=>paintFrame(ctx,o.W,o.H,0,o));
-      rec.start(250);
-      const t0=performance.now(); let t=0, frames=0;
-      while(t<dur && !RD.cancel){
-        t=Math.min(dur,(performance.now()-t0)/1000);
-        await withPlanView(()=>paintFrame(ctx,o.W,o.H,t,o)); frames++;
-        rdProgress(t/dur,`${t.toFixed(1)} / ${dur} s${mime.startsWith("video/webm")?"  ·  WebM":"  ·  MP4"}`);
-        await new Promise(r=>setTimeout(r,Math.max(0,1000/fps-4)));
+      const mime=pickMime(); if(!mime && !(o.format==="webm"&&window.VideoEncoder)){ alert(tr("This browser cannot record video. Try Chrome or Edge, or render an image sequence instead.")); return; }
+      /* Pass 1: draw every frame off line at a fixed rate, as JPEG blobs. Pass 2: play
+         them to the recorder in real time. Drawing is too slow for live recording at
+         Full HD, which produced duplicated frames and a stuttering walk. */
+      const fps = dur<=120 ? 30 : dur<=200 ? 20 : 15;
+      const N=Math.round(dur*fps)+1, frames=[];
+      for(let i=0;i<N && !RD.cancel;i++){
+        const t=Math.min(dur,i/fps);
+        await withPlanView(()=>paintFrame(ctx,o.W,o.H,t,o));
+        frames.push(await new Promise(r=>canvas.toBlob(r,"image/jpeg",0.92)));
+        if(i%3===0) rdProgress(i/N*0.7,`${tr("Drawing frames")} ${i+1} / ${N}`);
       }
-      await withPlanView(()=>paintFrame(ctx,o.W,o.H,dur,o));
-      await new Promise(r=>setTimeout(r,350)); rec.stop(); await done;
-      if(!RD.cancel){ const ext=mime.startsWith("video/mp4")?"mp4":"webm"; download(`${safeName()}.${ext}`,new Blob(chunks,{type:mime.split(";")[0]}),mime); rdProgress(1,tr("Video saved.")+(ext==="webm"?" "+tr("This browser records WebM; it plays in Chrome, Edge, Firefox and VLC."):"")); }
+      if(!RD.cancel && o.format==="webm" && window.VideoEncoder){
+        rdProgress(0.7,tr("Encoding")+"...");
+        const blob=await encodeWebMOffline(canvas,frames,fps,o.W,o.H,f=>rdProgress(0.7+0.3*f,`${tr("Encoding")} ${Math.round(f*100)}%`));
+        download(`${safeName()}.webm`,blob,"video/webm"); rdProgress(1,tr("Video saved."));
+      } else if(!RD.cancel){
+        const stream=canvas.captureStream(fps);
+        const bps=Math.round(clamp(30e6*8/Math.max(1,dur),0.5e6,12e6));
+        const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:bps}); const chunks=[]; rec.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
+        const done=new Promise(r=>rec.onstop=r);
+        const show=async i=>{ const bmp=await createImageBitmap(frames[i]); ctx.drawImage(bmp,0,0); bmp.close&&bmp.close(); };
+        await show(0);
+        rec.start(250);
+        const t0=performance.now(); let last=-1;
+        while(!RD.cancel){
+          const el=(performance.now()-t0)/1000; const i=Math.min(N-1,Math.floor(el*fps));
+          if(i!==last){ await show(i); last=i; rdProgress(0.7+0.3*i/(N-1),`${tr("Recording")} ${(i/fps).toFixed(1)} / ${dur} s${mime.startsWith("video/webm")?"  ·  WebM":"  ·  MP4"}`); }
+          if(i>=N-1) break;
+          await new Promise(r=>setTimeout(r,4));
+        }
+        await new Promise(r=>setTimeout(r,300)); rec.stop(); await done;
+        if(!RD.cancel){ const ext=mime.startsWith("video/mp4")?"mp4":"webm"; download(`${safeName()}.${ext}`,new Blob(chunks,{type:mime.split(";")[0]}),mime); rdProgress(1,tr("Video saved.")+(ext==="webm"?" "+tr("This browser records WebM; it plays in Chrome, Edge, Firefox and VLC."):"")); }
+      }
+      frames.length=0;
     }
     if(RD.cancel) rdProgress(0,tr("Cancelled."));
   } catch(e){ console.error(e); rdProgress(0,tr("The render failed: ")+(e&&e.message||e)); }
@@ -10944,10 +11013,14 @@ async function startRender(){
 function openRender(){
   const cams=cameras(); $("#rdCam").innerHTML=cams.map(c=>`<option value="${c.id}">${esc(c.label)} | ${esc(shotNo(c))} | ${c.lens}mm</option>`).join("");
   const live=liveCamera(); if(live) $("#rdCam").value=live.id;
+  const fmt=$("#rdFormat"); const mp4ok=!!pickMime()&&pickMime().startsWith("video/mp4");
+  fmt.querySelector('[value="mp4"]').disabled=!mp4ok; fmt.querySelector('[value="webm"]').disabled=!window.VideoEncoder;
+  fmt.value = mp4ok ? "mp4" : "webm";
   const sync=()=>{ const s=$("#rdSource").value, out=$("#rdOutput").value;
     $("#rdCamWrap").style.display = s==="vfcam" ? "" : "none";
     $("#rdEveryWrap").style.display = out==="images" ? "" : "none";
-    $("#rdNote").textContent = out==="video" ? tr("The video is recorded in real time, so a 20 second scene takes 20 seconds to render. Keep this tab in front while it runs.")
+    $("#rdFormatWrap").style.display = out==="video" ? "" : "none";
+    $("#rdNote").textContent = out==="video" ? tr("Every frame is drawn first, then recorded at a steady 30 frames a second. A 20 second scene takes about a minute. Keep this tab in front while it runs.")
       : out==="images" ? tr("One PNG per interval, plus the last frame, packed into a zip.") : tr("Saves the picture at the current playhead position."); };
   $("#rdSource").onchange=sync; $("#rdOutput").onchange=sync; sync();
   $("#rdProgressWrap").style.display="none"; $("#rdPreview").style.display="none";
@@ -11365,8 +11438,9 @@ Object.assign(I18N_AR,{
 "1280 × 720 (HD)":"1280 × 720 (HD)","1920 × 1080 (Full HD)":"1920 × 1080 (Full HD)","960 × 540 (small, quick)":"960 × 540 (صغير وسريع)","One image every":"صورة كل","Overlays":"الطبقات العلوية",
 "Show paths, labels and the LIVE badge":"إظهار المسارات والتسميات وشارة مباشر","Clean picture, no paths or badge":"صورة نظيفة بلا مسارات أو شارة","Start render":"بدء التصيير","Cancel":"إلغاء",
 "The video is recorded in real time, so a 20 second scene takes 20 seconds to render. Keep this tab in front while it runs.":"يُسجَّل الفيديو في الزمن الحقيقي، فمشهد 20 ثانية يستغرق 20 ثانية. أبقِ هذا التبويب في المقدمة أثناء التشغيل.",
+"Every frame is drawn first, then recorded at a steady 30 frames a second. A 20 second scene takes about a minute. Keep this tab in front while it runs.":"تُرسم كل الإطارات أولًا ثم تُسجَّل بمعدل ثابت 30 إطارًا في الثانية. مشهد 20 ثانية يستغرق نحو دقيقة. أبقِ هذا التبويب في المقدمة أثناء التشغيل.",
 "One PNG per interval, plus the last frame, packed into a zip.":"صورة PNG لكل فاصل زمني مع الإطار الأخير، معبأة في zip.","Saves the picture at the current playhead position.":"يحفظ الصورة عند موضع مؤشر الزمن الحالي.","Drawing the frame...":"جارٍ رسم الإطار...","Saved one PNG frame.":"حُفظ إطار PNG واحد.",
-"images saved in a zip.":"صورة محفوظة في zip.","Video saved.":"حُفظ الفيديو.","This browser records WebM; it plays in Chrome, Edge, Firefox and VLC.":"يسجل هذا المتصفح WebM؛ يعمل في Chrome وEdge وFirefox وVLC.","Cancelled.":"أُلغي.","The render failed: ":"فشل التصيير: ",
+"images saved in a zip.":"صورة محفوظة في zip.","Video saved.":"حُفظ الفيديو.","Drawing frames":"جارٍ رسم الإطارات","Encoding":"جارٍ الترميز","Video format":"صيغة الفيديو","MP4 (H.264) — plays everywhere; pick WebM if it looks jerky":"MP4 (H.264) — يعمل في كل مكان؛ اختر WebM إن بدا متقطعًا","WebM (VP9) — exact 30 fps, encoded off line":"WebM (VP9) — 30 إطارًا بالضبط، ترميز دون اتصال","Recording":"جارٍ التسجيل","This browser records WebM; it plays in Chrome, Edge, Firefox and VLC.":"يسجل هذا المتصفح WebM؛ يعمل في Chrome وEdge وFirefox وVLC.","Cancelled.":"أُلغي.","The render failed: ":"فشل التصيير: ",
 "This browser cannot record video. Try Chrome or Edge, or render an image sequence instead.":"لا يستطيع هذا المتصفح تسجيل الفيديو. جرّب Chrome أو Edge، أو صيّر تسلسل صور بدلًا من ذلك.",
 "Corners":"الزوايا","Round":"مستدير","Bezier paths":"مسارات بيزييه","Every leg has two orange handles (a square leaving a keyframe, a circle arriving at the next). Drag them to shape the curve, hold Alt to keep the corner smooth on both sides, Shift to snap straight, right-click a handle to remove it. Double-click a path to add a keyframe on it without changing the shape.":"لكل ضلع مقبضان برتقاليان (مربع يغادر الإطار المفتاحي ودائرة تصل إلى التالي). اسحبهما لتشكيل المنحنى، واضغط Alt لإبقاء الزاوية ناعمة من الجانبين، وShift للتقويم، وانقر بالزر الأيمن على المقبض لإزالته. انقر مرتين على المسار لإضافة إطار مفتاحي دون تغيير الشكل.","Sharp":"حاد","Round or sharp corner at this keyframe":"زاوية مستديرة أو حادة عند هذا الإطار المفتاحي","Sharp (bend each leg by hand)":"حادة (اثنِ كل ضلع يدويًا)","Rounded automatically":"مستديرة تلقائيًا","Rounded corners":"زوايا مستديرة","In the inspector set":"في الفاحص اضبط","to \"Rounded automatically\" and the path flows smoothly through every keyframe. Roundness 0 is straight, 1 is very round. Each keyframe has its own Round / Sharp button, or right-click its dot on the plan (a square dot is a sharp corner).":"على «مستديرة تلقائيًا» فيتدفق المسار بسلاسة عبر كل إطار مفتاحي. الاستدارة 0 مستقيم و1 شديد الاستدارة. لكل إطار مفتاحي زر مستدير/حاد خاص به، أو انقر بالزر الأيمن على نقطته في المخطط (النقطة المربعة زاوية حادة).","Roundness (0 to 1)":"الاستدارة (0 إلى 1)","Round the corners once":"تدوير الزوايا مرة واحدة",
 "Tick":"حدد","Keyframes":"الإطارات المفتاحية","How the timeline, keyframes and cuts work":"كيف يعمل الخط الزمني والإطارات المفتاحية والقطعات",

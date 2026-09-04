@@ -79,10 +79,10 @@ a video (MP4 where the browser can encode it, otherwise WebM, recorded in real t
 30 fps), a PNG image sequence in a zip, or a single PNG of the current frame. Figures
 that travel between keyframes bob and sway in the viewfinder like a walk cycle.
 
-`assets/inline/` holds a script copy of every picture. It exists only so the renderer
-can read the pictures when `index.html` is opened straight from disk (`file://`), where
-browsers block `fetch()`. Regenerate it after changing artwork (see `tools/` note below)
-or delete it if the app is only ever served over http.
+`assets/inline/` holds a compact WebP copy of every picture wrapped in a script. It
+exists only so the renderer can read the pictures when `index.html` is opened straight
+from disk (`file://`), where browsers block `fetch()`. Leave it out when uploading to a
+web host; regenerate it after changing artwork.
 
 ## Language
 
